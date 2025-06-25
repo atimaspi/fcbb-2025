@@ -16,11 +16,14 @@ import type {
   RegionalAssociation
 } from '@/types/backend';
 
+// Export types for components to use
+export type { Game, Team, Player, NewsItem, Event, Referee, Coach, Competition, Federation, RegionalAssociation };
+
 export const useBackendData = () => {
   const { operations } = useBackendOperations();
 
   // Fetch clubs
-  const { data: clubs = [], isLoading: clubsLoading } = useQuery({
+  const { data: clubs = [], isLoading: clubsLoading, error: clubsError } = useQuery({
     queryKey: ['clubs'],
     queryFn: async () => {
       const { data, error } = await supabase.from('clubs').select('*');
@@ -30,7 +33,7 @@ export const useBackendData = () => {
   });
 
   // Fetch teams
-  const { data: teams = [], isLoading: teamsLoading } = useQuery({
+  const { data: teams = [], isLoading: teamsLoading, error: teamsError } = useQuery({
     queryKey: ['teams'],
     queryFn: async () => {
       const { data, error } = await supabase.from('teams').select('*');
@@ -40,7 +43,7 @@ export const useBackendData = () => {
   });
 
   // Fetch players
-  const { data: players = [], isLoading: playersLoading } = useQuery({
+  const { data: players = [], isLoading: playersLoading, error: playersError } = useQuery({
     queryKey: ['players'],
     queryFn: async () => {
       const { data, error } = await supabase.from('players').select('*');
@@ -50,7 +53,7 @@ export const useBackendData = () => {
   });
 
   // Fetch games
-  const { data: games = [], isLoading: gamesLoading } = useQuery({
+  const { data: games = [], isLoading: gamesLoading, error: gamesError } = useQuery({
     queryKey: ['games'],
     queryFn: async () => {
       const { data, error } = await supabase.from('games').select('*');
@@ -61,13 +64,20 @@ export const useBackendData = () => {
 
   // Fetch upcoming games
   const upcomingGames = games.filter(game => {
-    if (!game.scheduled_date && !game.game_date) return false;
-    const gameDate = new Date(game.scheduled_date || game.game_date || '');
-    return gameDate > new Date() && game.status === 'agendado';
+    if (!game.scheduled_date) return false;
+    const gameDate = new Date(game.scheduled_date);
+    return gameDate > new Date() && game.status === 'scheduled';
+  }).slice(0, 5);
+
+  // Fetch recent games
+  const recentGames = games.filter(game => {
+    if (!game.scheduled_date) return false;
+    const gameDate = new Date(game.scheduled_date);
+    return gameDate <= new Date() && game.status === 'finalizado';
   }).slice(0, 5);
 
   // Fetch news
-  const { data: news = [], isLoading: newsLoading } = useQuery({
+  const { data: news = [], isLoading: newsLoading, error: newsError } = useQuery({
     queryKey: ['news'],
     queryFn: async () => {
       const { data, error } = await supabase.from('news').select('*');
@@ -76,8 +86,11 @@ export const useBackendData = () => {
     },
   });
 
+  // Published news
+  const publishedNews = news.filter(item => item.published === true);
+
   // Fetch events
-  const { data: events = [], isLoading: eventsLoading } = useQuery({
+  const { data: events = [], isLoading: eventsLoading, error: eventsError } = useQuery({
     queryKey: ['events'],
     queryFn: async () => {
       const { data, error } = await supabase.from('events').select('*');
@@ -86,8 +99,14 @@ export const useBackendData = () => {
     },
   });
 
+  // Active events
+  const activeEvents = events.filter(event => {
+    const eventDate = new Date(event.event_date);
+    return eventDate >= new Date();
+  });
+
   // Fetch referees
-  const { data: referees = [], isLoading: refereesLoading } = useQuery({
+  const { data: referees = [], isLoading: refereesLoading, error: refereesError } = useQuery({
     queryKey: ['referees'],
     queryFn: async () => {
       const { data, error } = await supabase.from('referees').select('*');
@@ -96,25 +115,14 @@ export const useBackendData = () => {
     },
   });
 
-  // Fetch coaches (using profiles table as a fallback since coaches table might not exist)
-  const { data: coaches = [], isLoading: coachesLoading } = useQuery({
+  // Fetch coaches
+  const { data: coaches = [], isLoading: coachesLoading, error: coachesError } = useQuery({
     queryKey: ['coaches'],
     queryFn: async () => {
-      // Try coaches table first, fallback to profiles with coach role
       try {
-        const { data, error } = await supabase.from('profiles').select('*').eq('role', 'treinador');
+        const { data, error } = await supabase.from('coaches').select('*');
         if (error) throw error;
-        // Transform profiles to coach format
-        return data.map(profile => ({
-          id: profile.id,
-          name: profile.full_name || 'Treinador',
-          first_name: profile.full_name?.split(' ')[0] || '',
-          last_name: profile.full_name?.split(' ').slice(1).join(' ') || '',
-          status: 'ativo',
-          active: true,
-          created_at: profile.updated_at || new Date().toISOString(),
-          updated_at: profile.updated_at || new Date().toISOString()
-        })) as Coach[];
+        return data as Coach[];
       } catch (error) {
         console.error('Error fetching coaches:', error);
         return [] as Coach[];
@@ -123,7 +131,7 @@ export const useBackendData = () => {
   });
 
   // Fetch competitions (using championships table)
-  const { data: competitions = [], isLoading: competitionsLoading } = useQuery({
+  const { data: competitions = [], isLoading: competitionsLoading, error: competitionsError } = useQuery({
     queryKey: ['competitions'],
     queryFn: async () => {
       const { data, error } = await supabase.from('championships').select('*');
@@ -144,7 +152,7 @@ export const useBackendData = () => {
   });
 
   // Fetch federations
-  const { data: federations = [], isLoading: federationsLoading } = useQuery({
+  const { data: federations = [], isLoading: federationsLoading, error: federationsError } = useQuery({
     queryKey: ['federations'],
     queryFn: async () => {
       const { data, error } = await supabase.from('federations').select('*');
@@ -154,7 +162,7 @@ export const useBackendData = () => {
   });
 
   // Fetch regional associations
-  const { data: regionalAssociations = [], isLoading: regionalAssociationsLoading } = useQuery({
+  const { data: regionalAssociations = [], isLoading: regionalAssociationsLoading, error: regionalAssociationsError } = useQuery({
     queryKey: ['regional_associations'],
     queryFn: async () => {
       const { data, error } = await supabase.from('regional_associations').select('*');
@@ -168,11 +176,13 @@ export const useBackendData = () => {
                    competitionsLoading || federationsLoading || regionalAssociationsLoading;
 
   return {
+    // Data
     clubs,
     teams,
     players,
     games,
     upcomingGames,
+    recentGames,
     news,
     events,
     referees,
@@ -180,6 +190,16 @@ export const useBackendData = () => {
     competitions,
     federations,
     regionalAssociations,
+    
+    // Computed data
+    publishedNews,
+    activeEvents,
+    
+    // Data aliases for backward compatibility
+    newsData: news,
+    eventsData: events,
+    
+    // Loading states
     isLoading,
     clubsLoading,
     teamsLoading,
@@ -192,6 +212,21 @@ export const useBackendData = () => {
     competitionsLoading,
     federationsLoading,
     regionalAssociationsLoading,
+    
+    // Error states
+    clubsError,
+    teamsError,
+    playersError,
+    gamesError,
+    newsError,
+    eventsError,
+    refereesError,
+    coachesError,
+    competitionsError,
+    federationsError,
+    regionalAssociationsError,
+    
+    // Operations
     operations
   };
 };

@@ -29,7 +29,7 @@ export const useApi = () => {
       queryKey: [table],
       queryFn: async () => {
         const { data, error } = await supabase
-          .from(table)
+          .from(table as any) // Type assertion to handle string literal types
           .select('*');
 
         if (error) {
@@ -47,7 +47,7 @@ export const useApi = () => {
     return useMutation({
       mutationFn: async (data: any) => {
         const { data: result, error } = await supabase
-          .from(table)
+          .from(table as any)
           .insert([data])
           .select()
           .single();
@@ -82,7 +82,7 @@ export const useApi = () => {
     return useMutation({
       mutationFn: async ({ id, data }: { id: string; data: any }) => {
         const { data: result, error } = await supabase
-          .from(table)
+          .from(table as any)
           .update(data)
           .eq('id', id)
           .select()
@@ -117,7 +117,7 @@ export const useApi = () => {
     return useMutation({
       mutationFn: async (id: string) => {
         const { error } = await supabase
-          .from(table)
+          .from(table as any)
           .delete()
           .eq('id', id);
 

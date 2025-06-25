@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { useBackendData, Game, Team } from '@/hooks/useBackendData';
+import { useBackendData } from '@/hooks/useBackendData';
+import type { Game, Team } from '@/hooks/useBackendData';
 import { 
   Play, 
   Pause, 
@@ -81,7 +82,7 @@ const LiveScoring = () => {
                 <SelectContent>
                   {upcomingGames.map((game: Game) => (
                     <SelectItem key={game.id} value={game.id}>
-                      {getTeamName(game.home_team_id)} vs {getTeamName(game.away_team_id)}
+                      {getTeamName(game.home_team_id || '')} vs {getTeamName(game.away_team_id || '')}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -269,7 +270,7 @@ const LiveScoring = () => {
                     <div className="flex justify-between items-center">
                       <div className="text-sm">
                         <div className="font-medium">
-                          {getTeamName(game.home_team_id)} vs {getTeamName(game.away_team_id)}
+                          {getTeamName(game.home_team_id || '')} vs {getTeamName(game.away_team_id || '')}
                         </div>
                         <div className="text-gray-500">
                           {game.home_score} - {game.away_score}
