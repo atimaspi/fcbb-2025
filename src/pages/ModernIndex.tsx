@@ -5,6 +5,8 @@ import SEO from '@/components/SEO';
 import ModernHeader from '@/components/header/ModernHeader';
 import ModernHero from '@/components/ModernHero';
 import LiveGames from '@/components/LiveGames';
+import AtletaEmFoco from '@/components/AtletaEmFoco';
+import ContadorAnimado from '@/components/ContadorAnimado';
 import ModernNews from '@/components/ModernNews';
 import ModernFooter from '@/components/ModernFooter';
 import { useContentData } from '@/hooks/useContentData';
@@ -34,6 +36,8 @@ const ModernIndex = () => {
       >
         <ModernHero />
         <LiveGames />
+        <AtletaEmFoco />
+        <ContadorAnimado />
         <ModernNews />
       </motion.main>
 

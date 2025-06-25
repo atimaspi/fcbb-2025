@@ -1,352 +1,220 @@
 
-import PageLayout from './PageLayout';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Trophy, Calendar, Target, Star, Award } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Users, Trophy, Calendar, MapPin, Star } from 'lucide-react';
+import PageLayout from '@/components/PageLayout';
 
 const SelecoesPage = () => {
-  const seniorMaleTeam = {
-    coach: "José Maria Silva",
-    assistantCoach: "Pedro Santos",
-    physicalTrainer: "Ana Tavares",
-    players: [
-      { name: "João Monteiro", position: "Base", height: "1.85m", team: "Sporting CV", international: 45 },
-      { name: "Carlos Silva", position: "Extremo", height: "1.92m", team: "CD Travadores", international: 38 },
-      { name: "Pedro Lima", position: "Poste", height: "2.08m", team: "Académica", international: 52 },
-      { name: "António Santos", position: "Ala", height: "1.98m", team: "Mindelense", international: 29 },
-      { name: "Miguel Rodrigues", position: "Base", height: "1.80m", team: "ABC Basket", international: 15 }
-    ],
-    recentGames: [
-      { opponent: "Senegal", result: "78-82", date: "2024-02-15", competition: "AfroBasket Qualif." },
-      { opponent: "Guiné-Bissau", result: "89-76", date: "2024-02-18", competition: "AfroBasket Qualif." },
-      { opponent: "Mali", result: "71-85", date: "2024-06-12", competition: "Amigável" }
-    ]
-  };
+  const [activeTab, setActiveTab] = useState('masculina');
 
-  const seniorFemaleTeam = {
-    coach: "Maria Fernandes",
-    assistantCoach: "Carla Mendes",
-    physicalTrainer: "Sofia Costa",
-    players: [
-      { name: "Rita Gomes", position: "Base", height: "1.70m", team: "Sporting CV", international: 32 },
-      { name: "Lúcia Santos", position: "Extremo", height: "1.78m", team: "Académica", international: 28 },
-      { name: "Isabel Lima", position: "Poste", height: "1.85m", team: "Mindelense", international: 25 },
-      { name: "Paula Rodrigues", position: "Ala", height: "1.75m", team: "CD Travadores", international: 19 },
-      { name: "Ana Silva", position: "Base", height: "1.68m", team: "ABC Basket", international: 12 }
-    ],
-    recentGames: [
-      { opponent: "Marrocos", result: "65-72", date: "2024-03-10", competition: "AfroBasket Qualif." },
-      { opponent: "Tunísia", result: "58-69", date: "2024-03-13", competition: "AfroBasket Qualif." },
-      { opponent: "Guiné", result: "74-68", date: "2024-05-20", competition: "Amigável" }
-    ]
-  };
-
-  const youthTeams = [
-    {
-      category: "Sub-18 Masculino",
-      coach: "Rui Pereira",
-      lastCompetition: "AfroBasket U18 2023",
-      result: "7º lugar",
-      nextCompetition: "AfroBasket U18 2025"
+  const selecoes = {
+    masculina: {
+      name: "Seleção Nacional Masculina",
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2970",
+      coach: "Mário Palma",
+      captain: "João Silva",
+      nextGame: "AfroBasket 2025 - Qualificação",
+      nextGameDate: "15 de Março, 2024",
+      achievements: [
+        "Participação AfroBasket 2021",
+        "Campeão Regional 2020",
+        "Vice-campeão CPLP 2019"
+      ],
+      players: [
+        { name: "João Silva", position: "Base", club: "CD Travadores", number: 7 },
+        { name: "Carlos Santos", position: "Extremo", club: "Sporting CV", number: 23 },
+        { name: "Miguel Fonseca", position: "Poste", club: "ABC Mindelo", number: 15 },
+        { name: "André Tavares", position: "Base", club: "Flor Juventude", number: 10 },
+        { name: "Pedro Lima", position: "Ala", club: "Académico 83", number: 8 },
+        { name: "Rui Monteiro", position: "Poste", club: "Varanda Fogo", number: 12 }
+      ]
     },
-    {
-      category: "Sub-18 Feminino", 
-      coach: "Teresa Alves",
-      lastCompetition: "AfroBasket U18 2023",
-      result: "5º lugar",
-      nextCompetition: "AfroBasket U18 2025"
+    feminina: {
+      name: "Seleção Nacional Feminina",
+      image: "https://images.unsplash.com/photo-1594736797933-d0aa4cb6a2dc?q=80&w=2970",
+      coach: "Ana Rodrigues",
+      captain: "Maria Santos",
+      nextGame: "Torneio da Amizade",
+      nextGameDate: "28 de Fevereiro, 2024",
+      achievements: [
+        "Participação AfroBasket Women 2019",
+        "Campeã Regional 2022",
+        "Bronze CPLP 2021"
+      ],
+      players: [
+        { name: "Maria Santos", position: "Base", club: "Praia Basquet", number: 9 },
+        { name: "Carla Fonseca", position: "Extremo", club: "Mindelo Stars", number: 14 },
+        { name: "Ana Tavares", position: "Poste", club: "Fogo Queens", number: 21 },
+        { name: "Sofia Lima", position: "Ala", club: "Santiago Angels", number: 6 },
+        { name: "Rita Monteiro", position: "Base", club: "Sal Warriors", number: 11 },
+        { name: "Joana Pereira", position: "Poste", club: "Boavista Lions", number: 18 }
+      ]
     },
-    {
-      category: "Sub-16 Masculino",
-      coach: "Manuel Costa",
-      lastCompetition: "Torneio CPLP 2024",
-      result: "Medalha de Bronze",
-      nextCompetition: "Torneio CPLP 2025"
-    },
-    {
-      category: "Sub-16 Feminino",
-      coach: "Cristina Martins",
-      lastCompetition: "Torneio CPLP 2024", 
-      result: "4º lugar",
-      nextCompetition: "Torneio CPLP 2025"
+    sub18: {
+      name: "Seleção Sub-18 Masculina",
+      image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=2990",
+      coach: "Carlos Mendes",
+      captain: "Tiago Santos",
+      nextGame: "FIBA U18 África",
+      nextGameDate: "10 de Abril, 2024",
+      achievements: [
+        "Participação FIBA U18 2023",
+        "Campeão Regional Sub-18 2023",
+        "Prata Torneio Atlântico 2022"
+      ],
+      players: [
+        { name: "Tiago Santos", position: "Base", club: "Travadores Youth", number: 4 },
+        { name: "Bruno Silva", position: "Extremo", club: "Sporting Youth", number: 17 },
+        { name: "Diogo Fonseca", position: "Poste", club: "Mindelo Academy", number: 22 },
+        { name: "Gabriel Lima", position: "Ala", club: "Praia Basketball", number: 13 },
+        { name: "Rafael Santos", position: "Base", club: "Fogo Juniors", number: 5 },
+        { name: "Lucas Tavares", position: "Poste", club: "Sal Academy", number: 19 }
+      ]
     }
-  ];
+  };
 
-  const achievements = [
-    { year: "1995", event: "Primeira participação no AfroBasket (Masculino)", result: "12º lugar" },
-    { year: "2007", event: "Melhor resultado AfroBasket Masculino", result: "8º lugar" },
-    { year: "2009", event: "Primeira participação AfroBasket Feminino", result: "10º lugar" },
-    { year: "2019", event: "Medalha de Ouro Jogos das Ilhas", result: "Campeão (Masc./Fem.)" },
-    { year: "2023", event: "AfroBasket U18 Masculino", result: "7º lugar" }
-  ];
+  const currentSelection = selecoes[activeTab as keyof typeof selecoes];
 
   return (
-    <PageLayout 
+    <PageLayout
       title="Seleções Nacionais"
-      description="Conheça as seleções cabo-verdianas de basquetebol e acompanhe os seus resultados"
+      description="Conheça as seleções que representam Cabo Verde nas competições internacionais"
     >
-      <div className="space-y-8">
-        {/* Visão Geral das Seleções */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-gradient-to-br from-blue-500 to-cv-blue text-white">
-            <CardContent className="p-6 text-center">
-              <Users className="w-12 h-12 mx-auto mb-4" />
-              <div className="text-3xl font-bold mb-2">6</div>
-              <div className="text-sm opacity-90">Seleções Ativas</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
-            <CardContent className="p-6 text-center">
-              <Trophy className="w-12 h-12 mx-auto mb-4" />
-              <div className="text-3xl font-bold mb-2">147</div>
-              <div className="text-sm opacity-90">Jogos Internacionais</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-yellow-500 to-orange-500 text-white">
-            <CardContent className="p-6 text-center">
-              <Award className="w-12 h-12 mx-auto mb-4" />
-              <div className="text-3xl font-bold mb-2">8</div>
-              <div className="text-sm opacity-90">Participações AfroBasket</div>
-            </CardContent>
-          </Card>
-        </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+        <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto">
+          <TabsTrigger value="masculina">Masculina</TabsTrigger>
+          <TabsTrigger value="feminina">Feminina</TabsTrigger>
+          <TabsTrigger value="sub18">Sub-18</TabsTrigger>
+        </TabsList>
 
-        {/* Seleções por Categoria */}
-        <Tabs defaultValue="senior-male" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="senior-male">Sénior Masculino</TabsTrigger>
-            <TabsTrigger value="senior-female">Sénior Feminino</TabsTrigger>
-            <TabsTrigger value="youth">Seleções Jovens</TabsTrigger>
-            <TabsTrigger value="achievements">Conquistas</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="senior-male" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Users className="w-5 h-5 mr-2 text-cv-blue" />
-                  Seleção Nacional Masculina Sénior
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold mb-4">Equipa Técnica</h4>
-                    <div className="space-y-2">
-                      <div><strong>Treinador Principal:</strong> {seniorMaleTeam.coach}</div>
-                      <div><strong>Treinador Adjunto:</strong> {seniorMaleTeam.assistantCoach}</div>
-                      <div><strong>Preparador Físico:</strong> {seniorMaleTeam.physicalTrainer}</div>
+        <TabsContent value={activeTab} className="space-y-8">
+          {/* Header Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden rounded-2xl"
+          >
+            <div className="relative h-80">
+              <img 
+                src={currentSelection.image}
+                alt={currentSelection.name}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-cv-blue/90 to-cv-red/60"></div>
+              <div className="absolute inset-0 flex items-center justify-center text-center text-white p-8">
+                <div>
+                  <h1 className="text-4xl md:text-6xl font-bold mb-4">
+                    {currentSelection.name}
+                  </h1>
+                  <div className="flex flex-wrap justify-center gap-4 text-lg">
+                    <div className="flex items-center">
+                      <Users className="w-5 h-5 mr-2" />
+                      Treinador: {currentSelection.coach}
                     </div>
-
-                    <h4 className="font-semibold mt-6 mb-4">Resultados Recentes</h4>
-                    <div className="space-y-2">
-                      {seniorMaleTeam.recentGames.map((game, index) => (
-                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                          <div>
-                            <div className="font-medium">vs {game.opponent}</div>
-                            <div className="text-sm text-gray-600">{game.competition}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-bold">{game.result}</div>
-                            <div className="text-sm text-gray-600">{game.date}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-4">Convocados (Última Convocatória)</h4>
-                    <div className="space-y-3">
-                      {seniorMaleTeam.players.map((player, index) => (
-                        <div key={index} className="flex justify-between items-center p-3 border rounded">
-                          <div>
-                            <div className="font-medium">{player.name}</div>
-                            <div className="text-sm text-gray-600">{player.position} • {player.height}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium">{player.team}</div>
-                            <div className="text-xs text-gray-500">{player.international} jogos</div>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="flex items-center">
+                      <Star className="w-5 h-5 mr-2" />
+                      Capitão: {currentSelection.captain}
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="senior-female" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Users className="w-5 h-5 mr-2 text-cv-blue" />
-                  Seleção Nacional Feminina Sénior
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold mb-4">Equipa Técnica</h4>
-                    <div className="space-y-2">
-                      <div><strong>Treinadora Principal:</strong> {seniorFemaleTeam.coach}</div>
-                      <div><strong>Treinadora Adjunta:</strong> {seniorFemaleTeam.assistantCoach}</div>
-                      <div><strong>Preparadora Física:</strong> {seniorFemaleTeam.physicalTrainer}</div>
-                    </div>
-
-                    <h4 className="font-semibold mt-6 mb-4">Resultados Recentes</h4>
-                    <div className="space-y-2">
-                      {seniorFemaleTeam.recentGames.map((game, index) => (
-                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                          <div>
-                            <div className="font-medium">vs {game.opponent}</div>
-                            <div className="text-sm text-gray-600">{game.competition}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-bold">{game.result}</div>
-                            <div className="text-sm text-gray-600">{game.date}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold mb-4">Convocadas (Última Convocatória)</h4>
-                    <div className="space-y-3">
-                      {seniorFemaleTeam.players.map((player, index) => (
-                        <div key={index} className="flex justify-between items-center p-3 border rounded">
-                          <div>
-                            <div className="font-medium">{player.name}</div>
-                            <div className="text-sm text-gray-600">{player.position} • {player.height}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium">{player.team}</div>
-                            <div className="text-xs text-gray-500">{player.international} jogos</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="youth" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {youthTeams.map((team, index) => (
-                <Card key={index}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>{team.category}</span>
-                      <Badge variant="outline">Jovens</Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div>
-                        <strong>Treinador:</strong> {team.coach}
-                      </div>
-                      <div>
-                        <strong>Última Competição:</strong> {team.lastCompetition}
-                      </div>
-                      <div>
-                        <strong>Resultado:</strong> 
-                        <Badge variant="secondary" className="ml-2">{team.result}</Badge>
-                      </div>
-                      <div>
-                        <strong>Próxima Competição:</strong> {team.nextCompetition}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              </div>
             </div>
-          </TabsContent>
+          </motion.div>
 
-          <TabsContent value="achievements" className="space-y-6">
+          {/* Info Cards */}
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Next Game */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card className="border-l-4 border-cv-blue">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-cv-blue">
+                    <Calendar className="w-5 h-5 mr-2" />
+                    Próximo Jogo
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <h3 className="text-xl font-semibold mb-2">{currentSelection.nextGame}</h3>
+                  <p className="text-gray-600 flex items-center">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    {currentSelection.nextGameDate}
+                  </p>
+                  <Button className="mt-4 bg-cv-blue hover:bg-cv-blue/90">
+                    Ver Detalhes
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Achievements */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="border-l-4 border-cv-red">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-cv-red">
+                    <Trophy className="w-5 h-5 mr-2" />
+                    Principais Conquistas
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {currentSelection.achievements.map((achievement, index) => (
+                      <li key={index} className="flex items-center">
+                        <Badge variant="outline" className="mr-2">
+                          {achievement}
+                        </Badge>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Players List */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Trophy className="w-5 h-5 mr-2 text-cv-blue" />
-                  Principais Conquistas e Participações
-                </CardTitle>
+                <CardTitle className="text-cv-blue text-2xl">Plantel Atual</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {achievements.map((achievement, index) => (
-                    <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                      <Badge variant="outline" className="text-lg px-3 py-1">{achievement.year}</Badge>
-                      <div className="flex-1">
-                        <div className="font-medium">{achievement.event}</div>
-                        <div className="text-sm text-gray-600">{achievement.result}</div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {currentSelection.players.map((player, index) => (
+                    <motion.div
+                      key={player.name}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.5 + index * 0.1 }}
+                      className="p-4 bg-gray-50 rounded-lg hover:bg-cv-blue/5 transition-colors"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold text-cv-blue">{player.name}</h4>
+                        <Badge className="bg-cv-red text-white">#{player.number}</Badge>
                       </div>
-                    </div>
+                      <p className="text-sm text-gray-600 mb-1">{player.position}</p>
+                      <p className="text-xs text-gray-500">{player.club}</p>
+                    </motion.div>
                   ))}
                 </div>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Ranking FIBA</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="text-center p-6 bg-blue-50 rounded-lg">
-                    <div className="text-3xl font-bold text-cv-blue mb-2">68º</div>
-                    <div className="text-sm text-gray-600">Ranking Mundial Masculino</div>
-                    <div className="text-xs text-gray-500 mt-1">FIBA World Ranking</div>
-                  </div>
-                  <div className="text-center p-6 bg-pink-50 rounded-lg">
-                    <div className="text-3xl font-bold text-pink-600 mb-2">45º</div>
-                    <div className="text-sm text-gray-600">Ranking Mundial Feminino</div>
-                    <div className="text-xs text-gray-500 mt-1">FIBA World Ranking</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Próximos Jogos/Competições */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Calendar className="w-5 h-5 mr-2 text-cv-blue" />
-              Calendário das Seleções 2025
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h4 className="font-semibold text-blue-900 mb-2">Fevereiro 2025</h4>
-                <ul className="text-sm space-y-1 text-blue-800">
-                  <li>• Qualificação AfroBasket (Masculino)</li>
-                  <li>• Estágio Seleção Sub-18</li>
-                </ul>
-              </div>
-              <div className="p-4 bg-green-50 rounded-lg">
-                <h4 className="font-semibold text-green-900 mb-2">Junho 2025</h4>
-                <ul className="text-sm space-y-1 text-green-800">
-                  <li>• AfroBasket U18 (Angola)</li>
-                  <li>• Torneio Preparação Feminino</li>
-                </ul>
-              </div>
-              <div className="p-4 bg-orange-50 rounded-lg">
-                <h4 className="font-semibold text-orange-900 mb-2">Agosto 2025</h4>
-                <ul className="text-sm space-y-1 text-orange-800">
-                  <li>• AfroBasket Masculino (Angola)</li>
-                  <li>• Qualificação AfroBasket Feminino</li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          </motion.div>
+        </TabsContent>
+      </Tabs>
     </PageLayout>
   );
 };

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import './App.css';
 import { Toaster } from "@/components/ui/toaster";
@@ -14,6 +13,8 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import NoticiasPage from "./pages/NoticiasPage";
+import SelecoesPage from "./pages/SelecoesPage";
+import CompeticoesPage from "./pages/CompeticoesPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +50,8 @@ const App = () => {
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/noticias" element={<NoticiasPage />} />
+                  <Route path="/selecoes" element={<SelecoesPage />} />
+                  <Route path="/competicoes" element={<CompeticoesPage />} />
                 </Routes>
               </BrowserRouter>
             </TooltipProvider>
