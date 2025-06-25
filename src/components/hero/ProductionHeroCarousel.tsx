@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Play, Pause, ArrowRight } from 'lucide-react';
@@ -20,19 +19,19 @@ const heroSlides: HeroSlide[] = [
     id: 1,
     image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1920&h=1080&fit=crop",
     webpImage: "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1920&h=1080&fit=crop&fm=webp",
-    title: "FCBB - Federação Cabo-verdiana de Basquetebol",
-    subtitle: "Excelência Desportiva Nacional",
-    description: "Promovendo o desenvolvimento do basquetebol em todas as ilhas de Cabo Verde com paixão e dedicação",
-    ctaText: "Descobrir Mais",
-    ctaLink: "/sobre"
+    title: "Orgulho Nacional. Talento Global.",
+    subtitle: "FCBB - Unidos pelo Basquetebol",
+    description: "Do bairro para o mundo. Desenvolvendo o basquetebol cabo-verdiano com paixão, dedicação e visão internacional",
+    ctaText: "Ver Competições",
+    ctaLink: "/competicoes"
   },
   {
     id: 2,
     image: "https://images.unsplash.com/photo-1574623452334-1e0ac2b3ccb4?q=80&w=1920&h=1080&fit=crop",
     webpImage: "https://images.unsplash.com/photo-1574623452334-1e0ac2b3ccb4?q=80&w=1920&h=1080&fit=crop&fm=webp",
     title: "Seleções Nacionais",
-    subtitle: "Orgulho Cabo-verdiano",
-    description: "Representando Cabo Verde nas competições internacionais com determinação, talento e espírito competitivo",
+    subtitle: "Representando Cabo Verde com Orgulho",
+    description: "Os nossos atletas levam o nome de Cabo Verde aos palcos internacionais, competindo com determinação e espírito cabo-verdiano",
     ctaText: "Ver Seleções",
     ctaLink: "/selecoes"
   },
@@ -40,19 +39,19 @@ const heroSlides: HeroSlide[] = [
     id: 3,
     image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1920&h=1080&fit=crop",
     webpImage: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=1920&h=1080&fit=crop&fm=webp",
-    title: "Liga Nacional 2024",
-    subtitle: "Competições Nacionais",
-    description: "Acompanhe as melhores equipas de Cabo Verde na temporada mais emocionante do basquetebol nacional",
-    ctaText: "Ver Calendário",
-    ctaLink: "/competicoes"
+    title: "Futuro do Basquetebol Africano",
+    subtitle: "Inovação e Desenvolvimento",
+    description: "Construindo o futuro do basquetebol em África através da formação, infraestruturas e parcerias estratégicas com a FIBA",
+    ctaText: "Seja Nosso Parceiro",
+    ctaLink: "#parceiros"
   },
   {
     id: 4,
     image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?q=80&w=1920&h=1080&fit=crop",
     webpImage: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?q=80&w=1920&h=1080&fit=crop&fm=webp",
-    title: "Futuro do Basquetebol",
+    title: "Do Bairro para o Mundo",
     subtitle: "Desenvolvimento Jovem",
-    description: "Investindo na formação dos jovens talentos cabo-verdianos para construir o futuro do nosso desporto",
+    description: "Identificando e desenvolvendo talentos em todas as ilhas de Cabo Verde, criando oportunidades para os nossos jovens atletas",
     ctaText: "Programas Jovens",
     ctaLink: "/formacao"
   }
@@ -80,10 +79,10 @@ const ProductionHeroCarousel = () => {
     setCurrentSlide(index);
   }, [currentSlide]);
 
-  // Auto-play with 7-second intervals
+  // Auto-play with 8-second intervals as requested
   useEffect(() => {
     if (isPlaying && !isPaused) {
-      intervalRef.current = setInterval(nextSlide, 7000);
+      intervalRef.current = setInterval(nextSlide, 8000);
     } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -186,57 +185,60 @@ const ProductionHeroCarousel = () => {
 
   return (
     <section 
-      className="relative h-screen overflow-hidden bg-gradient-to-br from-[#0B132B] via-[#1A1F2E] to-[#0B132B]"
+      className="relative h-screen overflow-hidden bg-gradient-to-br from-[#002D72] via-[#1A1F2E] to-[#002D72]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       role="banner"
       aria-label="Carousel de banner principal da FCBB"
     >
-      {/* Background Cabo Verde Elements */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        {/* Cabo Verde Flag Stripes */}
-        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-cv-blue via-cv-red to-cv-yellow"></div>
-        <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-cv-yellow via-cv-red to-cv-blue"></div>
+      {/* Enhanced Cabo Verde Background Elements */}
+      <div className="absolute inset-0 opacity-15 pointer-events-none">
+        {/* Cabo Verde Flag Colors */}
+        <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-[#002D72] via-[#E10600] to-[#FFD100]"></div>
+        <div className="absolute bottom-0 left-0 w-full h-3 bg-gradient-to-r from-[#FFD100] via-[#E10600] to-[#002D72]"></div>
         
-        {/* 10 Stars Pattern */}
+        {/* 10 Stars Pattern representing CV flag */}
         <div className="absolute top-8 right-8">
           {[...Array(10)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-3 h-3 bg-cv-yellow"
+              className="absolute w-4 h-4 bg-[#FFD100]"
               style={{
-                left: `${(i % 5) * 20}px`,
-                top: `${Math.floor(i / 5) * 15}px`,
+                left: `${(i % 5) * 25}px`,
+                top: `${Math.floor(i / 5) * 20}px`,
                 clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'
               }}
               animate={{ 
                 rotate: [0, 360],
-                scale: [1, 1.2, 1]
+                scale: [1, 1.3, 1]
               }}
               transition={{ 
-                duration: 8,
+                duration: 10,
                 repeat: Infinity,
-                delay: i * 0.2,
+                delay: i * 0.3,
                 ease: "linear"
               }}
             />
           ))}
         </div>
 
-        {/* Basketball Court SVG */}
-        <svg className="w-full h-full opacity-20" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
-          <line x1="0" y1="400" x2="1200" y2="400" stroke="white" strokeWidth="3" strokeDasharray="10,5"/>
-          <circle cx="600" cy="400" r="120" fill="none" stroke="white" strokeWidth="3"/>
-          <circle cx="200" cy="400" r="90" fill="none" stroke="white" strokeWidth="2"/>
-          <circle cx="1000" cy="400" r="90" fill="none" stroke="white" strokeWidth="2"/>
-          <rect x="0" y="300" width="150" height="200" fill="none" stroke="white" strokeWidth="2"/>
-          <rect x="1050" y="300" width="150" height="200" fill="none" stroke="white" strokeWidth="2"/>
+        {/* Enhanced Basketball Court SVG */}
+        <svg className="w-full h-full opacity-25" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+          <line x1="0" y1="400" x2="1200" y2="400" stroke="#FFD100" strokeWidth="4" strokeDasharray="15,8"/>
+          <circle cx="600" cy="400" r="140" fill="none" stroke="#FFD100" strokeWidth="4"/>
+          <circle cx="200" cy="400" r="100" fill="none" stroke="#E10600" strokeWidth="3"/>
+          <circle cx="1000" cy="400" r="100" fill="none" stroke="#E10600" strokeWidth="3"/>
+          <rect x="0" y="280" width="180" height="240" fill="none" stroke="#002D72" strokeWidth="3"/>
+          <rect x="1020" y="280" width="180" height="240" fill="none" stroke="#002D72" strokeWidth="3"/>
+          <rect x="0" y="350" width="60" height="100" fill="none" stroke="#FFD100" strokeWidth="2"/>
+          <rect x="1140" y="350" width="60" height="100" fill="none" stroke="#FFD100" strokeWidth="2"/>
         </svg>
 
-        {/* Wave Pattern */}
-        <svg className="absolute bottom-0 w-full h-32" viewBox="0 0 1200 100" preserveAspectRarity="none">
-          <path d="M0,50 Q300,20 600,50 T1200,50 L1200,100 L0,100 Z" fill="rgba(247, 209, 22, 0.1)"/>
-          <path d="M0,70 Q400,40 800,70 T1200,70 L1200,100 L0,100 Z" fill="rgba(207, 32, 39, 0.1)"/>
+        {/* Cabo Verde Wave Pattern */}
+        <svg className="absolute bottom-0 w-full h-40" viewBox="0 0 1200 200" preserveAspectRatio="none">
+          <path d="M0,100 Q300,40 600,100 T1200,100 L1200,200 L0,200 Z" fill="rgba(255, 209, 0, 0.1)"/>
+          <path d="M0,130 Q400,70 800,130 T1200,130 L1200,200 L0,200 Z" fill="rgba(225, 6, 0, 0.1)"/>
+          <path d="M0,160 Q500,110 1000,160 T1200,160 L1200,200 L0,200 Z" fill="rgba(0, 45, 114, 0.1)"/>
         </svg>
       </div>
 
@@ -272,10 +274,10 @@ const ProductionHeroCarousel = () => {
                   sizes="100vw"
                 />
               </picture>
-              <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent"></div>
             </div>
 
-            {/* Content */}
+            {/* Enhanced Content */}
             <motion.div
               variants={contentVariants}
               initial="enter"
@@ -284,9 +286,9 @@ const ProductionHeroCarousel = () => {
               className="relative z-10 h-full flex items-center"
             >
               <div className="cv-container">
-                <div className="max-w-4xl text-white">
+                <div className="max-w-5xl text-white">
                   <motion.span 
-                    className="inline-block px-6 py-3 bg-gradient-to-r from-cv-red to-cv-yellow text-black font-bold rounded-full mb-8 text-lg shadow-lg"
+                    className="inline-block px-8 py-4 bg-gradient-to-r from-[#E10600] to-[#FFD100] text-black font-bold rounded-full mb-10 text-xl shadow-2xl"
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.6, duration: 0.6 }}
@@ -295,11 +297,15 @@ const ProductionHeroCarousel = () => {
                   </motion.span>
                   
                   <motion.h1 
-                    className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight font-display"
+                    className="text-5xl md:text-7xl lg:text-8xl font-bold mb-10 leading-tight font-display"
                     style={{
-                      textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+                      textShadow: '3px 3px 6px rgba(0,0,0,0.8)',
+                      background: 'linear-gradient(135deg, #FFD100 0%, #FFFFFF 50%, #002D72 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text'
                     }}
-                    initial={{ y: 40, opacity: 0 }}
+                    initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.7, duration: 0.8 }}
                   >
@@ -307,8 +313,8 @@ const ProductionHeroCarousel = () => {
                   </motion.h1>
                   
                   <motion.p 
-                    className="text-xl md:text-2xl lg:text-3xl mb-10 text-gray-200 leading-relaxed max-w-3xl"
-                    initial={{ y: 40, opacity: 0 }}
+                    className="text-2xl md:text-3xl lg:text-4xl mb-12 text-gray-100 leading-relaxed max-w-4xl"
+                    initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.8, duration: 0.8 }}
                   >
@@ -316,18 +322,18 @@ const ProductionHeroCarousel = () => {
                   </motion.p>
                   
                   <motion.div
-                    className="flex flex-col sm:flex-row gap-6"
-                    initial={{ y: 40, opacity: 0 }}
+                    className="flex flex-col sm:flex-row gap-8"
+                    initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.9, duration: 0.8 }}
                   >
                     <motion.div
                       animate={{
                         background: [
-                          "linear-gradient(45deg, #003893, #CF2027)",
-                          "linear-gradient(45deg, #CF2027, #F7D116)",
-                          "linear-gradient(45deg, #F7D116, #003893)",
-                          "linear-gradient(45deg, #003893, #CF2027)"
+                          "linear-gradient(45deg, #002D72, #E10600)",
+                          "linear-gradient(45deg, #E10600, #FFD100)",
+                          "linear-gradient(45deg, #FFD100, #002D72)",
+                          "linear-gradient(45deg, #002D72, #E10600)"
                         ]
                       }}
                       transition={{
@@ -339,12 +345,12 @@ const ProductionHeroCarousel = () => {
                     >
                       <Button 
                         size="lg" 
-                        className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-bold text-xl px-10 py-6 rounded-2xl shadow-2xl transition-all duration-300 w-full sm:w-auto"
+                        className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-bold text-2xl px-12 py-8 rounded-2xl shadow-2xl transition-all duration-300 w-full sm:w-auto"
                         asChild
                       >
                         <a href={heroSlides[currentSlide].ctaLink}>
                           {heroSlides[currentSlide].ctaText}
-                          <ArrowRight className="ml-3 h-6 w-6" />
+                          <ArrowRight className="ml-4 h-7 w-7" />
                         </a>
                       </Button>
                     </motion.div>
@@ -356,10 +362,10 @@ const ProductionHeroCarousel = () => {
                       <Button 
                         size="lg" 
                         variant="outline" 
-                        className="border-3 border-white/40 text-white hover:bg-white/10 backdrop-blur-sm font-bold text-xl px-10 py-6 rounded-2xl transition-all duration-300 w-full sm:w-auto"
+                        className="border-4 border-white/50 text-white hover:bg-white/15 backdrop-blur-sm font-bold text-2xl px-12 py-8 rounded-2xl transition-all duration-300 w-full sm:w-auto"
                       >
-                        <Play className="mr-3 h-6 w-6" />
-                        Ver Vídeo
+                        <Play className="mr-4 h-7 w-7" />
+                        Ver Vídeo Institucional
                       </Button>
                     </motion.div>
                   </motion.div>
@@ -373,32 +379,32 @@ const ProductionHeroCarousel = () => {
       {/* Navigation Controls */}
       <button
         onClick={prevSlide}
-        className="absolute left-6 top-1/2 transform -translate-y-1/2 bg-black/60 backdrop-blur-md hover:bg-black/80 text-white p-4 rounded-full transition-all duration-300 hover:scale-110 z-20 focus:outline-none focus:ring-2 focus:ring-cv-yellow"
+        className="absolute left-8 top-1/2 transform -translate-y-1/2 bg-black/70 backdrop-blur-md hover:bg-black/90 text-white p-5 rounded-full transition-all duration-300 hover:scale-110 z-20 focus:outline-none focus:ring-2 focus:ring-[#FFD100]"
         aria-label="Slide anterior"
         tabIndex={0}
       >
-        <ChevronLeft className="h-6 w-6" />
+        <ChevronLeft className="h-8 w-8" />
       </button>
 
       <button
         onClick={nextSlide}
-        className="absolute right-6 top-1/2 transform -translate-y-1/2 bg-black/60 backdrop-blur-md hover:bg-black/80 text-white p-4 rounded-full transition-all duration-300 hover:scale-110 z-20 focus:outline-none focus:ring-2 focus:ring-cv-yellow"
+        className="absolute right-8 top-1/2 transform -translate-y-1/2 bg-black/70 backdrop-blur-md hover:bg-black/90 text-white p-5 rounded-full transition-all duration-300 hover:scale-110 z-20 focus:outline-none focus:ring-2 focus:ring-[#FFD100]"
         aria-label="Próximo slide"
         tabIndex={0}
       >
-        <ChevronRight className="h-6 w-6" />
+        <ChevronRight className="h-8 w-8" />
       </button>
 
-      {/* Slide Indicators */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4 z-20">
+      {/* Enhanced Slide Indicators */}
+      <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex space-x-6 z-20">
         {heroSlides.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-cv-yellow rounded-full ${
+            className={`transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-[#FFD100] rounded-full ${
               index === currentSlide 
-                ? 'w-16 h-5 bg-gradient-to-r from-cv-blue via-cv-red to-cv-yellow rounded-full shadow-lg' 
-                : 'w-5 h-5 bg-white/60 rounded-full hover:bg-white/80 hover:scale-110'
+                ? 'w-20 h-6 bg-gradient-to-r from-[#002D72] via-[#E10600] to-[#FFD100] rounded-full shadow-2xl' 
+                : 'w-6 h-6 bg-white/70 rounded-full hover:bg-white/90 hover:scale-125'
             }`}
             aria-label={`Ir para slide ${index + 1}: ${heroSlides[index].title}`}
             tabIndex={0}
@@ -409,25 +415,25 @@ const ProductionHeroCarousel = () => {
       {/* Play/Pause Toggle */}
       <button
         onClick={() => setIsPlaying(!isPlaying)}
-        className="absolute bottom-8 right-8 bg-black/60 backdrop-blur-md hover:bg-black/80 text-white p-4 rounded-full transition-all duration-300 hover:scale-110 z-20 focus:outline-none focus:ring-2 focus:ring-cv-yellow"
+        className="absolute bottom-12 right-12 bg-black/70 backdrop-blur-md hover:bg-black/90 text-white p-5 rounded-full transition-all duration-300 hover:scale-110 z-20 focus:outline-none focus:ring-2 focus:ring-[#FFD100]"
         aria-label={isPlaying ? "Pausar slideshow automático" : "Reproduzir slideshow automático"}
         tabIndex={0}
       >
         {isPlaying ? (
-          <Pause className="h-5 w-5" />
+          <Pause className="h-6 w-6" />
         ) : (
-          <Play className="h-5 w-5" />
+          <Play className="h-6 w-6" />
         )}
       </button>
 
-      {/* Progress Bar */}
-      <div className="absolute bottom-0 left-0 w-full h-1 bg-black/20 z-20">
+      {/* Enhanced Progress Bar */}
+      <div className="absolute bottom-0 left-0 w-full h-2 bg-black/30 z-20">
         <motion.div
-          className="h-full bg-gradient-to-r from-cv-blue via-cv-red to-cv-yellow"
+          className="h-full bg-gradient-to-r from-[#002D72] via-[#E10600] to-[#FFD100]"
           initial={{ width: '0%' }}
           animate={{ width: '100%' }}
           transition={{ 
-            duration: 7,
+            duration: 8,
             ease: "linear",
             repeat: Infinity
           }}

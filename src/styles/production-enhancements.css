@@ -1,15 +1,26 @@
 
 @layer base {
-  /* Production-grade CSS variables for consistent theming */
+  /* FCBB Institutional Colors - Premium Brand Identity */
   :root {
-    --bg-start: #0B132B;
-    --bg-end: #1A1F2E;
+    /* Primary FCBB Colors */
+    --fcbb-blue: #002D72;
+    --fcbb-red: #E10600; 
+    --fcbb-yellow: #FFD100;
+    
+    /* Legacy CV Colors (maintained for compatibility) */
     --cv-blue: #003893;
     --cv-red: #CF2027;
     --cv-yellow: #F7D116;
+    
+    /* Background Gradients */
+    --bg-start: #002D72;
+    --bg-end: #1A1F2E;
+    
+    /* Text Colors */
     --text-primary: #FFFFFF;
     --text-secondary: #E5E7EB;
-    --text-accent: #F7D116;
+    --text-accent: #FFD100;
+    --text-dark: #002D72;
   }
 
   /* Dark mode variables */
@@ -18,8 +29,8 @@
     --bg-end: #111827;
   }
 
-  /* Typography enhancements */
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap');
+  /* Enhanced Typography for Premium Feel */
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Montserrat:wght@300;400;500;600;700;800&display=swap');
   
   body {
     font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -27,110 +38,190 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Poppins', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-weight: 700;
     line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  /* Premium heading styles */
+  .font-display {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.02em;
   }
 }
 
 @layer components {
-  /* Production-grade component styles */
-  .production-hero {
-    background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
-    position: relative;
-    overflow: hidden;
+  /* FCBB Premium Brand Elements */
+  .fcbb-gradient {
+    background: linear-gradient(135deg, var(--fcbb-blue) 0%, var(--fcbb-red) 50%, var(--fcbb-yellow) 100%);
   }
 
-  .metallic-border {
-    background: linear-gradient(45deg, #C0C0C0, #F8F8FF, #C0C0C0);
-    padding: 2px;
-    border-radius: 16px;
+  .fcbb-gradient-primary {
+    background: linear-gradient(135deg, var(--fcbb-blue) 0%, var(--fcbb-red) 100%);
+  }
+
+  .fcbb-gradient-secondary {
+    background: linear-gradient(135deg, var(--fcbb-red) 0%, var(--fcbb-yellow) 100%);
+  }
+
+  .fcbb-gradient-accent {
+    background: linear-gradient(135deg, var(--fcbb-yellow) 0%, var(--fcbb-blue) 100%);
+  }
+
+  /* Premium Card Effects */
+  .premium-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 45, 114, 0.1),
+      0 2px 4px -1px rgba(0, 45, 114, 0.06),
+      0 20px 25px -5px rgba(0, 45, 114, 0.1);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .premium-card:hover {
+    box-shadow: 
+      0 10px 15px -3px rgba(0, 45, 114, 0.15),
+      0 4px 6px -2px rgba(0, 45, 114, 0.1),
+      0 25px 50px -12px rgba(0, 45, 114, 0.25);
+    transform: translateY(-4px) scale(1.02);
+  }
+
+  /* Institutional Hero Styles */
+  .institutional-hero {
+    background: linear-gradient(135deg, var(--fcbb-blue) 0%, var(--fcbb-red) 100%);
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+  }
+
+  /* Enhanced Metallic Borders */
+  .metallic-border-platinum {
+    background: linear-gradient(45deg, #E5E4E2, #F8F8FF, #C0C0C0, #F5F5F5);
+    padding: 3px;
+    border-radius: 20px;
   }
 
   .metallic-border-gold {
-    background: linear-gradient(45deg, #FFD700, #FFF8DC, #B8860B);
-    padding: 2px;
-    border-radius: 16px;
+    background: linear-gradient(45deg, #FFD700, #FFF8DC, #DAA520, #FFEF94);
+    padding: 3px;
+    border-radius: 20px;
   }
 
   .metallic-border-silver {
-    background: linear-gradient(45deg, #C0C0C0, #F5F5F5, #A9A9A9);
-    padding: 2px;
-    border-radius: 16px;
+    background: linear-gradient(45deg, #C0C0C0, #F5F5F5, #A9A9A9, #DCDCDC);
+    padding: 3px;
+    border-radius: 20px;
   }
 
-  /* Enhanced glow effects */
-  .glow-platinum {
+  /* Premium Glow Effects */
+  .glow-fcbb-blue {
     box-shadow: 
-      0 0 10px rgba(255, 255, 255, 0.3),
-      0 0 20px rgba(255, 255, 255, 0.2),
-      0 0 30px rgba(255, 255, 255, 0.1);
+      0 0 15px rgba(0, 45, 114, 0.4),
+      0 0 30px rgba(0, 45, 114, 0.3),
+      0 0 45px rgba(0, 45, 114, 0.2);
   }
 
-  .glow-gold {
+  .glow-fcbb-red {
     box-shadow: 
-      0 0 10px rgba(255, 215, 0, 0.4),
-      0 0 20px rgba(255, 215, 0, 0.3),
-      0 0 30px rgba(255, 215, 0, 0.2);
+      0 0 15px rgba(225, 6, 0, 0.4),
+      0 0 30px rgba(225, 6, 0, 0.3),
+      0 0 45px rgba(225, 6, 0, 0.2);
   }
 
-  .glow-silver {
+  .glow-fcbb-yellow {
     box-shadow: 
-      0 0 10px rgba(192, 192, 192, 0.4),
-      0 0 20px rgba(192, 192, 192, 0.3),
-      0 0 30px rgba(192, 192, 192, 0.2);
+      0 0 15px rgba(255, 209, 0, 0.4),
+      0 0 30px rgba(255, 209, 0, 0.3),
+      0 0 45px rgba(255, 209, 0, 0.2);
+  }
+
+  /* Cape Verde Flag Pattern */
+  .cv-flag-pattern {
+    background: 
+      linear-gradient(0deg, var(--fcbb-blue) 0%, var(--fcbb-blue) 20%),
+      linear-gradient(0deg, var(--fcbb-red) 20%, var(--fcbb-red) 40%),
+      linear-gradient(0deg, var(--fcbb-yellow) 40%, var(--fcbb-yellow) 60%),
+      linear-gradient(0deg, var(--fcbb-red) 60%, var(--fcbb-red) 80%),
+      linear-gradient(0deg, var(--fcbb-blue) 80%, var(--fcbb-blue) 100%);
   }
 }
 
 @layer utilities {
-  /* Performance-optimized animations */
-  .animate-gradient-flow {
-    background: linear-gradient(-45deg, var(--cv-blue), var(--cv-red), var(--cv-yellow), var(--cv-blue));
+  /* Premium Animation Suite */
+  .animate-institutional-flow {
+    background: linear-gradient(-45deg, var(--fcbb-blue), var(--fcbb-red), var(--fcbb-yellow), var(--fcbb-blue));
     background-size: 400% 400%;
-    animation: gradient-flow 8s ease infinite;
+    animation: institutional-flow 10s ease infinite;
   }
 
-  @keyframes gradient-flow {
+  @keyframes institutional-flow {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
 
-  /* Micro-interactions */
-  .hover-lift-gentle {
-    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Premium Hover Effects */
+  .hover-lift-premium {
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
-  .hover-lift-gentle:hover {
-    transform: translateY(-2px) scale(1.02);
+  .hover-lift-premium:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 25px 50px -12px rgba(0, 45, 114, 0.25);
   }
 
-  .pulse-gentle {
-    animation: pulse-gentle 3s ease-in-out infinite;
+  /* Institutional Pulse */
+  .pulse-institutional {
+    animation: pulse-institutional 4s ease-in-out infinite;
   }
 
-  @keyframes pulse-gentle {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.9; transform: scale(1.02); }
-  }
-
-  /* Accessibility enhancements */
-  .focus-visible-enhanced {
-    outline: 2px solid var(--cv-yellow);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
-
-  /* Reduced motion support */
-  @media (prefers-reduced-motion: reduce) {
-    .animate-gradient-flow {
-      animation: none;
+  @keyframes pulse-institutional {
+    0%, 100% { 
+      opacity: 1; 
+      transform: scale(1);
+      box-shadow: 0 0 30px rgba(255, 209, 0, 0.3);
     }
-    
-    .pulse-gentle {
+    50% { 
+      opacity: 0.9; 
+      transform: scale(1.05);
+      box-shadow: 0 0 60px rgba(255, 209, 0, 0.6);
+    }
+  }
+
+  /* Text Gradients */
+  .text-gradient-fcbb {
+    background: linear-gradient(135deg, var(--fcbb-yellow) 0%, #FFFFFF 50%, var(--fcbb-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-premium {
+    background: linear-gradient(135deg, var(--fcbb-blue) 0%, var(--fcbb-red) 50%, var(--fcbb-yellow) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Accessibility & Performance */
+  .focus-visible-fcbb {
+    outline: 3px solid var(--fcbb-yellow);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  /* Reduced Motion Support */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-institutional-flow,
+    .pulse-institutional {
       animation: none;
     }
     
@@ -141,30 +232,71 @@
     }
   }
 
-  /* High contrast mode */
+  /* High Contrast Mode */
   @media (prefers-contrast: high) {
-    .glow-platinum,
-    .glow-gold,
-    .glow-silver {
+    .glow-fcbb-blue,
+    .glow-fcbb-red,
+    .glow-fcbb-yellow {
       box-shadow: none;
-      border: 2px solid currentColor;
+      border: 3px solid currentColor;
+    }
+    
+    .premium-card {
+      border: 2px solid var(--fcbb-blue);
+    }
+  }
+
+  /* Print Styles */
+  @media print {
+    .glow-fcbb-blue,
+    .glow-fcbb-red,
+    .glow-fcbb-yellow,
+    .premium-card {
+      box-shadow: none;
+    }
+    
+    .animate-institutional-flow,
+    .pulse-institutional {
+      animation: none;
     }
   }
 }
 
-/* Performance optimizations */
+/* Performance Optimizations */
 @layer utilities {
-  .gpu-layer {
+  .gpu-accelerated {
     transform: translateZ(0);
     backface-visibility: hidden;
     perspective: 1000px;
+    will-change: transform, opacity;
   }
 
-  .will-change-transform {
+  .optimize-animations {
     will-change: transform;
   }
 
-  .will-change-opacity {
+  .optimize-opacity {
     will-change: opacity;
+  }
+
+  /* Shadow Variations for Depth */
+  .shadow-fcbb-sm {
+    box-shadow: 0 2px 4px rgba(0, 45, 114, 0.1);
+  }
+
+  .shadow-fcbb-md {
+    box-shadow: 0 4px 8px rgba(0, 45, 114, 0.15);
+  }
+
+  .shadow-fcbb-lg {
+    box-shadow: 0 8px 16px rgba(0, 45, 114, 0.2);
+  }
+
+  .shadow-fcbb-xl {
+    box-shadow: 0 16px 32px rgba(0, 45, 114, 0.25);
+  }
+
+  .shadow-fcbb-2xl {
+    box-shadow: 0 24px 48px rgba(0, 45, 114, 0.3);
   }
 }
