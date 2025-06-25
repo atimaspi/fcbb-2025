@@ -132,15 +132,20 @@ export interface Referee {
 export interface Coach {
   id: string;
   name: string;
+  first_name?: string;
+  last_name?: string;
   license_number?: string;
   certification_level?: 'nivel_1' | 'nivel_2' | 'nivel_3' | 'fiba';
   team_id?: string;
-  position: 'treinador_principal' | 'treinador_assistente' | 'preparador_fisico';
+  position?: 'treinador_principal' | 'treinador_assistente' | 'preparador_fisico';
   contact_email?: string;
   contact_phone?: string;
-  experience_years: number;
+  phone?: string;
+  email?: string;
+  experience_years?: number;
   photo_url?: string;
   status: 'ativo' | 'inativo';
+  active?: boolean;
   created_at: string;
   updated_at: string;
 }

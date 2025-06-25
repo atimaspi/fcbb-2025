@@ -1,5 +1,5 @@
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 // Define allowed table names based on actual Supabase schema
@@ -17,10 +17,30 @@ type TableName =
   | 'profiles'
   | 'partners'
   | 'hero_slides'
-  | 'basketball_stats';
+  | 'basketball_stats'
+  | 'coaches';
 
 export const useApi = () => {
   const queryClient = useQueryClient();
+
+  // Generic fetch query
+  const useFetch = (table: TableName) => {
+    return useQuery({
+      queryKey: [table],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from(table)
+          .select('*');
+
+        if (error) {
+          console.error(`Error fetching ${table}:`, error);
+          throw new Error(`Erro ao buscar ${table}: ${error.message}`);
+        }
+
+        return data || [];
+      },
+    });
+  };
 
   // Generic create mutation
   const useCreate = (table: TableName) => {
@@ -126,6 +146,7 @@ export const useApi = () => {
   };
 
   return {
+    useFetch,
     useCreate,
     useUpdate,
     useDelete

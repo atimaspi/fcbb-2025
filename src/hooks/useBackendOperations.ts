@@ -70,6 +70,16 @@ export const useBackendOperations = () => {
       create: api.useCreate('basketball_stats'),
       update: api.useUpdate('basketball_stats'),
       delete: api.useDelete('basketball_stats')
+    },
+    coaches: {
+      create: api.useCreate('coaches'),
+      update: api.useUpdate('coaches'),
+      delete: api.useDelete('coaches')
+    },
+    competitions: {
+      create: api.useCreate('championships'),
+      update: api.useUpdate('championships'),
+      delete: api.useDelete('championships')
     }
   };
 

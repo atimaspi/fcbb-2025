@@ -8,6 +8,7 @@ interface SEOProps {
   image?: string;
   url?: string;
   type?: 'website' | 'article';
+  robots?: string;
 }
 
 const SEO = ({ 
@@ -16,7 +17,8 @@ const SEO = ({
   keywords = 'basquetebol, cabo verde, fcbb, federação, competições, seleções, liga nacional',
   image = '/lovable-uploads/8c0e50b0-b06a-42cf-b3fc-9a08063308b3.png',
   url = 'https://fcbb.cv',
-  type = 'website'
+  type = 'website',
+  robots = 'index, follow'
 }: SEOProps) => {
   const fullTitle = title.includes('FCBB') ? title : `${title} | FCBB`;
   const fullUrl = url.startsWith('http') ? url : `https://fcbb.cv${url}`;
@@ -30,7 +32,7 @@ const SEO = ({
       <meta name="keywords" content={keywords} />
       <meta name="author" content="FCBB - Federação Cabo-verdiana de Basquetebol" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta name="robots" content="index, follow" />
+      <meta name="robots" content={robots} />
       <link rel="canonical" href={fullUrl} />
 
       {/* Open Graph / Facebook */}
