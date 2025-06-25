@@ -35,7 +35,7 @@ export const useBackendData = () => {
   // Transform clubs data to match interface
   const clubs: Club[] = clubsData.map(club => ({
     ...club,
-    updated_at: club.updated_at || club.created_at
+    updated_at: (club as any).updated_at || club.created_at
   }));
 
   // Fetch teams
@@ -52,7 +52,7 @@ export const useBackendData = () => {
   const teams: Team[] = teamsData.map(team => ({
     ...team,
     status: 'ativo' as const,
-    updated_at: team.updated_at || team.created_at
+    updated_at: (team as any).updated_at || team.created_at
   }));
 
   // Fetch players
@@ -70,7 +70,7 @@ export const useBackendData = () => {
     ...player,
     name: `${player.first_name} ${player.last_name}`,
     position: (player.position as Player['position']) || undefined,
-    updated_at: player.updated_at || player.created_at
+    updated_at: (player as any).updated_at || player.created_at
   }));
 
   // Fetch games
@@ -87,7 +87,7 @@ export const useBackendData = () => {
   const games: Game[] = gamesData.map(game => ({
     ...game,
     status: (game.status as Game['status']) || 'agendado',
-    updated_at: game.updated_at || game.created_at
+    updated_at: (game as any).updated_at || game.created_at
   }));
 
   // Fetch upcoming games
@@ -117,7 +117,7 @@ export const useBackendData = () => {
   // Transform news data to match interface
   const news: NewsItem[] = newsData.map(item => ({
     ...item,
-    views_count: item.views_count || 0
+    views_count: (item as any).views_count || 0
   }));
 
   // Published news
@@ -138,7 +138,7 @@ export const useBackendData = () => {
     ...event,
     event_type: 'evento_social' as const,
     status: 'agendado' as const,
-    updated_at: event.updated_at || event.created_at
+    updated_at: (event as any).updated_at || event.created_at
   }));
 
   // Active events
@@ -162,7 +162,7 @@ export const useBackendData = () => {
     ...referee,
     name: `${referee.first_name} ${referee.last_name}`,
     status: 'ativo' as const,
-    updated_at: referee.updated_at || referee.created_at
+    updated_at: (referee as any).updated_at || referee.created_at
   }));
 
   // Fetch coaches - simplified approach without using the table that doesn't exist in types yet
@@ -170,10 +170,10 @@ export const useBackendData = () => {
     queryKey: ['coaches'],
     queryFn: async () => {
       try {
-        // Use supabase.rpc or raw query to avoid TypeScript issues
-        const { data, error } = await supabase.rpc('get_coaches_data');
+        // Try to fetch from coaches table directly
+        const { data, error } = await supabase.from('coaches' as any).select('*');
         if (error) {
-          console.log('Coaches RPC not available, returning empty array');
+          console.log('Coaches table not available, returning empty array');
           return [];
         }
         return data || [];
@@ -185,13 +185,13 @@ export const useBackendData = () => {
   });
 
   // Transform coaches data - provide empty array as fallback
-  const coaches: Coach[] = coachesData.map((coach: any) => ({
+  const coaches: Coach[] = Array.isArray(coachesData) ? coachesData.map((coach: any) => ({
     id: coach.id,
     name: coach.name || 'Unknown Coach',
     status: (coach.status as Coach['status']) || 'ativo',
     created_at: coach.created_at,
     updated_at: coach.updated_at || coach.created_at
-  }));
+  })) : [];
 
   // Fetch competitions (using championships table)
   const { data: competitionsData = [], isLoading: competitionsLoading, error: competitionsError } = useQuery({
@@ -214,7 +214,7 @@ export const useBackendData = () => {
     description: champ.description,
     status: champ.status,
     created_at: champ.created_at,
-    updated_at: champ.updated_at || champ.created_at
+    updated_at: (champ as any).updated_at || champ.created_at
   }));
 
   // Fetch federations
@@ -230,7 +230,7 @@ export const useBackendData = () => {
   // Transform federations data to match interface
   const federations: Federation[] = federationsData.map(fed => ({
     ...fed,
-    country: fed.country || 'Cabo Verde',
+    country: (fed as any).country || 'Cabo Verde',
     partnership_status: 'ativo' as const
   }));
 
@@ -247,8 +247,8 @@ export const useBackendData = () => {
   // Transform regional associations data to match interface
   const regionalAssociations: RegionalAssociation[] = regionalAssociationsData.map(ra => ({
     ...ra,
-    president_name: ra.president_name || undefined,
-    clubs_count: ra.clubs_count || 0,
+    president_name: (ra as any).president_name || undefined,
+    clubs_count: (ra as any).clubs_count || 0,
     status: 'ativo' as const
   }));
 
