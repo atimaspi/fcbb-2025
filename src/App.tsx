@@ -9,9 +9,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import { InternationalizationProvider } from "@/contexts/InternationalizationContext";
 import SafeErrorBoundary from "@/components/SafeErrorBoundary";
+import ModernIndex from "./pages/ModernIndex";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
+import NoticiasPage from "./pages/NoticiasPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,9 +44,11 @@ const App = () => {
               <Sonner />
               <BrowserRouter>
                 <Routes>
-                  <Route path="/" element={<Index />} />
+                  <Route path="/" element={<ModernIndex />} />
+                  <Route path="/old" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/noticias" element={<NoticiasPage />} />
                 </Routes>
               </BrowserRouter>
             </TooltipProvider>
