@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,9 +11,23 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
 
 const ModernHero = () => {
+  const [api, setApi] = React.useState<CarouselApi>();
+
+  // Implement autoplay functionality
+  useEffect(() => {
+    if (!api) return;
+
+    const interval = setInterval(() => {
+      api.scrollNext();
+    }, 5000); // Change slide every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [api]);
+
   const heroSlides = [
     {
       id: 1,
@@ -62,7 +76,7 @@ const ModernHero = () => {
           align: "start",
           loop: true,
         }}
-        autoplay={true}
+        setApi={setApi}
       >
         <CarouselContent>
           {heroSlides.map((slide, index) => (
