@@ -5,7 +5,7 @@ import SEO from '@/components/SEO';
 
 interface FCBBLayoutProps {
   title?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   description?: string;
   keywords?: string;
   image?: string;
