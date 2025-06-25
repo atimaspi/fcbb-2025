@@ -1,6 +1,6 @@
 
 import { motion } from 'framer-motion';
-import { GraduationCap, Whistle, Plane, Users, BookOpen, Trophy, ArrowRight } from 'lucide-react';
+import { GraduationCap, Shield, Plane, Users, BookOpen, Trophy, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -19,7 +19,7 @@ const FeaturedProjectsSection = () => {
       id: 2,
       title: "Formação de Árbitros",
       description: "Academia de formação e certificação de árbitros segundo os padrões FIBA, garantindo qualidade e profissionalismo nas competições nacionais",
-      icon: Whistle,
+      icon: Shield,
       color: "from-[#002D72] to-[#E10600]",
       stats: { referees: 30, certified: 18, fiba: 5 },
       achievements: ["Certificação FIBA", "Intercâmbio Regional", "Programa Mentor"]

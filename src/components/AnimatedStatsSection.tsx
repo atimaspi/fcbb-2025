@@ -5,7 +5,7 @@ import { Users, MapPin, Trophy, Calendar, TrendingUp, Globe } from 'lucide-react
 
 const AnimatedStatsSection = () => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, threshold: 0.3 });
+  const isInView = useInView(ref, { once: true });
   const [counters, setCounters] = useState({
     athletes: 0,
     clubs: 0,
