@@ -1,112 +1,54 @@
 
-import { useEffect } from "react";
-import { motion } from "framer-motion";
-import ProductionHeroCarousel from "@/components/hero/ProductionHeroCarousel";
-import MissionVisionSection from "@/components/MissionVisionSection";
-import NationalTeamsSection from "@/components/NationalTeamsSection";
-import FeaturedProjectsSection from "@/components/FeaturedProjectsSection";
-import AnimatedStatsSection from "@/components/AnimatedStatsSection";
-import ProductionPartnersSection from "@/components/partners/ProductionPartnersSection";
-import FibaStyleLiveResults from "@/components/FibaStyleLiveResults";
-import FibaNewsSection from "@/components/FibaNewsSection";
-import FibaStyleHeader from "@/components/header/FibaStyleHeader";
-import Footer from "@/components/Footer";
-import { useTranslation } from "@/contexts/InternationalizationContext";
-import SEO from "@/components/SEO";
+import React, { Suspense, lazy } from 'react';
+import { motion } from 'framer-motion';
+import SEO from '@/components/SEO';
+import { useSafeDOM } from '@/hooks/useSafeDOM';
+
+// Lazy load components to prevent initialization issues
+const FCBBLayout = lazy(() => import('@/components/layout/FCBBLayout').catch(() => ({
+  default: () => <div>Erro ao carregar layout</div>
+})));
 
 const Index = () => {
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    console.log("FCBB Premium Website - Página Principal Carregada");
-  }, []);
+  const { safeAddClass } = useSafeDOM();
+  
+  // Safe initialization
+  React.useEffect(() => {
+    console.log('Index page mounted successfully');
+    
+    // Safe DOM manipulation example
+    const body = document.body;
+    safeAddClass(body, 'page-loaded');
+    
+    return () => {
+      console.log('Index page cleanup');
+    };
+  }, [safeAddClass]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       <SEO 
-        title="FCBB - Federação Cabo-verdiana de Basquetebol | Orgulho Nacional, Talento Global"
-        description="Website oficial da Federação Cabo-verdiana de Basquetebol. Do bairro para o mundo - acompanhe as seleções nacionais, competições, projetos de desenvolvimento e parcerias internacionais. Referência africana em basquetebol."
-        keywords="basquetebol, Cabo Verde, FCBB, federação, FIBA, seleções nacionais, AfroBasket, desporto cabo-verdiano, competições, formação, desenvolvimento desportivo"
+        title="Federação Cabo-verdiana de Basquetebol - FCBB"
+        description="Site oficial da Federação Cabo-verdiana de Basquetebol. Notícias, competições, equipas e toda a informação sobre o basquetebol em Cabo Verde."
+        keywords="basquetebol, Cabo Verde, FCBB, federação, desporto, competições"
       />
       
-      <FibaStyleHeader />
-      
-      <main>
-        {/* Full-Screen Hero Carousel */}
-        <ProductionHeroCarousel />
-
-        {/* Mission & Vision Section */}
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#002D72] mx-auto mb-4"></div>
+            <p className="text-gray-600">A carregar FCBB...</p>
+          </div>
+        </div>
+      }>
         <motion.div
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
         >
-          <MissionVisionSection />
+          <FCBBLayout />
         </motion.div>
-
-        {/* National Teams Section */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <NationalTeamsSection />
-        </motion.div>
-
-        {/* Live Results Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <FibaStyleLiveResults />
-        </motion.div>
-
-        {/* Featured Projects Section */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <FeaturedProjectsSection />
-        </motion.div>
-
-        {/* Animated Statistics */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <AnimatedStatsSection />
-        </motion.div>
-
-        {/* News Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <FibaNewsSection />
-        </motion.div>
-
-        {/* Partners Section */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <ProductionPartnersSection />
-        </motion.div>
-      </main>
-
-      <Footer />
+      </Suspense>
     </div>
   );
 };
