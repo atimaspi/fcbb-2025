@@ -1,92 +1,93 @@
 
-// Backend data types for FCBB system
-
+// Backend data types for FCBB management system
 export interface Team {
   id: string;
   name: string;
-  club_id?: string;
-  category: string;
-  division?: string;
-  created_at?: string;
+  abbreviation?: string;
+  city?: string;
+  island?: string;
+  logo_url?: string;
+  status: 'ativo' | 'inativo';
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Club {
   id: string;
   name: string;
-  island: string;
+  abbreviation?: string;
+  city?: string;
+  island?: string;
   logo_url?: string;
-  description?: string;
   contact_email?: string;
   contact_phone?: string;
-  address?: string;
-  website?: string;
-  regional_association_id?: string;
+  president_name?: string;
   founded_year?: number;
-  active?: boolean;
-  status?: string;
-  created_at?: string;
+  status: 'ativo' | 'inativo';
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Competition {
   id: string;
   name: string;
-  description?: string;
-  season: string;
-  type: string;
-  status: string;
+  type?: 'campeonato' | 'torneio' | 'copa' | 'liga';
+  season?: string;
   start_date?: string;
   end_date?: string;
-  federation_id?: string;
-  regional_association_id?: string;
-  created_at?: string;
+  description?: string;
+  status: 'planejado' | 'ativo' | 'finalizado' | 'cancelado';
+  logo_url?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Game {
   id: string;
-  competition_id?: string;
+  championship_id?: string;
   home_team_id?: string;
   away_team_id?: string;
-  scheduled_date: string;
-  home_score?: number;
-  away_score?: number;
+  game_date?: string;
   venue?: string;
-  status?: string;
   round?: string;
-  created_at?: string;
+  home_score: number;
+  away_score: number;
+  status: 'agendado' | 'ao_vivo' | 'pausado' | 'finalizado' | 'adiado' | 'cancelado';
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Player {
   id: string;
-  first_name: string;
-  last_name: string;
-  position?: string;
-  team_id?: string;
+  name: string;
+  position?: 'Base' | 'Escolta' | 'Extremo' | 'Poste Baixo' | 'Poste Alto';
   jersey_number?: number;
+  team_id?: string;
   birth_date?: string;
-  age?: number;
   height_cm?: number;
   weight_kg?: number;
   nationality?: string;
-  club?: string;
-  active?: boolean;
-  status?: string;
-  created_at?: string;
+  photo_url?: string;
+  status: 'ativo' | 'lesionado' | 'suspenso' | 'inativo';
+  created_at: string;
+  updated_at: string;
 }
 
 export interface NewsItem {
   id: string;
   title: string;
+  content?: string;
   excerpt?: string;
-  content: string;
-  image_url?: string;
-  category: string;
-  status?: string;
-  author?: string;
   author_id?: string;
-  published?: boolean;
-  featured?: boolean;
-  created_at?: string;
-  updated_at?: string;
+  category: 'geral' | 'competicoes' | 'selecoes' | 'internacional' | 'formacao';
+  image_url?: string;
+  published: boolean;
+  featured: boolean;
+  slug?: string;
+  views_count: number;
+  created_at: string;
+  updated_at: string;
+  published_at?: string;
 }
 
 export interface Event {
@@ -94,63 +95,76 @@ export interface Event {
   title: string;
   description?: string;
   event_date: string;
-  end_date?: string;
   location?: string;
-  type: string;
-  organizer?: string;
-  created_at?: string;
+  event_type: 'jogo' | 'treino' | 'reuniao' | 'evento_social' | 'competicao';
+  status: 'agendado' | 'em_andamento' | 'finalizado' | 'cancelado';
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Referee {
   id: string;
-  first_name: string;
-  last_name: string;
+  name: string;
   license_number?: string;
-  level: string;
+  certification_level?: 'regional' | 'nacional' | 'fiba';
+  contact_email?: string;
+  contact_phone?: string;
   island?: string;
-  phone?: string;
-  email?: string;
-  active?: boolean;
-  certified_date?: string;
-  created_at?: string;
+  status: 'ativo' | 'suspenso' | 'inativo';
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Coach {
   id: string;
   name: string;
-  team_id?: string;
   license_number?: string;
-  phone?: string;
-  email?: string;
-  experience_years?: number;
-  status?: string;
-  created_at?: string;
+  certification_level?: 'nivel_1' | 'nivel_2' | 'nivel_3' | 'fiba';
+  team_id?: string;
+  position: 'treinador_principal' | 'treinador_assistente' | 'preparador_fisico';
+  contact_email?: string;
+  contact_phone?: string;
+  experience_years: number;
+  photo_url?: string;
+  status: 'ativo' | 'inativo';
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Federation {
   id: string;
   name: string;
-  acronym?: string;
+  country: string;
   logo_url?: string;
+  website_url?: string;
   contact_email?: string;
-  contact_phone?: string;
-  address?: string;
-  website?: string;
-  foundation_date?: string;
-  created_at?: string;
-  updated_at?: string;
+  partnership_type?: 'fiba' | 'bilateral' | 'regional' | 'observador';
+  partnership_status: 'ativo' | 'suspenso' | 'finalizado';
+  created_at: string;
+  updated_at: string;
 }
 
 export interface RegionalAssociation {
   id: string;
   name: string;
-  acronym?: string;
-  island?: string;
-  logo_url?: string;
+  island: string;
+  president_name?: string;
   contact_email?: string;
   contact_phone?: string;
   address?: string;
-  federation_id: string;
-  created_at?: string;
-  updated_at?: string;
+  clubs_count: number;
+  status: 'ativo' | 'inativo';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Profile {
+  id: string;
+  user_id: string;
+  full_name?: string;
+  role: 'admin' | 'editor' | 'user';
+  avatar_url?: string;
+  created_at: string;
+  updated_at: string;
 }

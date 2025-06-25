@@ -1,58 +1,43 @@
 
 import React from 'react';
-import { usePermissions, Permission } from '@/hooks/usePermissions';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield } from 'lucide-react';
 
 interface PermissionGuardProps {
+  permission: { resource: string; action: string };
   children: React.ReactNode;
-  permission?: {
-    resource: string;
-    action: string;
-  };
-  permissions?: Permission[];
-  requireAll?: boolean;
-  fallback?: React.ReactNode;
   showError?: boolean;
 }
 
-const PermissionGuard: React.FC<PermissionGuardProps> = ({
-  children,
-  permission,
-  permissions = [],
-  requireAll = false,
-  fallback,
-  showError = true,
+const PermissionGuard: React.FC<PermissionGuardProps> = ({ 
+  permission, 
+  children, 
+  showError = true 
 }) => {
-  const { hasPermission, hasAnyPermission, hasAllPermissions } = usePermissions();
+  const { hasPermission, loading } = usePermissions();
 
-  let hasAccess = false;
-
-  if (permission) {
-    hasAccess = hasPermission(permission.resource, permission.action);
-  } else if (permissions.length > 0) {
-    hasAccess = requireAll 
-      ? hasAllPermissions(permissions)
-      : hasAnyPermission(permissions);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#002D72]"></div>
+      </div>
+    );
   }
 
-  if (!hasAccess) {
-    if (fallback) {
-      return <>{fallback}</>;
+  if (!hasPermission(permission)) {
+    if (!showError) {
+      return null;
     }
-
-    if (showError) {
-      return (
-        <Alert variant="destructive">
-          <Shield className="h-4 w-4" />
-          <AlertDescription>
-            Não tem permissões suficientes para aceder a esta funcionalidade.
-          </AlertDescription>
-        </Alert>
-      );
-    }
-
-    return null;
+    
+    return (
+      <Alert className="border-red-200 bg-red-50">
+        <Shield className="h-4 w-4 text-red-500" />
+        <AlertDescription className="text-red-700">
+          Não tem permissões para aceder a esta funcionalidade.
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   return <>{children}</>;

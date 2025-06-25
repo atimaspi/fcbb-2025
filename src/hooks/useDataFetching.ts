@@ -1,37 +1,207 @@
 
-import { useApi } from '@/hooks/useApi';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useDataFetching = () => {
-  const { useFetch } = useApi();
+  // Teams data
+  const { data: teamsData, isLoading: teamsLoading, error: teamsError } = useQuery({
+    queryKey: ['teams'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teams')
+        .select('*')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching teams:', error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2
+  });
 
-  // Fetch data with simplified approach - using correct column names
-  const { data: teamsData, isLoading: teamsLoading, error: teamsError } = useFetch('teams');
-  const { data: clubsData, isLoading: clubsLoading, error: clubsError } = useFetch('clubs');
-  const { data: competitionsData, isLoading: competitionsLoading, error: competitionsError } = useFetch('championships');
-  const { data: gamesData, isLoading: gamesLoading, error: gamesError } = useFetch('games');
-  const { data: playersData, isLoading: playersLoading, error: playersError } = useFetch('players');
-  
-  // Fix news fetch - remove the invalid orderBy configuration
-  const { data: newsData, isLoading: newsLoading, error: newsError } = useFetch('news');
-  
-  const { data: eventsData, isLoading: eventsLoading, error: eventsError } = useFetch('events');
-  const { data: refereesData, isLoading: refereesLoading, error: refereesError } = useFetch('referees');
-  const { data: federationsData, isLoading: federationsLoading, error: federationsError } = useFetch('federations');
-  const { data: regionalAssociationsData, isLoading: regionalAssociationsLoading, error: regionalAssociationsError } = useFetch('regional_associations');
+  // Clubs data
+  const { data: clubsData, isLoading: clubsLoading, error: clubsError } = useQuery({
+    queryKey: ['clubs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('clubs')
+        .select('*')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching clubs:', error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: 2
+  });
 
-  // Comprehensive logging for all data
-  console.log('=== COMPLETE DATA LOADING STATUS ===');
-  console.log('Teams:', { data: teamsData, loading: teamsLoading, error: teamsError });
-  console.log('Clubs:', { data: clubsData, loading: clubsLoading, error: clubsError });
-  console.log('Competitions:', { data: competitionsData, loading: competitionsLoading, error: competitionsError });
-  console.log('Games:', { data: gamesData, loading: gamesLoading, error: gamesError });
-  console.log('Players:', { data: playersData, loading: playersLoading, error: playersError });
-  console.log('News:', { data: newsData, loading: newsLoading, error: newsError });
-  console.log('Events:', { data: eventsData, loading: eventsLoading, error: eventsError });
-  console.log('Referees:', { data: refereesData, loading: refereesLoading, error: refereesError });
-  console.log('Federations:', { data: federationsData, loading: federationsLoading, error: federationsError });
-  console.log('Regional Associations:', { data: regionalAssociationsData, loading: regionalAssociationsLoading, error: regionalAssociationsError });
-  console.log('====================================');
+  // Competitions data
+  const { data: competitionsData, isLoading: competitionsLoading, error: competitionsError } = useQuery({
+    queryKey: ['competitions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('championships')
+        .select('*')
+        .order('start_date', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching competitions:', error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: 2
+  });
+
+  // Games data
+  const { data: gamesData, isLoading: gamesLoading, error: gamesError } = useQuery({
+    queryKey: ['games'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('games')
+        .select('*')
+        .order('game_date', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching games:', error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes - games change more frequently
+    retry: 2
+  });
+
+  // Players data
+  const { data: playersData, isLoading: playersLoading, error: playersError } = useQuery({
+    queryKey: ['players'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('players')
+        .select('*')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching players:', error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2
+  });
+
+  // News data
+  const { data: newsData, isLoading: newsLoading, error: newsError } = useQuery({
+    queryKey: ['news'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('news')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching news:', error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    staleTime: 2 * 60 * 1000,
+    retry: 2
+  });
+
+  // Events data
+  const { data: eventsData, isLoading: eventsLoading, error: eventsError } = useQuery({
+    queryKey: ['events'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('event_date', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching events:', error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: 2
+  });
+
+  // Referees data
+  const { data: refereesData, isLoading: refereesLoading, error: refereesError } = useQuery({
+    queryKey: ['referees'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('referees')
+        .select('*')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching referees:', error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    staleTime: 10 * 60 * 1000,
+    retry: 2
+  });
+
+  // Federations data
+  const { data: federationsData, isLoading: federationsLoading, error: federationsError } = useQuery({
+    queryKey: ['federations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('federations')
+        .select('*')
+        .order('name');
+      
+      if (error) {
+        console.error('Error fetching federations:', error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    staleTime: 30 * 60 * 1000, // 30 minutes - federations rarely change
+    retry: 2
+  });
+
+  // Regional associations data
+  const { data: regionalAssociationsData, isLoading: regionalAssociationsLoading, error: regionalAssociationsError } = useQuery({
+    queryKey: ['regional-associations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('regional_associations')
+        .select('*')
+        .order('island');
+      
+      if (error) {
+        console.error('Error fetching regional associations:', error);
+        throw error;
+      }
+      
+      return data || [];
+    },
+    staleTime: 30 * 60 * 1000,
+    retry: 2
+  });
 
   return {
     // Raw data
@@ -45,7 +215,7 @@ export const useDataFetching = () => {
     refereesData,
     federationsData,
     regionalAssociationsData,
-    
+
     // Loading states
     teamsLoading,
     clubsLoading,
@@ -57,8 +227,8 @@ export const useDataFetching = () => {
     refereesLoading,
     federationsLoading,
     regionalAssociationsLoading,
-    
-    // Errors
+
+    // Error states
     teamsError,
     clubsError,
     competitionsError,

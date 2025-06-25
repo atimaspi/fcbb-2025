@@ -1,180 +1,184 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/contexts/AuthContext';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { UserPlus } from 'lucide-react';
-import RoleSelector, { DetailedRole } from './RoleSelector';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { UserPlus } from 'lucide-react';
+import { usePermissions } from '@/hooks/usePermissions';
 
 const AdminUserRegistration = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [selectedRole, setSelectedRole] = useState<DetailedRole>('user');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  
-  const { isAdmin } = useAuth();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    fullName: '',
+    role: 'user'
+  });
+  const { toast } = useToast();
+  const { canManageUsers } = usePermissions();
+
+  if (!canManageUsers()) {
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setMessage('');
-    
+
     try {
-      // Create user with Supabase Auth
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName
-          }
-        }
+      // Create user account
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: formData.email,
+        password: formData.password,
+        user_metadata: {
+          full_name: formData.fullName
+        },
+        email_confirm: true
       });
 
-      if (signUpError) {
-        throw signUpError;
+      if (authError) {
+        toast({
+          title: "Erro ao Criar Utilizador",
+          description: authError.message,
+          variant: "destructive",
+        });
+        return;
       }
 
-      if (data.user) {
-        // Create/update profile with selected role
+      // Update profile with role
+      if (authData.user) {
         const { error: profileError } = await supabase
           .from('profiles')
-          .upsert({
-            id: data.user.id,
-            full_name: fullName,
-            role: selectedRole,
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'id'
-          });
+          .update({ role: formData.role })
+          .eq('id', authData.user.id);
 
         if (profileError) {
-          console.error('Profile creation error:', profileError);
-          // Don't throw error here, user was created successfully
-          setMessage(`Usuário criado com sucesso, mas houve um problema ao definir o perfil. Role: ${selectedRole}`);
-        } else {
-          setMessage(`Usuário registado com sucesso como ${selectedRole}!`);
+          console.error('Error updating profile:', profileError);
         }
       }
 
-      // Clear form
-      setEmail('');
-      setPassword('');
-      setFullName('');
-      setSelectedRole('user');
+      toast({
+        title: "Utilizador Criado",
+        description: `Utilizador ${formData.fullName} criado com sucesso!`,
+      });
+
+      // Reset form
+      setFormData({
+        email: '',
+        password: '',
+        fullName: '',
+        role: 'user'
+      });
 
     } catch (error: any) {
-      console.error('Registration error:', error);
-      if (error.message.includes('already registered')) {
-        setError('Este email já está registado');
-      } else {
-        setError(error.message || 'Erro ao registar usuário');
-      }
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro inesperado.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  if (!isAdmin) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
-            Registar Novo Usuário
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Alert>
-            <AlertDescription>
-              Apenas administradores podem registar novos usuários.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <UserPlus className="h-5 w-5" />
-          Registar Novo Usuário
+          <UserPlus className="w-5 h-5" />
+          Criar Novo Utilizador
         </CardTitle>
         <CardDescription>
-          Criar nova conta de usuário no sistema com função específica
+          Criar contas para outros utilizadores do sistema (apenas administradores)
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="adminFullName">Nome Completo</Label>
-            <Input
-              id="adminFullName"
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-              placeholder="Nome completo do usuário"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="adminEmail">Email</Label>
-            <Input
-              id="adminEmail"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="email@exemplo.com"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="adminPassword">Palavra-passe</Label>
-            <Input
-              id="adminPassword"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-              minLength={6}
-            />
-          </div>
-          
-          <RoleSelector
-            value={selectedRole}
-            onChange={setSelectedRole}
-            showDescription={true}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-user-name">Nome Completo</Label>
+              <Input
+                id="new-user-name"
+                type="text"
+                value={formData.fullName}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                required
+                disabled={loading}
+                placeholder="Nome do utilizador"
+              />
+            </div>
 
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          {message && (
-            <Alert>
-              <AlertDescription>{message}</AlertDescription>
-            </Alert>
-          )}
-          <Button 
-            type="submit" 
-            className="w-full bg-cv-blue hover:bg-cv-blue/90"
-            disabled={loading}
-          >
-            {loading ? <LoadingSpinner size="sm" /> : 'Registar Usuário'}
-          </Button>
+            <div className="space-y-2">
+              <Label htmlFor="new-user-email">Email</Label>
+              <Input
+                id="new-user-email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
+                disabled={loading}
+                placeholder="email@exemplo.com"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-user-password">Palavra-passe Temporária</Label>
+              <Input
+                id="new-user-password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                disabled={loading}
+                placeholder="••••••••"
+                minLength={6}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="new-user-role">Função</Label>
+              <Select 
+                value={formData.role} 
+                onValueChange={(value) => setFormData({ ...formData, role: value })}
+                disabled={loading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecionar função" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Utilizador</SelectItem>
+                  <SelectItem value="editor">Editor</SelectItem>
+                  <SelectItem value="admin">Administrador</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <Button 
+              type="submit"
+              disabled={loading}
+              className="bg-[#E10600] hover:bg-[#E10600]/90"
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  A criar...
+                </div>
+              ) : (
+                <>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Criar Utilizador
+                </>
+              )}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

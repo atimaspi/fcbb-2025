@@ -1,239 +1,227 @@
+
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { User, LogOut } from 'lucide-react';
-import { ROLE_LABELS, DetailedRole } from './RoleSelector';
-
-interface Profile {
-  id: string;
-  full_name: string | null;
-  role: DetailedRole;
-  updated_at: string | null;
-  avatar_url: string | null;
-  club_id: string | null;
-  regional_association_id: string | null;
-}
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { User, Save } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const UserProfile = () => {
-  const { user, signOut } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [fullName, setFullName] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    full_name: '',
+    avatar_url: ''
+  });
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      fetchProfile();
-    }
-  }, [user]);
+    fetchProfile();
+  }, []);
 
   const fetchProfile = async () => {
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
-
     try {
-      setError('');
-      
-      const { data, error } = await supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      setUser(session.user);
+
+      const { data: profileData, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          // Profile doesn't exist, create it
-          const defaultRole: DetailedRole = user.email === 'admin@fcbb.cv' ? 'admin' : 'user';
-          
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert({
-              id: user.id,
-              full_name: user.user_metadata?.full_name || 'Utilizador',
-              role: defaultRole
-            })
-            .select()
-            .single();
-
-          if (createError) {
-            console.error('Error creating profile:', createError);
-            // Create fallback profile with proper typing
-            const fallbackProfile: Profile = {
-              id: user.id,
-              full_name: user.user_metadata?.full_name || 'Utilizador',
-              role: defaultRole,
-              updated_at: new Date().toISOString(),
-              avatar_url: null,
-              club_id: null,
-              regional_association_id: null
-            };
-            setProfile(fallbackProfile);
-            setFullName(fallbackProfile.full_name || '');
-            setError('Perfil criado localmente. Algumas funcionalidades podem estar limitadas.');
-          } else {
-            // Cast the role to DetailedRole type
-            const typedProfile: Profile = {
-              ...newProfile,
-              role: newProfile.role as DetailedRole
-            };
-            setProfile(typedProfile);
-            setFullName(typedProfile.full_name || '');
-          }
-        } else {
-          throw error;
-        }
-      } else {
-        // Cast the role to DetailedRole type for existing profiles
-        const typedProfile: Profile = {
-          ...data,
-          role: data.role as DetailedRole
-        };
-        setProfile(typedProfile);
-        setFullName(typedProfile.full_name || '');
+        console.error('Error fetching profile:', error);
+        return;
       }
-    } catch (error: any) {
-      console.error('Error fetching profile:', error);
-      
-      // Provide fallback profile data with proper typing
-      const defaultRole: DetailedRole = user.email === 'admin@fcbb.cv' ? 'admin' : 'user';
-      const fallbackProfile: Profile = {
-        id: user.id,
-        full_name: user.user_metadata?.full_name || 'Utilizador',
-        role: defaultRole,
-        updated_at: new Date().toISOString(),
-        avatar_url: null,
-        club_id: null,
-        regional_association_id: null
-      };
-      
-      setProfile(fallbackProfile);
-      setFullName(fallbackProfile.full_name || '');
-      setError('Operando em modo offline. Conecte-se à internet para sincronizar dados.');
+
+      setProfile(profileData);
+      setFormData({
+        full_name: profileData.full_name || '',
+        avatar_url: profileData.avatar_url || ''
+      });
+    } catch (error) {
+      console.error('Error in fetchProfile:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user?.id || !profile) return;
-    
-    setUpdating(true);
-    setError('');
-    setSuccess('');
+  const handleSave = async () => {
+    if (!user) return;
 
+    setSaving(true);
     try {
       const { error } = await supabase
         .from('profiles')
-        .upsert({ 
-          id: user.id,
-          full_name: fullName,
-          role: profile.role,
+        .update({
+          full_name: formData.full_name,
+          avatar_url: formData.avatar_url,
           updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'id'
-        });
+        })
+        .eq('id', user.id);
 
-      if (error) throw error;
-      
-      setSuccess('Perfil atualizado com sucesso!');
-      await fetchProfile();
-    } catch (error: any) {
-      console.error('Error updating profile:', error);
-      setError('Erro ao atualizar perfil. Verifique sua conexão.');
+      if (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível actualizar o perfil.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Sucesso",
+        description: "Perfil actualizado com sucesso!",
+      });
+
+      fetchProfile(); // Refresh profile data
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro inesperado.",
+        variant: "destructive",
+      });
     } finally {
-      setUpdating(false);
+      setSaving(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center p-8">
-        <LoadingSpinner size="lg" />
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#002D72]"></div>
       </div>
     );
   }
 
-  return (
-    <div className="max-w-2xl mx-auto space-y-6">
+  if (!user || !profile) {
+    return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Perfil do Utilizador
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="p-6">
+          <p className="text-gray-500">Não foi possível carregar o perfil do utilizador.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'bg-red-100 text-red-800';
+      case 'editor':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <User className="w-5 h-5" />
+          Perfil do Utilizador
+        </CardTitle>
+        <CardDescription>
+          Gerir informações da sua conta
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
             <div>
-              <Label className="text-sm font-medium text-gray-500">Email</Label>
-              <p className="mt-1 text-sm text-gray-900">{user?.email}</p>
-            </div>
-            <div>
-              <Label className="text-sm font-medium text-gray-500">Função</Label>
-              <p className="mt-1 text-sm text-gray-900">
-                {profile?.role ? ROLE_LABELS[profile.role] : 'Utilizador'}
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={user.email}
+                disabled
+                className="bg-gray-50"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                O email não pode ser alterado
               </p>
             </div>
-          </div>
 
-          <form onSubmit={updateProfile} className="space-y-4">
             <div>
-              <Label htmlFor="fullName">Nome Completo</Label>
+              <Label htmlFor="full_name">Nome Completo</Label>
               <Input
-                id="fullName"
+                id="full_name"
                 type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Seu nome completo"
+                value={formData.full_name}
+                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                placeholder="Introduza o seu nome completo"
               />
             </div>
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {success && (
-              <Alert>
-                <AlertDescription>{success}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="flex gap-3">
-              <Button 
-                type="submit" 
-                disabled={updating}
-                className="bg-cv-blue hover:bg-cv-blue/90"
-              >
-                {updating ? <LoadingSpinner size="sm" /> : 'Atualizar Perfil'}
-              </Button>
-              
-              <Button 
-                type="button" 
-                variant="outline"
-                onClick={signOut}
-                className="flex items-center gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                Sair
-              </Button>
+            <div>
+              <Label htmlFor="avatar_url">URL do Avatar</Label>
+              <Input
+                id="avatar_url"
+                type="url"
+                value={formData.avatar_url}
+                onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
+                placeholder="https://exemplo.com/avatar.jpg"
+              />
             </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <Label>Função</Label>
+              <div className="mt-2">
+                <Badge className={getRoleBadgeColor(profile.role)}>
+                  {profile.role === 'admin' ? 'Administrador' : 
+                   profile.role === 'editor' ? 'Editor' : 'Utilizador'}
+                </Badge>
+              </div>
+            </div>
+
+            <div>
+              <Label>Conta criada</Label>
+              <p className="text-sm text-gray-600 mt-1">
+                {new Date(profile.created_at).toLocaleDateString('pt-PT')}
+              </p>
+            </div>
+
+            <div>
+              <Label>Última actualização</Label>
+              <p className="text-sm text-gray-600 mt-1">
+                {new Date(profile.updated_at).toLocaleDateString('pt-PT')}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <Button 
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-[#002D72] hover:bg-[#002D72]/90"
+          >
+            {saving ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                A guardar...
+              </div>
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                Guardar Alterações
+              </>
+            )}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
