@@ -1,326 +1,254 @@
 
-import PageLayout from './PageLayout';
-import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter
-} from "@/components/ui/dialog";
-import { Users, Trophy, MapPin, Calendar } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, MapPin, Phone, Mail, Users, Trophy, Filter } from 'lucide-react';
+import PageLayout from '@/components/PageLayout';
 
 const ClubesPage = () => {
-  const [showTransferDialog, setShowTransferDialog] = useState(false);
-  const [playerName, setPlayerName] = useState('');
-  const [fromClub, setFromClub] = useState('');
-  const [toClub, setToClub] = useState('');
-  const [transferType, setTransferType] = useState('definitiva');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedIsland, setSelectedIsland] = useState('all');
+
+  const islands = [
+    { value: 'all', label: 'Todas as Ilhas' },
+    { value: 'santiago', label: 'Santiago' },
+    { value: 'sao-vicente', label: 'São Vicente' },
+    { value: 'sal', label: 'Sal' },
+    { value: 'fogo', label: 'Fogo' },
+    { value: 'brava', label: 'Brava' },
+    { value: 'maio', label: 'Maio' },
+    { value: 'boavista', label: 'Boa Vista' },
+    { value: 'santo-antao', label: 'Santo Antão' },
+    { value: 'sao-nicolau', label: 'São Nicolau' }
+  ];
 
   const clubs = [
-    { 
-      id: 1, 
-      name: 'ABC Basquete', 
-      region: 'Santiago', 
-      founded: 1985, 
-      players: 15, 
-      titles: 3,
-      contact: 'abc@basquete.cv'
+    {
+      id: 1,
+      name: "CD Travadores",
+      city: "Praia",
+      island: "Santiago",
+      founded: 1976,
+      president: "João Silva",
+      phone: "+238 260 1234",
+      email: "geral@travadores.cv",
+      logo: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=100",
+      achievements: ["Campeão Nacional 2024", "Taça CV 2023"],
+      teams: ["Sénior Masculino", "Sénior Feminino", "Sub-18"],
+      status: "ativo"
     },
-    { 
-      id: 2, 
-      name: 'CD Travadores', 
-      region: 'São Vicente', 
-      founded: 1978, 
-      players: 14, 
-      titles: 5,
-      contact: 'travadores@clube.cv'
+    {
+      id: 2,
+      name: "Sporting Clube de Cabo Verde",
+      city: "Praia",
+      island: "Santiago",
+      founded: 1968,
+      president: "Maria Santos",
+      phone: "+238 260 5678",
+      email: "info@sporting.cv",
+      logo: "https://images.unsplash.com/photo-1608245449230-4ac19066d2d0?q=80&w=100",
+      achievements: ["Vice-campeão Nacional 2024", "Campeão Regional 2023"],
+      teams: ["Sénior Masculino", "Sénior Feminino"],
+      status: "ativo"
     },
-    { 
-      id: 3, 
-      name: 'Sporting Clube da Praia', 
-      region: 'Santiago', 
-      founded: 1923, 
-      players: 16, 
-      titles: 8,
-      contact: 'sporting@praia.cv'
+    {
+      id: 3,
+      name: "ABC Mindelo",
+      city: "Mindelo",
+      island: "São Vicente",
+      founded: 1985,
+      president: "Carlos Fonseca",
+      phone: "+238 232 9876",
+      email: "contacto@abcmindelo.cv",
+      logo: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=100",
+      achievements: ["3º Lugar Nacional 2024"],
+      teams: ["Sénior Masculino", "Sub-18"],
+      status: "ativo"
     },
-    { 
-      id: 4, 
-      name: 'FC Porto CV', 
-      region: 'São Vicente', 
-      founded: 1995, 
-      players: 13, 
-      titles: 2,
-      contact: 'porto@cv.pt'
-    },
+    {
+      id: 4,
+      name: "Académico 83",
+      city: "Espargos",
+      island: "Sal",
+      founded: 1983,
+      president: "Ana Tavares",
+      phone: "+238 241 3456",
+      email: "academico83@gmail.com",
+      logo: "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=100",
+      achievements: ["Campeão Regional Sal 2024"],
+      teams: ["Sénior Masculino"],
+      status: "ativo"
+    }
   ];
 
-  const recentTransfers = [
-    { id: 1, player: 'João Silva', from: 'ABC Basquete', to: 'Sporting CP', type: 'Definitiva', date: '15/05/2025' },
-    { id: 2, player: 'Carlos Santos', from: 'FC Porto', to: 'CD Travadores', type: 'Empréstimo', date: '12/05/2025' },
-    { id: 3, player: 'Pedro Gomes', from: 'Benfica', to: 'ABC Basquete', type: 'Definitiva', date: '08/05/2025' },
-  ];
-
-  const topPlayers = [
-    { rank: 1, player: 'Miguel Costa', club: 'ABC Basquete', position: 'Base', age: 25, points: 18.5 },
-    { rank: 2, player: 'André Pereira', club: 'Sporting CP', position: 'Extremo', age: 23, points: 16.8 },
-    { rank: 3, player: 'Bruno Tavares', club: 'CD Travadores', position: 'Poste', age: 28, points: 15.2 },
-    { rank: 4, player: 'Rui Martins', club: 'FC Porto', position: 'Ala', age: 26, points: 14.7 },
-    { rank: 5, player: 'Tiago Sousa', club: 'Benfica', position: 'Pivot', age: 29, points: 13.9 },
-  ];
-
-  const handleSubmitTransfer = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Transfer submitted:', { playerName, fromClub, toClub, transferType });
-    setShowTransferDialog(false);
-    // Reset form
-    setPlayerName('');
-    setFromClub('');
-    setToClub('');
-    setTransferType('definitiva');
-    alert('Transferência registada com sucesso!');
-  };
+  const filteredClubs = clubs.filter(club => {
+    const matchesSearch = club.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         club.city.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesIsland = selectedIsland === 'all' || club.island.toLowerCase().replace(' ', '-') === selectedIsland;
+    return matchesSearch && matchesIsland;
+  });
 
   return (
-    <PageLayout title="Clubes e Atletas">
+    <PageLayout
+      title="Clubes Federados"
+      description="Conheça todos os clubes afiliados à FCBB em todo o arquipélago cabo-verdiano"
+    >
+      {/* Search and Filter Section */}
+      <div className="mb-8 space-y-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Pesquisar clubes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={selectedIsland} onValueChange={setSelectedIsland}>
+            <SelectTrigger className="w-full md:w-64">
+              <Filter className="w-4 h-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {islands.map((island) => (
+                <SelectItem key={island.value} value={island.value}>
+                  {island.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Clubes Filiados</CardTitle>
-            <Trophy className="h-4 w-4 text-cv-blue" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-cv-blue">16</div>
+          <CardContent className="p-6 text-center">
+            <div className="text-3xl font-bold text-cv-blue mb-2">{filteredClubs.length}</div>
+            <p className="text-gray-600">Clubes Ativos</p>
           </CardContent>
         </Card>
-        
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Atletas Registados</CardTitle>
-            <Users className="h-4 w-4 text-cv-blue" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-cv-blue">240</div>
+          <CardContent className="p-6 text-center">
+            <div className="text-3xl font-bold text-cv-red mb-2">9</div>
+            <p className="text-gray-600">Ilhas Representadas</p>
           </CardContent>
         </Card>
-        
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Transferências</CardTitle>
-            <Calendar className="h-4 w-4 text-cv-blue" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-cv-blue">12</div>
-            <p className="text-xs text-gray-600">Este mês</p>
+          <CardContent className="p-6 text-center">
+            <div className="text-3xl font-bold text-cv-blue mb-2">45</div>
+            <p className="text-gray-600">Equipas Registadas</p>
           </CardContent>
         </Card>
-        
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Regiões</CardTitle>
-            <MapPin className="h-4 w-4 text-cv-blue" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-cv-blue">10</div>
+          <CardContent className="p-6 text-center">
+            <div className="text-3xl font-bold text-cv-red mb-2">1350+</div>
+            <p className="text-gray-600">Atletas Federados</p>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="clubes" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="clubes">Clubes</TabsTrigger>
-          <TabsTrigger value="atletas">Atletas</TabsTrigger>
-          <TabsTrigger value="transferencias">Transferências</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="clubes" className="space-y-4">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold text-cv-blue mb-4">Clubes Filiados</h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Região</TableHead>
-                  <TableHead className="text-center">Fundado</TableHead>
-                  <TableHead className="text-center">Jogadores</TableHead>
-                  <TableHead className="text-center">Títulos</TableHead>
-                  <TableHead>Contacto</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {clubs.map((club) => (
-                  <TableRow key={club.id}>
-                    <TableCell className="font-medium">{club.name}</TableCell>
-                    <TableCell>{club.region}</TableCell>
-                    <TableCell className="text-center">{club.founded}</TableCell>
-                    <TableCell className="text-center">{club.players}</TableCell>
-                    <TableCell className="text-center">{club.titles}</TableCell>
-                    <TableCell>{club.contact}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="atletas" className="space-y-4">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold text-cv-blue mb-4">Top Atletas</h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-16">#</TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Clube</TableHead>
-                  <TableHead>Posição</TableHead>
-                  <TableHead className="text-center">Idade</TableHead>
-                  <TableHead className="text-center">PPJ</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {topPlayers.map((player) => (
-                  <TableRow key={player.rank}>
-                    <TableCell className="font-medium">{player.rank}</TableCell>
-                    <TableCell className="font-medium">{player.player}</TableCell>
-                    <TableCell>{player.club}</TableCell>
-                    <TableCell>{player.position}</TableCell>
-                    <TableCell className="text-center">{player.age}</TableCell>
-                    <TableCell className="text-center font-bold">{player.points}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="transferencias" className="space-y-4">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-cv-blue">Transferências Recentes</h3>
-              <Button 
-                className="bg-cv-blue hover:bg-blue-700"
-                onClick={() => setShowTransferDialog(true)}
-              >
-                Registar Transferência
-              </Button>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Jogador</TableHead>
-                  <TableHead>De</TableHead>
-                  <TableHead>Para</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Data</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentTransfers.map((transfer) => (
-                  <TableRow key={transfer.id}>
-                    <TableCell className="font-medium">{transfer.player}</TableCell>
-                    <TableCell>{transfer.from}</TableCell>
-                    <TableCell>{transfer.to}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        transfer.type === 'Definitiva' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {transfer.type}
-                      </span>
-                    </TableCell>
-                    <TableCell>{transfer.date}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-      </Tabs>
+      {/* Clubs Grid */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredClubs.map((club, index) => (
+          <motion.div
+            key={club.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+          >
+            <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-102">
+              <CardHeader className="pb-3">
+                <div className="flex items-center space-x-4">
+                  <img 
+                    src={club.logo}
+                    alt={club.name}
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <CardTitle className="text-lg text-cv-blue">{club.name}</CardTitle>
+                    <div className="flex items-center text-gray-600 text-sm mt-1">
+                      <MapPin className="w-3 h-3 mr-1" />
+                      {club.city}, {club.island}
+                    </div>
+                  </div>
+                  <Badge variant={club.status === 'ativo' ? 'default' : 'secondary'} className="bg-cv-red text-white">
+                    {club.status}
+                  </Badge>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-cv-blue mb-2">Informações</h4>
+                  <div className="space-y-1 text-sm text-gray-600">
+                    <p>Fundado em: {club.founded}</p>
+                    <p>Presidente: {club.president}</p>
+                  </div>
+                </div>
 
-      {/* Transfer Dialog */}
-      <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
-        <DialogContent className="sm:max-w-[525px]">
-          <DialogHeader>
-            <DialogTitle>Registar Transferência</DialogTitle>
-            <DialogDescription>
-              Preencha os dados da transferência do jogador.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmitTransfer}>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <label htmlFor="playerName" className="text-sm font-medium">
-                  Nome do Jogador
-                </label>
-                <input
-                  id="playerName"
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <label htmlFor="fromClub" className="text-sm font-medium">
-                    Clube de Origem
-                  </label>
-                  <input
-                    id="fromClub"
-                    value={fromClub}
-                    onChange={(e) => setFromClub(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md"
-                    required
-                  />
+                <div>
+                  <h4 className="font-semibold text-cv-blue mb-2">Contactos</h4>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex items-center text-gray-600">
+                      <Phone className="w-3 h-3 mr-2" />
+                      {club.phone}
+                    </div>
+                    <div className="flex items-center text-gray-600">
+                      <Mail className="w-3 h-3 mr-2" />
+                      {club.email}
+                    </div>
+                  </div>
                 </div>
-                <div className="grid gap-2">
-                  <label htmlFor="toClub" className="text-sm font-medium">
-                    Clube de Destino
-                  </label>
-                  <input
-                    id="toClub"
-                    value={toClub}
-                    onChange={(e) => setToClub(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md"
-                    required
-                  />
+
+                <div>
+                  <h4 className="font-semibold text-cv-blue mb-2">Equipas</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {club.teams.map((team, idx) => (
+                      <Badge key={idx} variant="outline" className="text-xs">
+                        {team}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              
-              <div className="grid gap-2">
-                <label htmlFor="transferType" className="text-sm font-medium">
-                  Tipo de Transferência
-                </label>
-                <select
-                  id="transferType"
-                  value={transferType}
-                  onChange={(e) => setTransferType(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md"
-                >
-                  <option value="definitiva">Definitiva</option>
-                  <option value="emprestimo">Empréstimo</option>
-                </select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit" className="bg-cv-blue">Registar</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+
+                {club.achievements.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-cv-blue mb-2 flex items-center">
+                      <Trophy className="w-4 h-4 mr-1" />
+                      Conquistas Recentes
+                    </h4>
+                    <div className="space-y-1">
+                      {club.achievements.map((achievement, idx) => (
+                        <Badge key={idx} variant="outline" className="mr-1 mb-1 text-xs border-cv-yellow text-cv-blue">
+                          {achievement}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <Button className="w-full bg-cv-blue hover:bg-cv-blue/90">
+                  <Users className="w-4 h-4 mr-2" />
+                  Ver Detalhes
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      {filteredClubs.length === 0 && (
+        <div className="text-center py-12">
+          <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500 text-lg">Nenhum clube encontrado com os filtros selecionados.</p>
+        </div>
+      )}
     </PageLayout>
   );
 };

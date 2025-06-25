@@ -1,3 +1,4 @@
+
 import React from 'react';
 import './App.css';
 import { Toaster } from "@/components/ui/toaster";
@@ -7,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import { InternationalizationProvider } from "@/contexts/InternationalizationContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import SafeErrorBoundary from "@/components/SafeErrorBoundary";
 import ModernIndex from "./pages/ModernIndex";
 import Index from "./pages/Index";
@@ -15,6 +17,11 @@ import Admin from "./pages/Admin";
 import NoticiasPage from "./pages/NoticiasPage";
 import SelecoesPage from "./pages/SelecoesPage";
 import CompeticoesPage from "./pages/CompeticoesPage";
+import ClubesPage from "./pages/ClubesPage";
+import GaleriaPage from "./pages/GaleriaPage";
+import SobrePage from "./pages/SobrePage";
+import ContactosPage from "./pages/ContactosPage";
+import AreaReservadaPage from "./pages/AreaReservadaPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,23 +46,30 @@ const App = () => {
     <SafeErrorBoundary>
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          <InternationalizationProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<ModernIndex />} />
-                  <Route path="/old" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/noticias" element={<NoticiasPage />} />
-                  <Route path="/selecoes" element={<SelecoesPage />} />
-                  <Route path="/competicoes" element={<CompeticoesPage />} />
-                </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </InternationalizationProvider>
+          <AuthProvider>
+            <InternationalizationProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<ModernIndex />} />
+                    <Route path="/old" element={<Index />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/noticias" element={<NoticiasPage />} />
+                    <Route path="/selecoes" element={<SelecoesPage />} />
+                    <Route path="/competicoes" element={<CompeticoesPage />} />
+                    <Route path="/clubes" element={<ClubesPage />} />
+                    <Route path="/galeria" element={<GaleriaPage />} />
+                    <Route path="/sobre" element={<SobrePage />} />
+                    <Route path="/contactos" element={<ContactosPage />} />
+                    <Route path="/area-reservada" element={<AreaReservadaPage />} />
+                  </Routes>
+                </BrowserRouter>
+              </TooltipProvider>
+            </InternationalizationProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </HelmetProvider>
     </SafeErrorBoundary>

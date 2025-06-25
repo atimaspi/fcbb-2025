@@ -1,149 +1,94 @@
 
-import { memo } from 'react';
-import PermissionGuard from '@/components/auth/PermissionGuard';
-import UserProfile from '@/components/auth/UserProfile';
-import AdminUserRegistration from '@/components/auth/AdminUserRegistration';
-import Dashboard from '@/components/admin/Dashboard';
-import NewsManagementAdvanced from '@/components/admin/NewsManagementAdvanced';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import DataManagement from '@/components/backend/DataManagement';
+import UserProfile from '@/components/admin/UserProfile';
+import NewsManagement from '@/components/admin/NewsManagement';
 import EventsManagement from '@/components/admin/EventsManagement';
-import ClubsManagement from '@/components/admin/ClubsManagement';
-import CompetitionsManagementAdvanced from '@/components/admin/CompetitionsManagementAdvanced';
 import GalleryManagement from '@/components/admin/GalleryManagement';
-import StatisticsManagementAdvanced from '@/components/admin/StatisticsManagementAdvanced';
-import RefereesManagement from '@/components/admin/RefereesManagement';
-import PlayersManagementAdvanced from '@/components/admin/PlayersManagementAdvanced';
-import CoachesManagement from '@/components/admin/CoachesManagement';
-import GamesManagementAdvanced from '@/components/admin/GamesManagementAdvanced';
-import RegionalAssociationsManagement from '@/components/admin/RegionalAssociationsManagement';
-import FederationsManagement from '@/components/admin/FederationsManagement';
 import HeroSlidesManagement from '@/components/admin/HeroSlidesManagement';
-import PartnersManagementAdvanced from '@/components/admin/PartnersManagementAdvanced';
-import SiteSettingsAdvanced from '@/components/admin/SiteSettingsAdvanced';
+import PartnersManagement from '@/components/admin/PartnersManagement';
+import StatisticsManagement from '@/components/admin/StatisticsManagement';
+import SiteSettingsManagement from '@/components/admin/SiteSettingsManagement';
+import AdminDashboard from '@/components/admin/AdminDashboard';
+import { BarChart3, Users, FileText, Calendar, Trophy, Building2, Building, UserCheck, GraduationCap, GamepadIcon, Shield, Image, Star, Handshake, Sliders } from 'lucide-react';
 
 interface AdminContentProps {
   activeTab: string;
 }
 
-const AdminContent = memo(({ activeTab }: AdminContentProps) => {
+const AdminContent = ({ activeTab }: AdminContentProps) => {
+  const { user, profile, isAdmin } = useAuth();
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <Dashboard />
-          </PermissionGuard>
-        );
+        return <AdminDashboard />;
       case 'profile':
-        return (
-          <div className="space-y-6">
-            <UserProfile />
-            <PermissionGuard permission={{ resource: 'users', action: 'create' }} showError={false}>
-              <AdminUserRegistration />
-            </PermissionGuard>
-          </div>
-        );
-      case 'hero-slides':
-        return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <HeroSlidesManagement />
-          </PermissionGuard>
-        );
-      case 'statistics':
-        return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <StatisticsManagementAdvanced />
-          </PermissionGuard>
-        );
-      case 'partners':
-        return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <PartnersManagementAdvanced />
-          </PermissionGuard>
-        );
-      case 'site-settings':
-        return (
-          <PermissionGuard permission={{ resource: 'settings', action: 'edit' }}>
-            <SiteSettingsAdvanced />
-          </PermissionGuard>
-        );
+        return <UserProfile />;
       case 'news':
-        return (
-          <PermissionGuard permission={{ resource: 'news', action: 'create' }}>
-            <NewsManagementAdvanced />
-          </PermissionGuard>
-        );
+        return <NewsManagement />;
       case 'events':
-        return (
-          <PermissionGuard permission={{ resource: 'events', action: 'create' }}>
-            <EventsManagement />
-          </PermissionGuard>
-        );
-      case 'competitions':
-        return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <CompetitionsManagementAdvanced />
-          </PermissionGuard>
-        );
-      case 'federations':
-        return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <FederationsManagement />
-          </PermissionGuard>
-        );
-      case 'regionalAssociations':
-        return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <RegionalAssociationsManagement />
-          </PermissionGuard>
-        );
-      case 'clubs':
-        return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <ClubsManagement />
-          </PermissionGuard>
-        );
-      case 'players':
-        return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <PlayersManagementAdvanced />
-          </PermissionGuard>
-        );
-      case 'coaches':
-        return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <CoachesManagement />
-          </PermissionGuard>
-        );
-      case 'games':
-        return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <GamesManagementAdvanced />
-          </PermissionGuard>
-        );
+        return <EventsManagement />;
       case 'gallery':
-        return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <GalleryManagement />
-          </PermissionGuard>
-        );
+        return <GalleryManagement />;
+      case 'hero-slides':
+        return <HeroSlidesManagement />;
+      case 'partners':
+        return <PartnersManagement />;
+      case 'statistics':
+        return <StatisticsManagement />;
+      case 'site-settings':
+        return <SiteSettingsManagement />;
+      case 'clubs':
+      case 'competitions':
+      case 'federations':
+      case 'regionalAssociations':
+      case 'players':
+      case 'coaches':
+      case 'games':
       case 'referees':
-        return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <RefereesManagement />
-          </PermissionGuard>
-        );
+        return <DataManagement />;
       default:
         return (
-          <PermissionGuard permission={{ resource: 'dashboard', action: 'view' }}>
-            <Dashboard />
-          </PermissionGuard>
+          <Card>
+            <CardHeader>
+              <CardTitle>Bem-vindo ao Painel Administrativo</CardTitle>
+              <CardDescription>
+                Selecione uma opção no menu lateral para começar a gerir o conteúdo do site FCBB.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-cv-blue/5 rounded-lg">
+                  <FileText className="w-8 h-8 text-cv-blue mx-auto mb-2" />
+                  <p className="text-sm font-medium">Notícias</p>
+                </div>
+                <div className="text-center p-4 bg-cv-red/5 rounded-lg">
+                  <Calendar className="w-8 h-8 text-cv-red mx-auto mb-2" />
+                  <p className="text-sm font-medium">Eventos</p>
+                </div>
+                <div className="text-center p-4 bg-cv-yellow/20 rounded-lg">
+                  <Users className="w-8 h-8 text-cv-blue mx-auto mb-2" />
+                  <p className="text-sm font-medium">Clubes</p>
+                </div>
+                <div className="text-center p-4 bg-gray-100 rounded-lg">
+                  <Trophy className="w-8 h-8 text-cv-red mx-auto mb-2" />
+                  <p className="text-sm font-medium">Competições</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         );
     }
   };
 
-  return <div className="flex-1">{renderContent()}</div>;
-});
-
-AdminContent.displayName = 'AdminContent';
+  return (
+    <div className="space-y-6">
+      {renderContent()}
+    </div>
+  );
+};
 
 export default AdminContent;
