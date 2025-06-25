@@ -26,6 +26,11 @@ export interface Club {
   status: 'ativo' | 'inativo';
   created_at: string;
   updated_at: string;
+  // Add missing properties used in ClubsDirectory
+  address?: string;
+  description?: string;
+  website?: string;
+  active?: boolean;
 }
 
 export interface Competition {
@@ -48,6 +53,7 @@ export interface Game {
   home_team_id?: string;
   away_team_id?: string;
   game_date?: string;
+  scheduled_date?: string; // Add this for compatibility
   venue?: string;
   round?: string;
   home_score: number;
@@ -114,6 +120,13 @@ export interface Referee {
   status: 'ativo' | 'suspenso' | 'inativo';
   created_at: string;
   updated_at: string;
+  // Add missing properties used in RefereesManagement
+  first_name?: string;
+  last_name?: string;
+  level?: string;
+  phone?: string;
+  email?: string;
+  active?: boolean;
 }
 
 export interface Coach {

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-interface Permission {
+export interface Permission {
   resource: string;
   action: string;
 }
@@ -73,6 +73,14 @@ export const usePermissions = () => {
     return false;
   };
 
+  const hasAnyPermission = (permissions: Permission[]): boolean => {
+    return permissions.some(permission => hasPermission(permission));
+  };
+
+  const hasAllPermissions = (permissions: Permission[]): boolean => {
+    return permissions.every(permission => hasPermission(permission));
+  };
+
   const canAccessAdminArea = (): boolean => {
     return ['admin', 'editor'].includes(userRole || '');
   };
@@ -89,6 +97,8 @@ export const usePermissions = () => {
     userRole,
     loading,
     hasPermission,
+    hasAnyPermission,
+    hasAllPermissions,
     canAccessAdminArea,
     canManageUsers,
     canPublishContent

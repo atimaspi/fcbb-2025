@@ -2,11 +2,28 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
+// Define allowed table names based on actual Supabase schema
+type TableName = 
+  | 'clubs' 
+  | 'teams' 
+  | 'players' 
+  | 'games' 
+  | 'news' 
+  | 'events' 
+  | 'referees' 
+  | 'federations' 
+  | 'regional_associations'
+  | 'championships'
+  | 'profiles'
+  | 'partners'
+  | 'hero_slides'
+  | 'basketball_stats';
+
 export const useApi = () => {
   const queryClient = useQueryClient();
 
   // Generic create mutation
-  const useCreate = (table: string) => {
+  const useCreate = (table: TableName) => {
     return useMutation({
       mutationFn: async (data: any) => {
         const { data: result, error } = await supabase
@@ -41,7 +58,7 @@ export const useApi = () => {
   };
 
   // Generic update mutation
-  const useUpdate = (table: string) => {
+  const useUpdate = (table: TableName) => {
     return useMutation({
       mutationFn: async ({ id, data }: { id: string; data: any }) => {
         const { data: result, error } = await supabase
@@ -76,7 +93,7 @@ export const useApi = () => {
   };
 
   // Generic delete mutation
-  const useDelete = (table: string) => {
+  const useDelete = (table: TableName) => {
     return useMutation({
       mutationFn: async (id: string) => {
         const { error } = await supabase

@@ -57,7 +57,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Verificação de permissão específica
-  if (permission && !hasPermission(permission.resource, permission.action)) {
+  if (permission && !hasPermission(permission)) {
     return fallbackComponent || (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Alert variant="destructive" className="max-w-md">

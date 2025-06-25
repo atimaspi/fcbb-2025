@@ -55,8 +55,8 @@ const UpcomingGames = () => {
   const gamesToDisplay = upcomingGames && upcomingGames.length > 0 
     ? upcomingGames.slice(0, 3).map(game => ({
         id: game.id,
-        date: formatGameDate(game.scheduled_date),
-        time: game.scheduled_date ? new Date(game.scheduled_date).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '--:--',
+        date: formatGameDate(game.scheduled_date || game.game_date || ''),
+        time: (game.scheduled_date || game.game_date) ? new Date(game.scheduled_date || game.game_date || '').toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '--:--',
         competition: "Liga Nacional",
         homeTeam: game.home_team_id || "Equipa Casa",
         awayTeam: game.away_team_id || "Equipa Fora", 

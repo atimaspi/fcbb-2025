@@ -1,64 +1,75 @@
 
-import { useApi } from '@/hooks/useApi';
+import { useApi } from './useApi';
 
+// Simple wrapper for backend operations
 export const useBackendOperations = () => {
-  const { useCreate, useUpdate, useDelete } = useApi();
+  const api = useApi();
 
   const operations = {
-    teams: {
-      create: useCreate('teams'),
-      update: useUpdate('teams'),
-      delete: useDelete('teams')
-    },
     clubs: {
-      create: useCreate('clubs'),
-      update: useUpdate('clubs'),
-      delete: useDelete('clubs')
+      create: api.useCreate('clubs'),
+      update: api.useUpdate('clubs'),
+      delete: api.useDelete('clubs')
     },
-    competitions: {
-      create: useCreate('championships'),
-      update: useUpdate('championships'),
-      delete: useDelete('championships')
-    },
-    games: {
-      create: useCreate('games'),
-      update: useUpdate('games'),
-      delete: useDelete('games')
+    teams: {
+      create: api.useCreate('teams'),
+      update: api.useUpdate('teams'),
+      delete: api.useDelete('teams')
     },
     players: {
-      create: useCreate('players'),
-      update: useUpdate('players'),
-      delete: useDelete('players')
+      create: api.useCreate('players'),
+      update: api.useUpdate('players'),
+      delete: api.useDelete('players')
+    },
+    games: {
+      create: api.useCreate('games'),
+      update: api.useUpdate('games'),
+      delete: api.useDelete('games')
     },
     news: {
-      create: useCreate('news'),
-      update: useUpdate('news'),
-      delete: useDelete('news')
+      create: api.useCreate('news'),
+      update: api.useUpdate('news'),
+      delete: api.useDelete('news')
     },
     events: {
-      create: useCreate('events'),
-      update: useUpdate('events'),
-      delete: useDelete('events')
+      create: api.useCreate('events'),
+      update: api.useUpdate('events'),
+      delete: api.useDelete('events')
     },
     referees: {
-      create: useCreate('referees'),
-      update: useUpdate('referees'),
-      delete: useDelete('referees')
-    },
-    coaches: {
-      create: useCreate('coaches'),
-      update: useUpdate('coaches'),
-      delete: useDelete('coaches')
+      create: api.useCreate('referees'),
+      update: api.useUpdate('referees'),
+      delete: api.useDelete('referees')
     },
     federations: {
-      create: useCreate('federations'),
-      update: useUpdate('federations'),
-      delete: useDelete('federations')
+      create: api.useCreate('federations'),
+      update: api.useUpdate('federations'),
+      delete: api.useDelete('federations')
     },
     regionalAssociations: {
-      create: useCreate('regional_associations'),
-      update: useUpdate('regional_associations'),
-      delete: useDelete('regional_associations')
+      create: api.useCreate('regional_associations'),
+      update: api.useUpdate('regional_associations'),
+      delete: api.useDelete('regional_associations')
+    },
+    championships: {
+      create: api.useCreate('championships'),
+      update: api.useUpdate('championships'),
+      delete: api.useDelete('championships')
+    },
+    partners: {
+      create: api.useCreate('partners'),
+      update: api.useUpdate('partners'),
+      delete: api.useDelete('partners')
+    },
+    heroSlides: {
+      create: api.useCreate('hero_slides'),
+      update: api.useUpdate('hero_slides'),
+      delete: api.useDelete('hero_slides')
+    },
+    basketballStats: {
+      create: api.useCreate('basketball_stats'),
+      update: api.useUpdate('basketball_stats'),
+      delete: api.useDelete('basketball_stats')
     }
   };
 
