@@ -1,5 +1,5 @@
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import SEO from '@/components/SEO';
 import { useSafeDOM } from '@/hooks/useSafeDOM';
@@ -10,20 +10,50 @@ const FCBBLayout = lazy(() => import('@/components/layout/FCBBLayout').catch(() 
 })));
 
 const Index = () => {
-  const { safeAddClass } = useSafeDOM();
+  const { safeAddClass, isClient } = useSafeDOM();
   
-  // Safe initialization
-  React.useEffect(() => {
+  // Safe initialization with better error handling
+  useEffect(() => {
     console.log('Index page mounted successfully');
     
-    // Safe DOM manipulation example
-    const body = document.body;
-    safeAddClass(body, 'page-loaded');
+    // Only run DOM manipulation if we're in the client
+    if (!isClient) {
+      console.log('Skipping DOM manipulation - not in client environment');
+      return;
+    }
+    
+    // Safe DOM manipulation with proper checks
+    const addPageLoadedClass = () => {
+      try {
+        const body = document?.body;
+        if (body) {
+          const success = safeAddClass(body, 'page-loaded');
+          console.log('Page loaded class added:', success);
+        } else {
+          console.warn('Document body not available');
+        }
+      } catch (error) {
+        console.warn('Error in page initialization:', error);
+      }
+    };
+
+    // Use setTimeout to ensure DOM is ready
+    const timeoutId = setTimeout(addPageLoadedClass, 100);
     
     return () => {
       console.log('Index page cleanup');
+      clearTimeout(timeoutId);
     };
-  }, [safeAddClass]);
+  }, [safeAddClass, isClient]);
+
+  const LoadingFallback = () => (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#002D72] mx-auto mb-4"></div>
+        <p className="text-gray-600">A carregar FCBB...</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen">
@@ -33,14 +63,7 @@ const Index = () => {
         keywords="basquetebol, Cabo Verde, FCBB, federação, desporto, competições"
       />
       
-      <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#002D72] mx-auto mb-4"></div>
-            <p className="text-gray-600">A carregar FCBB...</p>
-          </div>
-        </div>
-      }>
+      <Suspense fallback={<LoadingFallback />}>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
