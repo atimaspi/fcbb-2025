@@ -1,11 +1,11 @@
 
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import DynamicBannerCarousel from "@/components/hero/DynamicBannerCarousel";
+import ProductionHeroCarousel from "@/components/hero/ProductionHeroCarousel";
 import PremiumStatsSection from "@/components/PremiumStatsSection";
 import FibaStyleLiveResults from "@/components/FibaStyleLiveResults";
 import FibaNewsSection from "@/components/FibaNewsSection";
-import FPBStylePartnersSection from "@/components/partners/FPBStylePartnersSection";
+import ProductionPartnersSection from "@/components/partners/ProductionPartnersSection";
 import TeamsSection from "@/components/TeamsSection";
 import FibaStyleHeader from "@/components/header/FibaStyleHeader";
 import Footer from "@/components/Footer";
@@ -16,11 +16,11 @@ const Index = () => {
   const { t } = useTranslation();
 
   useEffect(() => {
-    console.log("Index page loaded - FCBB website initialized");
+    console.log("Index page loaded - FCBB Production Website initialized");
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#0B132B] via-[#1A1F2E] to-[#0B132B]">
       <SEO 
         title="FCBB - Federação Cabo-verdiana de Basquetebol"
         description="Website oficial da Federação Cabo-verdiana de Basquetebol. Acompanhe as últimas notícias, resultados, classificações e informações sobre o basquetebol em Cabo Verde."
@@ -30,8 +30,8 @@ const Index = () => {
       <FibaStyleHeader />
       
       <main>
-        {/* Dynamic Banner Carousel */}
-        <DynamicBannerCarousel />
+        {/* Production Hero Carousel */}
+        <ProductionHeroCarousel />
 
         {/* Live Results Section */}
         <motion.div
@@ -73,8 +73,8 @@ const Index = () => {
           <TeamsSection />
         </motion.div>
 
-        {/* FPB Style Partners Section */}
-        <FPBStylePartnersSection />
+        {/* Production Partners Section */}
+        <ProductionPartnersSection />
       </main>
 
       <Footer />

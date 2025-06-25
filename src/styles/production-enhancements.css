@@ -1,0 +1,170 @@
+
+@layer base {
+  /* Production-grade CSS variables for consistent theming */
+  :root {
+    --bg-start: #0B132B;
+    --bg-end: #1A1F2E;
+    --cv-blue: #003893;
+    --cv-red: #CF2027;
+    --cv-yellow: #F7D116;
+    --text-primary: #FFFFFF;
+    --text-secondary: #E5E7EB;
+    --text-accent: #F7D116;
+  }
+
+  /* Dark mode variables */
+  .dark {
+    --bg-start: #000000;
+    --bg-end: #111827;
+  }
+
+  /* Typography enhancements */
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap');
+  
+  body {
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: 'liga' 1, 'kern' 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+}
+
+@layer components {
+  /* Production-grade component styles */
+  .production-hero {
+    background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .metallic-border {
+    background: linear-gradient(45deg, #C0C0C0, #F8F8FF, #C0C0C0);
+    padding: 2px;
+    border-radius: 16px;
+  }
+
+  .metallic-border-gold {
+    background: linear-gradient(45deg, #FFD700, #FFF8DC, #B8860B);
+    padding: 2px;
+    border-radius: 16px;
+  }
+
+  .metallic-border-silver {
+    background: linear-gradient(45deg, #C0C0C0, #F5F5F5, #A9A9A9);
+    padding: 2px;
+    border-radius: 16px;
+  }
+
+  /* Enhanced glow effects */
+  .glow-platinum {
+    box-shadow: 
+      0 0 10px rgba(255, 255, 255, 0.3),
+      0 0 20px rgba(255, 255, 255, 0.2),
+      0 0 30px rgba(255, 255, 255, 0.1);
+  }
+
+  .glow-gold {
+    box-shadow: 
+      0 0 10px rgba(255, 215, 0, 0.4),
+      0 0 20px rgba(255, 215, 0, 0.3),
+      0 0 30px rgba(255, 215, 0, 0.2);
+  }
+
+  .glow-silver {
+    box-shadow: 
+      0 0 10px rgba(192, 192, 192, 0.4),
+      0 0 20px rgba(192, 192, 192, 0.3),
+      0 0 30px rgba(192, 192, 192, 0.2);
+  }
+}
+
+@layer utilities {
+  /* Performance-optimized animations */
+  .animate-gradient-flow {
+    background: linear-gradient(-45deg, var(--cv-blue), var(--cv-red), var(--cv-yellow), var(--cv-blue));
+    background-size: 400% 400%;
+    animation: gradient-flow 8s ease infinite;
+  }
+
+  @keyframes gradient-flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Micro-interactions */
+  .hover-lift-gentle {
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .hover-lift-gentle:hover {
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  .pulse-gentle {
+    animation: pulse-gentle 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-gentle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.9; transform: scale(1.02); }
+  }
+
+  /* Accessibility enhancements */
+  .focus-visible-enhanced {
+    outline: 2px solid var(--cv-yellow);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-gradient-flow {
+      animation: none;
+    }
+    
+    .pulse-gentle {
+      animation: none;
+    }
+    
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    .glow-platinum,
+    .glow-gold,
+    .glow-silver {
+      box-shadow: none;
+      border: 2px solid currentColor;
+    }
+  }
+}
+
+/* Performance optimizations */
+@layer utilities {
+  .gpu-layer {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .will-change-opacity {
+    will-change: opacity;
+  }
+}
