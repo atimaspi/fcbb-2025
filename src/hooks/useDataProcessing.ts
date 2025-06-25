@@ -45,13 +45,16 @@ export const useDataProcessing = ({
     return teamsData.map(team => ({
       id: team.id,
       name: team.name,
+      category: team.category || 'senior',
+      division: team.division,
+      club_id: team.club_id,
+      created_at: team.created_at,
       abbreviation: team.abbreviation,
       city: team.city,
       island: team.island,
       logo_url: team.logo_url,
-      status: team.status,
-      created_at: team.created_at,
-      updated_at: team.updated_at
+      status: team.status || 'ativo',
+      updated_at: team.updated_at || team.created_at
     }));
   }, [teamsData]);
 
@@ -60,17 +63,24 @@ export const useDataProcessing = ({
     return clubsData.map(club => ({
       id: club.id,
       name: club.name,
+      island: club.island,
+      active: club.active !== false,
+      created_at: club.created_at,
+      regional_association_id: club.regional_association_id,
+      gallery_images: club.gallery_images,
+      documents: club.documents,
+      status: club.status,
+      website: club.website,
+      address: club.address,
+      contact_phone: club.contact_phone,
+      contact_email: club.contact_email,
+      description: club.description,
+      logo_url: club.logo_url,
+      founded_year: club.founded_year,
       abbreviation: club.abbreviation,
       city: club.city,
-      island: club.island,
-      logo_url: club.logo_url,
-      contact_email: club.contact_email,
-      contact_phone: club.contact_phone,
       president_name: club.president_name,
-      founded_year: club.founded_year,
-      status: club.status,
-      created_at: club.created_at,
-      updated_at: club.updated_at
+      updated_at: club.updated_at || club.created_at
     }));
   }, [clubsData]);
 
@@ -87,7 +97,7 @@ export const useDataProcessing = ({
       status: comp.status,
       logo_url: comp.logo_url,
       created_at: comp.created_at,
-      updated_at: comp.updated_at
+      updated_at: comp.updated_at || comp.created_at
     }));
   }, [competitionsData]);
 
@@ -95,17 +105,18 @@ export const useDataProcessing = ({
   const games = useMemo((): Game[] => {
     return gamesData.map(game => ({
       id: game.id,
-      championship_id: game.championship_id,
+      competition_id: game.championship_id || game.competition_id,
       home_team_id: game.home_team_id,
       away_team_id: game.away_team_id,
-      game_date: game.game_date,
+      scheduled_date: game.game_date || game.scheduled_date,
       venue: game.venue,
       round: game.round,
       home_score: game.home_score || 0,
       away_score: game.away_score || 0,
       status: game.status,
       created_at: game.created_at,
-      updated_at: game.updated_at
+      game_date: game.game_date,
+      updated_at: game.updated_at || game.created_at
     }));
   }, [gamesData]);
 
@@ -113,18 +124,24 @@ export const useDataProcessing = ({
   const players = useMemo((): Player[] => {
     return playersData.map(player => ({
       id: player.id,
-      name: player.name,
+      first_name: player.first_name || player.name?.split(' ')[0] || '',
+      last_name: player.last_name || player.name?.split(' ').slice(1).join(' ') || '',
       position: player.position,
       jersey_number: player.jersey_number,
       team_id: player.team_id,
       birth_date: player.birth_date,
+      age: player.age,
       height_cm: player.height_cm,
       weight_kg: player.weight_kg,
       nationality: player.nationality,
       photo_url: player.photo_url,
       status: player.status,
+      club: player.club,
+      active: player.active !== false,
+      documents: player.documents,
       created_at: player.created_at,
-      updated_at: player.updated_at
+      name: player.name || `${player.first_name || ''} ${player.last_name || ''}`.trim(),
+      updated_at: player.updated_at || player.created_at
     }));
   }, [playersData]);
 
@@ -136,6 +153,7 @@ export const useDataProcessing = ({
       content: newsItem.content,
       excerpt: newsItem.excerpt,
       author_id: newsItem.author_id,
+      author: newsItem.author || 'Admin',
       category: newsItem.category,
       image_url: newsItem.image_url,
       published: newsItem.published,
@@ -143,8 +161,14 @@ export const useDataProcessing = ({
       slug: newsItem.slug,
       views_count: newsItem.views_count || 0,
       created_at: newsItem.created_at,
-      updated_at: newsItem.updated_at,
-      published_at: newsItem.published_at
+      updated_at: newsItem.updated_at || newsItem.created_at,
+      published_at: newsItem.published_at,
+      featured_image_url: newsItem.featured_image_url,
+      tags: newsItem.tags,
+      video_url: newsItem.video_url,
+      attachments: newsItem.attachments,
+      gallery_images: newsItem.gallery_images,
+      status: newsItem.status
     }));
   }, [newsData]);
 
@@ -155,12 +179,15 @@ export const useDataProcessing = ({
       title: event.title,
       description: event.description,
       event_date: event.event_date,
+      end_date: event.end_date,
       location: event.location,
-      event_type: event.event_type,
-      status: event.status,
-      created_by: event.created_by,
+      type: event.type || event.event_type || 'meeting',
+      organizer: event.organizer,
       created_at: event.created_at,
-      updated_at: event.updated_at
+      event_type: event.event_type || 'evento_social',
+      status: event.status || 'agendado',
+      created_by: event.created_by,
+      updated_at: event.updated_at || event.created_at
     }));
   }, [eventsData]);
 
@@ -168,15 +195,24 @@ export const useDataProcessing = ({
   const referees = useMemo((): Referee[] => {
     return refereesData.map(referee => ({
       id: referee.id,
-      name: referee.name,
+      first_name: referee.first_name || referee.name?.split(' ')[0] || '',
+      last_name: referee.last_name || referee.name?.split(' ').slice(1).join(' ') || '',
       license_number: referee.license_number,
-      certification_level: referee.certification_level,
+      level: referee.level || referee.certification_level || 'regional',
       contact_email: referee.contact_email,
       contact_phone: referee.contact_phone,
+      phone: referee.phone,
+      email: referee.email,
       island: referee.island,
-      status: referee.status,
+      active: referee.active !== false,
+      certified_date: referee.certified_date,
+      certificates: referee.certificates,
+      photo_url: referee.photo_url,
       created_at: referee.created_at,
-      updated_at: referee.updated_at
+      name: referee.name || `${referee.first_name || ''} ${referee.last_name || ''}`.trim(),
+      certification_level: referee.certification_level,
+      status: referee.status || 'ativo',
+      updated_at: referee.updated_at || referee.created_at
     }));
   }, [refereesData]);
 
@@ -191,14 +227,18 @@ export const useDataProcessing = ({
     return federationsData.map(federation => ({
       id: federation.id,
       name: federation.name,
-      country: federation.country,
+      acronym: federation.acronym,
       logo_url: federation.logo_url,
-      website_url: federation.website_url,
+      website: federation.website_url || federation.website,
+      address: federation.address,
       contact_email: federation.contact_email,
-      partnership_type: federation.partnership_type,
-      partnership_status: federation.partnership_status,
+      contact_phone: federation.contact_phone,
+      foundation_date: federation.foundation_date,
       created_at: federation.created_at,
-      updated_at: federation.updated_at
+      updated_at: federation.updated_at || federation.created_at,
+      country: federation.country || 'Cabo Verde',
+      partnership_type: federation.partnership_type,
+      partnership_status: federation.partnership_status || 'ativo'
     }));
   }, [federationsData]);
 
@@ -208,14 +248,17 @@ export const useDataProcessing = ({
       id: association.id,
       name: association.name,
       island: association.island,
-      president_name: association.president_name,
+      acronym: association.acronym,
+      federation_id: association.federation_id || '',
       contact_email: association.contact_email,
       contact_phone: association.contact_phone,
       address: association.address,
-      clubs_count: association.clubs_count || 0,
-      status: association.status,
+      logo_url: association.logo_url,
       created_at: association.created_at,
-      updated_at: association.updated_at
+      updated_at: association.updated_at || association.created_at,
+      president_name: association.president_name,
+      clubs_count: association.clubs_count || 0,
+      status: association.status || 'ativo'
     }));
   }, [regionalAssociationsData]);
 

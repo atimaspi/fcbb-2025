@@ -65,10 +65,11 @@ export const useBackendData = () => {
     },
   });
 
-  // Transform players data to match interface
+  // Transform players data to match interface with proper type casting
   const players: Player[] = playersData.map(player => ({
     ...player,
     name: `${player.first_name} ${player.last_name}`,
+    position: (player.position as Player['position']) || undefined,
     updated_at: player.created_at
   }));
 
@@ -82,9 +83,10 @@ export const useBackendData = () => {
     },
   });
 
-  // Transform games data to match interface
+  // Transform games data to match interface with proper status casting
   const games: Game[] = gamesData.map(game => ({
     ...game,
+    status: (game.status as Game['status']) || 'agendado',
     updated_at: game.created_at
   }));
 
@@ -168,9 +170,16 @@ export const useBackendData = () => {
     queryKey: ['coaches'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('coaches').select('*');
-        if (error) throw error;
-        return data || [];
+        // First check if coaches table exists by attempting to query it
+        const { data, error } = await supabase.from('coaches').select('*').limit(1);
+        if (error) {
+          console.log('Coaches table not available:', error.message);
+          return [];
+        }
+        // If successful, fetch all coaches
+        const { data: allCoaches, error: fetchError } = await supabase.from('coaches').select('*');
+        if (fetchError) throw fetchError;
+        return allCoaches || [];
       } catch (error) {
         console.error('Error fetching coaches:', error);
         return [];
@@ -178,9 +187,10 @@ export const useBackendData = () => {
     },
   });
 
-  // Transform coaches data to match interface
+  // Transform coaches data to match interface with proper type casting
   const coaches: Coach[] = coachesData.map(coach => ({
     ...coach,
+    status: (coach.status as Coach['status']) || 'ativo',
     updated_at: coach.updated_at || coach.created_at
   }));
 
@@ -221,7 +231,7 @@ export const useBackendData = () => {
   // Transform federations data to match interface
   const federations: Federation[] = federationsData.map(fed => ({
     ...fed,
-    country: 'Unknown', // Default value
+    country: 'Cabo Verde', // Default value
     partnership_status: 'ativo' as const
   }));
 
