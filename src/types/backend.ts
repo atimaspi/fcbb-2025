@@ -19,6 +19,7 @@ export interface Team {
   club_id?: string;
   category: string;
   division?: string;
+  status?: 'active' | 'inactive';
   created_at: string;
 }
 

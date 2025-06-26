@@ -42,9 +42,11 @@ export interface HeroSlide {
   id: string;
   title: string;
   subtitle?: string;
+  description?: string;
   image_url: string;
   cta_text?: string;
   cta_url?: string;
+  cta_link?: string;
   order: number;
   active: boolean;
   created_at: string;
@@ -55,6 +57,7 @@ export interface Partner {
   name: string;
   logo_url: string;
   website_url?: string;
+  description?: string;
   category: string;
   order: number;
   active: boolean;
