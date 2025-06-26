@@ -28,12 +28,15 @@ const AuthForm = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('Tentando fazer login com:', loginData.email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
         password: loginData.password,
       });
 
       if (error) {
+        console.error('Erro de login:', error);
         if (error.message.includes('Invalid login credentials')) {
           toast({
             title: "Credenciais Inválidas",
@@ -50,14 +53,18 @@ const AuthForm = () => {
         return;
       }
 
+      console.log('Login bem-sucedido:', data);
+      
       toast({
         title: "Login Realizado",
         description: "Bem-vindo ao sistema FCBB!",
       });
 
+      // Redirecionar para a área reservada
       navigate('/area-reservada');
 
     } catch (error: any) {
+      console.error('Erro inesperado:', error);
       toast({
         title: "Erro",
         description: "Ocorreu um erro inesperado.",
@@ -69,20 +76,24 @@ const AuthForm = () => {
   };
 
   const handleQuickAccess = async () => {
+    console.log('Acesso rápido - tentando login direto');
     setIsLoading(true);
+    
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: 'admin@fcbb.cv',
         password: 'admin123456',
       });
 
-      if (!error) {
+      if (!error && data.user) {
+        console.log('Acesso rápido bem-sucedido');
         toast({
           title: "Acesso Rápido",
           description: "Login automático realizado!",
         });
         navigate('/area-reservada');
       } else {
+        console.log('Admin não encontrado, mostrando criação');
         setShowCreateAdmin(true);
         toast({
           title: "Admin não encontrado",
@@ -91,6 +102,7 @@ const AuthForm = () => {
         });
       }
     } catch (error) {
+      console.error('Erro no acesso rápido:', error);
       setShowCreateAdmin(true);
     } finally {
       setIsLoading(false);
@@ -207,6 +219,12 @@ const AuthForm = () => {
                 >
                   Criar Admin Inicial
                 </Button>
+              </div>
+
+              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-sm text-gray-700 mb-2">Credenciais de Teste:</h4>
+                <p className="text-xs text-gray-600">Email: admin@fcbb.cv</p>
+                <p className="text-xs text-gray-600">Password: admin123456</p>
               </div>
 
               <div className="mt-4 text-center text-sm text-gray-600">

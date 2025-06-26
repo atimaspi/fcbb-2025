@@ -5,7 +5,7 @@ import { AccessibleButton } from '@/components/ui/accessible-button';
 
 const TopBar = () => {
   const handleAreaReservadaClick = () => {
-    console.log('TopBar Área Reservada clicked');
+    console.log('TopBar - Navegando para /auth');
   };
 
   return (
@@ -43,7 +43,7 @@ const TopBar = () => {
               EN
             </Link>
             <Link 
-              to="/area-reservada" 
+              to="/auth" 
               className="flex items-center gap-1 hover:text-cv-yellow focus-visible-cv transition-colors text-xs"
               aria-label="Aceder à área reservada"
               title="Área Reservada"

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Menu, X, Lock, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -113,7 +114,7 @@ const StickyNavigation = () => {
   };
 
   const handleAreaReservadaClick = () => {
-    console.log('StickyNavigation Área Reservada clicked');
+    console.log('StickyNavigation - Navegando para /auth');
     setIsMobileMenuOpen(false);
   };
 
@@ -267,7 +268,7 @@ const StickyNavigation = () => {
                 </div>
               ) : (
                 <Link
-                  to="/area-reservada"
+                  to="/auth"
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 border-2 ${
                     isScrolled 
                       ? 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white' 
@@ -374,7 +375,7 @@ const StickyNavigation = () => {
                     </div>
                   ) : (
                     <Link
-                      to="/area-reservada"
+                      to="/auth"
                       className="flex items-center space-x-2 px-4 py-3 font-medium text-blue-600 hover:bg-blue-50 rounded-lg mx-2 transition-all border-2 border-blue-600"
                       onClick={handleAreaReservadaClick}
                     >
