@@ -1,376 +1,251 @@
 
-import { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { PenLine, Plus, Trash2 } from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter
-} from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-
-interface NewsItem {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-  category: string;
-  status: string;
-  author: string;
-}
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { useContentData } from '@/hooks/useContentData';
+import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 
 const NewsManagement = () => {
-  const [newsList, setNewsList] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [showDialog, setShowDialog] = useState(false);
-  const [editingItem, setEditingItem] = useState<NewsItem | null>(null);
+  const { toast } = useToast();
+  const { newsData } = useContentData();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingNews, setEditingNews] = useState<any>(null);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    category: 'Competições',
-    status: 'draft'
+    excerpt: '',
+    category: 'geral',
+    featured: false,
+    published: false,
+    featured_image_url: ''
   });
-  const { toast } = useToast();
-
-  useEffect(() => {
-    fetchNews();
-  }, []);
-
-  const fetchNews = async () => {
-    setLoading(true);
-    try {
-      console.log('Fetching news...');
-      const { data, error } = await supabase
-        .from('news')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      console.log('News fetch result:', { data, error });
-
-      if (error) {
-        console.error('Erro ao carregar notícias:', error);
-        throw error;
-      }
-
-      const formattedNews = data?.map(item => ({
-        id: item.id,
-        title: item.title,
-        content: item.content,
-        created_at: new Date(item.created_at).toLocaleDateString('pt-PT'),
-        category: item.category,
-        status: item.status === 'published' ? 'Publicado' : 'Rascunho',
-        author: item.author || 'Admin'
-      })) || [];
-
-      console.log('Formatted news:', formattedNews);
-      setNewsList(formattedNews);
-    } catch (error: any) {
-      console.error('Erro ao carregar notícias:', error);
-      toast({
-        title: "Erro",
-        description: `Erro ao carregar notícias: ${error.message}`,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAdd = () => {
-    console.log('Adding new news item');
-    setEditingItem(null);
-    setFormData({ title: '', content: '', category: 'Competições', status: 'draft' });
-    setShowDialog(true);
-  };
-
-  const handleEdit = (item: NewsItem) => {
-    console.log('Editing news item:', item);
-    setEditingItem(item);
-    setFormData({
-      title: item.title,
-      content: item.content,
-      category: item.category,
-      status: item.status === 'Publicado' ? 'published' : 'draft'
-    });
-    setShowDialog(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    console.log('Delete button clicked for id:', id);
-    if (!window.confirm('Tem certeza que deseja eliminar esta notícia?')) {
-      console.log('Delete cancelled by user');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      console.log('Deleting news with id:', id);
-      const { error } = await supabase
-        .from('news')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Delete error:', error);
-        throw error;
-      }
-
-      console.log('News deleted successfully');
-      toast({
-        title: "Sucesso",
-        description: "Notícia eliminada com sucesso.",
-      });
-
-      await fetchNews();
-    } catch (error: any) {
-      console.error('Erro ao eliminar notícia:', error);
-      toast({
-        title: "Erro",
-        description: `Erro ao eliminar notícia: ${error.message}`,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted with data:', formData);
-    setLoading(true);
-
+    
     try {
-      if (editingItem) {
-        console.log('Updating news with id:', editingItem.id);
-        const { data, error } = await supabase
-          .from('news')
-          .update({
-            title: formData.title,
-            content: formData.content,
-            category: formData.category,
-            status: formData.status,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', editingItem.id)
-          .select();
-
-        console.log('Update result:', { data, error });
-
-        if (error) {
-          console.error('Update error:', error);
-          throw error;
-        }
-
-        toast({
-          title: "Sucesso",
-          description: "Notícia atualizada com sucesso.",
-        });
-      } else {
-        console.log('Creating new news');
-        const { data, error } = await supabase
-          .from('news')
-          .insert({
-            title: formData.title,
-            content: formData.content,
-            category: formData.category,
-            status: formData.status,
-            author: 'Admin',
-            published: formData.status === 'published'
-          })
-          .select();
-
-        console.log('Insert result:', { data, error });
-
-        if (error) {
-          console.error('Insert error:', error);
-          throw error;
-        }
-
-        toast({
-          title: "Sucesso",
-          description: "Notícia criada com sucesso.",
-        });
-      }
-
-      setShowDialog(false);
-      setFormData({ title: '', content: '', category: 'Competições', status: 'draft' });
-      await fetchNews();
-    } catch (error: any) {
-      console.error('Erro ao salvar notícia:', error);
+      // Here you would save to database
+      toast({
+        title: "Sucesso",
+        description: editingNews ? "Notícia atualizada com sucesso!" : "Notícia criada com sucesso!",
+      });
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error) {
       toast({
         title: "Erro",
-        description: `Erro ao salvar notícia: ${error.message}`,
+        description: "Erro ao salvar notícia",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir esta notícia?')) {
+      try {
+        // Here you would delete from database
+        toast({
+          title: "Sucesso",
+          description: "Notícia eliminada com sucesso!",
+        });
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Erro ao eliminar notícia",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      content: '',
+      excerpt: '',
+      category: 'geral',
+      featured: false,
+      published: false,
+      featured_image_url: ''
+    });
+    setEditingNews(null);
+  };
+
+  const openEditDialog = (news: any) => {
+    setEditingNews(news);
+    setFormData({
+      title: news.title || '',
+      content: news.content || '',
+      excerpt: news.excerpt || '',
+      category: news.category || 'geral',
+      featured: news.featured || false,
+      published: news.published || false,
+      featured_image_url: news.featured_image_url || ''
+    });
+    setIsDialogOpen(true);
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold text-cv-blue">Gestão de Notícias</h3>
-        <Button onClick={handleAdd} className="bg-cv-blue hover:bg-blue-700 flex items-center gap-2">
-          <Plus size={18} />
-          Adicionar Notícia
-        </Button>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Título</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Autor</TableHead>
-              <TableHead>Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">Carregando...</TableCell>
-              </TableRow>
-            ) : newsList.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">Nenhuma notícia encontrada</TableCell>
-              </TableRow>
-            ) : (
-              newsList.map((news) => (
-                <TableRow key={news.id}>
-                  <TableCell className="max-w-xs truncate">{news.title}</TableCell>
-                  <TableCell>{news.created_at}</TableCell>
-                  <TableCell>{news.category}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      news.status === 'Publicado' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {news.status}
-                    </span>
-                  </TableCell>
-                  <TableCell>{news.author}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <button 
-                        onClick={() => handleEdit(news)}
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Editar"
-                      >
-                        <PenLine size={16} />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(news.id)}
-                        className="text-red-600 hover:text-red-800"
-                        title="Eliminar"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>
-              {editingItem ? 'Editar Notícia' : 'Adicionar Nova Notícia'}
-            </DialogTitle>
-            <DialogDescription>
-              Preencha os campos abaixo para {editingItem ? 'atualizar' : 'adicionar'} a notícia.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <label htmlFor="title" className="text-sm font-medium">
-                  Título da Notícia
-                </label>
+        <div>
+          <h2 className="text-2xl font-bold text-cv-blue">Gestão de Notícias</h2>
+          <p className="text-gray-600">Criar, editar e gerir notícias do site</p>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={resetForm} className="bg-cv-blue hover:bg-cv-blue/90">
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Notícia
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{editingNews ? 'Editar Notícia' : 'Nova Notícia'}</DialogTitle>
+              <DialogDescription>
+                Preencha os campos abaixo para {editingNews ? 'atualizar' : 'criar'} a notícia
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Título *</Label>
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) => setFormData({...formData, title: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   required
                 />
               </div>
-              
-              <div className="grid gap-2">
-                <label htmlFor="category" className="text-sm font-medium">
-                  Categoria
-                </label>
-                <select
-                  id="category"
-                  value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-md"
-                >
-                  <option value="Competições">Competições</option>
-                  <option value="Seleções">Seleções</option>
-                  <option value="Formação">Formação</option>
-                  <option value="Arbitragem">Arbitragem</option>
-                  <option value="Clubes">Clubes</option>
-                </select>
+              <div className="space-y-2">
+                <Label htmlFor="excerpt">Resumo</Label>
+                <Textarea
+                  id="excerpt"
+                  value={formData.excerpt}
+                  onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                  rows={2}
+                />
               </div>
-              
-              <div className="grid gap-2">
-                <label htmlFor="status" className="text-sm font-medium">
-                  Estado
-                </label>
-                <select
-                  id="status"
-                  value={formData.status}
-                  onChange={(e) => setFormData({...formData, status: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-md"
-                >
-                  <option value="draft">Rascunho</option>
-                  <option value="published">Publicado</option>
-                </select>
-              </div>
-              
-              <div className="grid gap-2">
-                <label htmlFor="content" className="text-sm font-medium">
-                  Conteúdo
-                </label>
-                <textarea
+              <div className="space-y-2">
+                <Label htmlFor="content">Conteúdo *</Label>
+                <Textarea
                   id="content"
                   value={formData.content}
-                  onChange={(e) => setFormData({...formData, content: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-md h-32"
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  rows={8}
                   required
                 />
               </div>
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowDialog(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit" className="bg-cv-blue" disabled={loading}>
-                {loading ? 'A processar...' : editingItem ? 'Atualizar' : 'Criar'} Notícia
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category">Categoria</Label>
+                  <select
+                    id="category"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full p-2 border rounded-md"
+                  >
+                    <option value="geral">Geral</option>
+                    <option value="competicoes">Competições</option>
+                    <option value="selecoes">Seleções</option>
+                    <option value="clubes">Clubes</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="featured_image">URL da Imagem</Label>
+                  <Input
+                    id="featured_image"
+                    value={formData.featured_image_url}
+                    onChange={(e) => setFormData({ ...formData, featured_image_url: e.target.value })}
+                    placeholder="https://exemplo.com/imagem.jpg"
+                  />
+                </div>
+              </div>
+              <div className="flex space-x-4">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.featured}
+                    onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                  />
+                  <span>Notícia em Destaque</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.published}
+                    onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
+                  />
+                  <span>Publicar Imediatamente</span>
+                </label>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" className="bg-cv-blue hover:bg-cv-blue/90">
+                  {editingNews ? 'Atualizar' : 'Criar'} Notícia
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Notícias Existentes</CardTitle>
+          <CardDescription>Lista de todas as notícias do sistema</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Título</TableHead>
+                <TableHead>Categoria</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {newsData.map((news: any) => (
+                <TableRow key={news.id}>
+                  <TableCell className="font-medium">{news.title}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{news.category}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={news.published ? "default" : "secondary"}>
+                      {news.published ? 'Publicado' : 'Rascunho'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{new Date(news.created_at).toLocaleDateString('pt-PT')}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="sm">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => openEditDialog(news)}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleDelete(news.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 };

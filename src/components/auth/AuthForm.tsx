@@ -1,205 +1,185 @@
 
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/contexts/AuthContext';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Eye, EyeOff, LogIn } from 'lucide-react';
 import CreateAdminUser from './CreateAdminUser';
 
 const AuthForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  
-  const { signIn, signUp, isAdmin } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showCreateAdmin, setShowCreateAdmin] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    
-    const { error } = await signIn(email, password);
-    
-    if (error) {
-      setError(error.message === 'Invalid login credentials' 
-        ? 'Email ou palavra-passe incorretos' 
-        : error.message);
-    }
-    
-    setLoading(false);
-  };
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
+  });
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-    setMessage('');
-    
-    const { error } = await signUp(email, password, fullName);
-    
-    if (error) {
-      if (error.message.includes('already registered')) {
-        setError('Este email já está registado');
-      } else if (error.message.includes('Apenas administradores')) {
-        setError('Apenas administradores podem registrar novos usuários');
-      } else {
-        setError(error.message);
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginData.email,
+        password: loginData.password,
+      });
+
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          toast({
+            title: "Credenciais Inválidas",
+            description: "Email ou palavra-passe incorretos.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Erro de Login",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
+        return;
       }
-    } else {
-      setMessage('Usuário registado com sucesso');
-      setEmail('');
-      setPassword('');
-      setFullName('');
+
+      toast({
+        title: "Login Realizado",
+        description: "Bem-vindo ao sistema FCBB!",
+      });
+
+      navigate('/area-reservada');
+
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro inesperado.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <div className="flex justify-center mb-4">
-            <img 
-              src="/lovable-uploads/8c0e50b0-b06a-42cf-b3fc-9a08063308b3.png" 
-              alt="FCBB Logo" 
-              className="h-16 w-auto"
-            />
+    <div className="min-h-screen bg-gradient-to-br from-[#002D72] via-[#1a237e] to-[#002D72] flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md z-10"
+      >
+        {showCreateAdmin ? (
+          <div className="space-y-4">
+            <CreateAdminUser />
+            <Button 
+              variant="outline" 
+              onClick={() => setShowCreateAdmin(false)}
+              className="w-full"
+            >
+              Voltar ao Login
+            </Button>
           </div>
-          <CardTitle className="text-center text-2xl font-bold text-cv-blue">
-            Área Reservada FCBB
-          </CardTitle>
-          <CardDescription className="text-center">
-            Acesso para administradores e membros da federação
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="signin">Entrar</TabsTrigger>
-              <TabsTrigger value="signup" disabled={!isAdmin}>
-                Registar {!isAdmin && '(Admin)'}
-              </TabsTrigger>
-              <TabsTrigger value="createadmin">Criar Admin</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
+        ) : (
+          <Card className="shadow-2xl border-0">
+            <CardHeader className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-r from-[#002D72] to-[#E10600] rounded-full flex items-center justify-center">
+                <LogIn className="h-8 w-8 text-white" />
+              </div>
+              <CardTitle className="text-2xl font-bold text-[#002D72]">
+                Área Reservada FCBB
+              </CardTitle>
+              <CardDescription>
+                Acesso ao painel administrativo da Federação Cabo-verdiana de Basquetebol
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="login-email">Email</Label>
                   <Input
-                    id="email"
+                    id="login-email"
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                    value={loginData.email}
+                    onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                     required
-                    placeholder="admin@fcbb.cv"
+                    disabled={isLoading}
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="password">Palavra-passe</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    placeholder="Spokers@1"
-                  />
+                  <Label htmlFor="login-password">Palavra-passe</Label>
+                  <div className="relative">
+                    <Input
+                      id="login-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={loginData.password}
+                      onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                      required
+                      disabled={isLoading}
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
                 </div>
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-                <Button 
-                  type="submit" 
-                  className="w-full bg-cv-blue hover:bg-cv-blue/90"
-                  disabled={loading}
+
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-[#002D72] to-[#E10600] hover:opacity-90"
+                  disabled={isLoading}
                 >
-                  {loading ? <LoadingSpinner size="sm" /> : 'Entrar'}
+                  {isLoading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>A entrar...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Entrar
+                    </>
+                  )}
                 </Button>
               </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              {!isAdmin ? (
-                <Alert>
-                  <AlertDescription>
-                    Apenas administradores podem registar novos usuários. 
-                    Faça login como administrador para aceder a esta funcionalidade.
-                  </AlertDescription>
-                </Alert>
-              ) : (
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Nome Completo</Label>
-                    <Input
-                      id="fullName"
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      required
-                      placeholder="Nome completo do usuário"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signupEmail">Email</Label>
-                    <Input
-                      id="signupEmail"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      placeholder="email@exemplo.com"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signupPassword">Palavra-passe</Label>
-                    <Input
-                      id="signupPassword"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      placeholder="••••••••"
-                      minLength={6}
-                    />
-                  </div>
-                  {error && (
-                    <Alert variant="destructive">
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
-                  {message && (
-                    <Alert>
-                      <AlertDescription>{message}</AlertDescription>
-                    </Alert>
-                  )}
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-cv-blue hover:bg-cv-blue/90"
-                    disabled={loading}
-                  >
-                    {loading ? <LoadingSpinner size="sm" /> : 'Registar Usuário'}
-                  </Button>
-                </form>
-              )}
-            </TabsContent>
 
-            <TabsContent value="createadmin">
-              <CreateAdminUser />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+              <div className="mt-6 text-center">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowCreateAdmin(true)}
+                  className="text-sm"
+                >
+                  Criar Admin Inicial
+                </Button>
+              </div>
+
+              <div className="mt-4 text-center text-sm text-gray-600">
+                <p>Sistema protegido da FCBB</p>
+                <p>Apenas utilizadores autorizados</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </motion.div>
     </div>
   );
 };

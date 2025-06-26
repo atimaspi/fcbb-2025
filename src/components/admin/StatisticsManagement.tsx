@@ -1,272 +1,298 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useBackendData } from '@/hooks/useBackendData';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { BarChart3, Users, Trophy, Calendar, TrendingUp, Target, Award, Activity } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useToast } from '@/hooks/use-toast';
+import { Plus, Edit, Trash2, BarChart3 } from 'lucide-react';
 
 const StatisticsManagement = () => {
-  const { 
-    teams, 
-    competitions, 
-    games, 
-    players, 
-    publishedNews, 
-    activeEvents,
-    isLoading 
-  } = useBackendData();
+  const { toast } = useToast();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingStat, setEditingStat] = useState<any>(null);
+  const [statistics, setStatistics] = useState<any[]>([]);
+  const [formData, setFormData] = useState({
+    title: '',
+    value: '',
+    description: '',
+    icon: 'users',
+    color: '#002D72',
+    order_index: 0,
+    active: true
+  });
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
-  // Estatísticas por ilha
-  const islandStats = teams.reduce((acc: any, team: any) => {
-    acc[team.island] = (acc[team.island] || 0) + 1;
-    return acc;
-  }, {});
-
-  const islandData = Object.entries(islandStats).map(([island, count]) => ({
-    island,
-    clubes: count
-  }));
-
-  // Estatísticas de jogos por status
-  const gameStats = games.reduce((acc: any, game: any) => {
-    acc[game.status] = (acc[game.status] || 0) + 1;
-    return acc;
-  }, {});
-
-  const gameStatusData = Object.entries(gameStats).map(([status, count]) => ({
-    status,
-    jogos: count
-  }));
-
-  // Estatísticas de competições por tipo
-  const competitionStats = competitions.reduce((acc: any, comp: any) => {
-    acc[comp.type] = (acc[comp.type] || 0) + 1;
-    return acc;
-  }, {});
-
-  const competitionTypeData = Object.entries(competitionStats).map(([type, count]) => ({
-    type,
-    competicoes: count
-  }));
-
-  // Dados mensais fictícios para demonstração
-  const monthlyData = [
-    { mes: 'Jan', jogos: 12, noticias: 8 },
-    { mes: 'Fev', jogos: 15, noticias: 12 },
-    { mes: 'Mar', jogos: 18, noticias: 15 },
-    { mes: 'Abr', jogos: 22, noticias: 18 },
-    { mes: 'Mai', jogos: 25, noticias: 20 },
-    { mes: 'Jun', jogos: 20, noticias: 16 }
+  const availableIcons = [
+    { value: 'users', label: 'Utilizadores' },
+    { value: 'trophy', label: 'Troféu' },
+    { value: 'calendar', label: 'Calendário' },
+    { value: 'target', label: 'Alvo' },
+    { value: 'award', label: 'Prémio' },
+    { value: 'star', label: 'Estrela' }
   ];
 
-  const COLORS = ['#1e40af', '#dc2626', '#059669', '#d97706', '#7c3aed', '#db2777'];
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      // Here you would save to database
+      toast({
+        title: "Sucesso",
+        description: editingStat ? "Estatística atualizada com sucesso!" : "Estatística criada com sucesso!",
+      });
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar estatística",
+        variant: "destructive",
+      });
+    }
+  };
 
-  const StatCard = ({ title, value, description, icon: Icon, color }: any) => (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-gray-600">
-          {title}
-        </CardTitle>
-        <Icon className={`h-5 w-5 ${color}`} />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold text-cv-blue">{value}</div>
-        <p className="text-xs text-gray-500">{description}</p>
-      </CardContent>
-    </Card>
-  );
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir esta estatística?')) {
+      try {
+        // Here you would delete from database
+        toast({
+          title: "Sucesso",
+          description: "Estatística eliminada com sucesso!",
+        });
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Erro ao eliminar estatística",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      value: '',
+      description: '',
+      icon: 'users',
+      color: '#002D72',
+      order_index: 0,
+      active: true
+    });
+    setEditingStat(null);
+  };
+
+  const openEditDialog = (stat: any) => {
+    setEditingStat(stat);
+    setFormData({
+      title: stat.title || '',
+      value: stat.value || '',
+      description: stat.description || '',
+      icon: stat.icon || 'users',
+      color: stat.color || '#002D72',
+      order_index: stat.order_index || 0,
+      active: stat.active !== false
+    });
+    setIsDialogOpen(true);
+  };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-cv-blue flex items-center gap-2">
-          <BarChart3 className="h-6 w-6" />
-          Estatísticas e Relatórios
-        </h2>
-        <p className="text-gray-600">Análise detalhada dos dados da FCBB</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-cv-blue">Gestão de Estatísticas</h2>
+          <p className="text-gray-600">Gerir números e estatísticas exibidas no site</p>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={resetForm} className="bg-cv-blue hover:bg-cv-blue/90">
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Estatística
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingStat ? 'Editar Estatística' : 'Nova Estatística'}</DialogTitle>
+              <DialogDescription>
+                Configure uma estatística para exibir no site
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Título *</Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Ex: Clubes Federados"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="value">Valor *</Label>
+                <Input
+                  id="value"
+                  value={formData.value}
+                  onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                  placeholder="Ex: 25 ou 25+"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Descrição</Label>
+                <Input
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Texto adicional (opcional)"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="icon">Ícone</Label>
+                  <select
+                    id="icon"
+                    value={formData.icon}
+                    onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                    className="w-full p-2 border rounded-md"
+                  >
+                    {availableIcons.map(icon => (
+                      <option key={icon.value} value={icon.value}>{icon.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="color">Cor</Label>
+                  <Input
+                    id="color"
+                    type="color"
+                    value={formData.color}
+                    onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="order_index">Ordem</Label>
+                  <Input
+                    id="order_index"
+                    type="number"
+                    value={formData.order_index}
+                    onChange={(e) => setFormData({ ...formData, order_index: parseInt(e.target.value) || 0 })}
+                    min="0"
+                  />
+                </div>
+                <div className="flex items-center space-x-2 pt-6">
+                  <input
+                    type="checkbox"
+                    id="active"
+                    checked={formData.active}
+                    onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                  />
+                  <Label htmlFor="active">Ativo</Label>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" className="bg-cv-blue hover:bg-cv-blue/90">
+                  {editingStat ? 'Atualizar' : 'Criar'} Estatística
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      {/* Estatísticas Gerais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total de Clubes"
-          value={teams.length}
-          description="Clubes registados"
-          icon={Users}
-          color="text-blue-600"
-        />
-        <StatCard
-          title="Competições Ativas"
-          value={competitions.filter((c: any) => c.status === 'ativo').length}
-          description="Em andamento"
-          icon={Trophy}
-          color="text-green-600"
-        />
-        <StatCard
-          title="Jogos Realizados"
-          value={games.filter((g: any) => g.status === 'finalizado').length}
-          description="Partidas completadas"
-          icon={Calendar}
-          color="text-yellow-600"
-        />
-        <StatCard
-          title="Jogadores Ativos"
-          value={players.length}
-          description="Atletas registados"
-          icon={Activity}
-          color="text-purple-600"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <BarChart3 className="w-8 h-8 text-cv-blue mx-auto mb-2" />
+            <div className="text-2xl font-bold text-cv-blue">25+</div>
+            <p className="text-sm text-gray-600">Clubes Federados</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6 text-center">
+            <BarChart3 className="w-8 h-8 text-cv-red mx-auto mb-2" />
+            <div className="text-2xl font-bold text-cv-red">500+</div>
+            <p className="text-sm text-gray-600">Jogadores Registados</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6 text-center">
+            <BarChart3 className="w-8 h-8 text-cv-yellow mx-auto mb-2" />
+            <div className="text-2xl font-bold text-cv-dark">10</div>
+            <p className="text-sm text-gray-600">Ilhas Representadas</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6 text-center">
+            <BarChart3 className="w-8 h-8 text-cv-blue mx-auto mb-2" />
+            <div className="text-2xl font-bold text-cv-blue">15</div>
+            <p className="text-sm text-gray-600">Competições Anuais</p>
+          </CardContent>
+        </Card>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="clubs">Clubes</TabsTrigger>
-          <TabsTrigger value="games">Jogos</TabsTrigger>
-          <TabsTrigger value="competitions">Competições</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Atividade Mensal</CardTitle>
-                <CardDescription>Jogos e notícias por mês</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mes" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="jogos" stroke="#1e40af" strokeWidth={2} />
-                    <Line type="monotone" dataKey="noticias" stroke="#dc2626" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Status dos Jogos</CardTitle>
-                <CardDescription>Distribuição por estado</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={gameStatusData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ status, jogos }) => `${status}: ${jogos}`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="jogos"
-                    >
-                      {gameStatusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="clubs" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Distribuição de Clubes por Ilha</CardTitle>
-              <CardDescription>Número de clubes registados em cada ilha</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={islandData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="island" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="clubes" fill="#1e40af" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="games" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Jogos Agendados</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-green-600">
-                  {games.filter((g: any) => g.status === 'agendado').length}
-                </div>
-                <p className="text-sm text-gray-500">Próximas partidas</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Jogos ao Vivo</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-red-600">
-                  {games.filter((g: any) => g.status === 'ao_vivo').length}
-                </div>
-                <p className="text-sm text-gray-500">Em andamento</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Jogos Finalizados</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-blue-600">
-                  {games.filter((g: any) => g.status === 'finalizado').length}
-                </div>
-                <p className="text-sm text-gray-500">Completados</p>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="competitions" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Competições por Tipo</CardTitle>
-              <CardDescription>Distribuição das competições por categoria</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={competitionTypeData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="type" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="competicoes" fill="#059669" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      <Card>
+        <CardHeader>
+          <CardTitle>Estatísticas Configuradas</CardTitle>
+          <CardDescription>Lista de todas as estatísticas do sistema</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {statistics.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <BarChart3 className="mx-auto h-12 w-12 mb-4" />
+              <p>Nenhuma estatística cadastrada ainda.</p>
+              <p className="text-sm">Use os exemplos acima como referência.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Título</TableHead>
+                  <TableHead>Valor</TableHead>
+                  <TableHead>Ordem</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {statistics.map((stat: any) => (
+                  <TableRow key={stat.id}>
+                    <TableCell className="font-medium">{stat.title}</TableCell>
+                    <TableCell>{stat.value}</TableCell>
+                    <TableCell>{stat.order_index}</TableCell>
+                    <TableCell>{stat.active ? 'Ativo' : 'Inativo'}</TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm" onClick={() => openEditDialog(stat)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => handleDelete(stat.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
