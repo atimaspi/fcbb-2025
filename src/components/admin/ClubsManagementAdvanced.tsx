@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,7 +28,7 @@ const ClubsManagementAdvanced = () => {
     website: '',
     founded_year: '',
     active: true,
-    status: 'active',
+    status: 'active' as 'active' | 'inactive',
     gallery_images: [] as any[],
     documents: [] as any[]
   });
@@ -52,7 +51,7 @@ const ClubsManagementAdvanced = () => {
       website: club.website || '',
       founded_year: club.founded_year?.toString() || '',
       active: club.active ?? true,
-      status: club.status || 'active',
+      status: (club.status || 'active') as 'active' | 'inactive',
       gallery_images: club.gallery_images || [],
       documents: club.documents || []
     });
@@ -72,7 +71,7 @@ const ClubsManagementAdvanced = () => {
       website: '',
       founded_year: '',
       active: true,
-      status: 'active',
+      status: 'active' as 'active' | 'inactive',
       gallery_images: [],
       documents: []
     });
@@ -83,7 +82,8 @@ const ClubsManagementAdvanced = () => {
     try {
       const clubData = {
         ...formData,
-        founded_year: formData.founded_year ? parseInt(formData.founded_year) : null
+        founded_year: formData.founded_year ? parseInt(formData.founded_year) : null,
+        status: formData.status as 'active' | 'inactive'
       };
 
       if (selectedClub) {
@@ -292,7 +292,6 @@ const ClubsManagementAdvanced = () => {
                   entityType="club"
                   entityId={selectedClub?.id}
                   allowedTypes={['image/jpeg', 'image/png', 'image/webp', 'image/gif']}
-                  folder="clubs/gallery"
                 />
                 
                 {formData.gallery_images.length > 0 && (
@@ -319,7 +318,6 @@ const ClubsManagementAdvanced = () => {
                   entityType="club"
                   entityId={selectedClub?.id}
                   allowedTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
-                  folder="clubs/documents"
                 />
                 
                 {formData.documents.length > 0 && (
@@ -349,7 +347,6 @@ const ClubsManagementAdvanced = () => {
                   entityId={selectedClub?.id}
                   allowedTypes={['image/jpeg', 'image/png', 'image/webp']}
                   maxFiles={1}
-                  folder="clubs/logos"
                 />
                 
                 {formData.logo_url && (

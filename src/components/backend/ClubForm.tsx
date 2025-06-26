@@ -119,11 +119,11 @@ const ClubForm = ({ onSubmit, initialData, onCancel, isSubmitting }: ClubFormPro
           <select
             id="status"
             value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value as 'ativo' | 'inativo' })}
+            onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'inactive' })}
             className="w-full p-2 border rounded-md"
           >
-            <option value="ativo">Ativo</option>
-            <option value="inativo">Inativo</option>
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
           </select>
         </div>
       </div>

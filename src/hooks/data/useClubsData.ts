@@ -36,7 +36,14 @@ export const useClubsData = () => {
         .order('name', { ascending: true });
 
       if (error) throw error;
-      setClubs(data || []);
+      
+      // Type cast the data to ensure status is properly typed
+      const typedData = (data || []).map(club => ({
+        ...club,
+        status: club.status as 'active' | 'inactive'
+      }));
+      
+      setClubs(typedData);
       setClubsError(null);
     } catch (err: any) {
       console.error('Error fetching clubs:', err);
@@ -53,7 +60,7 @@ export const useClubsData = () => {
           contact_phone: '+238 232 12 34',
           contact_email: 'abc@basket.cv',
           website: 'www.abcbasket.cv',
-          status: 'active',
+          status: 'active' as 'active' | 'inactive',
           active: true,
           created_at: new Date().toISOString()
         }
