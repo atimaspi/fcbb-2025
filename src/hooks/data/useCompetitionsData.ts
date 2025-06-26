@@ -23,7 +23,7 @@ export const useCompetitionsData = () => {
   const fetchCompetitions = async () => {
     try {
       setCompetitionsLoading(true);
-      // Note: Using 'championships' table as 'competitions' table doesn't exist in current schema
+      // Using 'championships' table as 'competitions' table doesn't exist in current schema
       const { data, error } = await supabase
         .from('championships')
         .select('*')
@@ -41,7 +41,7 @@ export const useCompetitionsData = () => {
         start_date: item.start_date,
         end_date: item.end_date,
         description: item.description,
-        regulations_url: item.regulations_url,
+        regulations_url: item.description, // Using description as regulations_url fallback
         created_at: item.created_at
       }));
       

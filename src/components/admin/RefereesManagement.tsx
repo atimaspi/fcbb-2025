@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -87,12 +86,15 @@ const RefereesManagement = () => {
     
     try {
       const dataToSubmit = {
-        ...formData,
+        name: `${formData.first_name.trim()} ${formData.last_name.trim()}`,
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),
         license_number: formData.license_number?.trim() || null,
+        level: formData.level,
         phone: formData.phone?.trim() || null,
         email: formData.email?.trim() || null,
+        island: formData.island || null,
+        status: formData.active ? 'ativo' as const : 'inativo' as const
       };
 
       if (editingReferee) {
@@ -136,7 +138,7 @@ const RefereesManagement = () => {
       phone: referee.phone || '',
       email: referee.email || '',
       island: referee.island || '',
-      active: referee.active !== false
+      active: referee.status === 'ativo'
     });
     setIsDialogOpen(true);
   };
@@ -374,7 +376,7 @@ const RefereesManagement = () => {
               <div>
                 <p className="text-sm font-medium">Árbitros Ativos</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {referees.filter(ref => ref.active !== false).length}
+                  {referees.filter(ref => ref.status === 'ativo').length}
                 </p>
               </div>
             </div>
@@ -440,7 +442,7 @@ const RefereesManagement = () => {
                 {referees.map((referee: any) => (
                   <TableRow key={referee.id}>
                     <TableCell className="font-medium">
-                      {referee.first_name} {referee.last_name}
+                      {referee.name || `${referee.first_name || ''} ${referee.last_name || ''}`.trim()}
                     </TableCell>
                     <TableCell>{referee.license_number || '—'}</TableCell>
                     <TableCell>
@@ -471,8 +473,8 @@ const RefereesManagement = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={referee.active !== false ? 'default' : 'secondary'}>
-                        {referee.active !== false ? 'Ativo' : 'Inativo'}
+                      <Badge variant={referee.status === 'ativo' ? 'default' : 'secondary'}>
+                        {referee.status === 'ativo' ? 'Ativo' : 'Inativo'}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -487,7 +489,7 @@ const RefereesManagement = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleDelete(referee.id, `${referee.first_name} ${referee.last_name}`)}
+                          onClick={() => handleDelete(referee.id, referee.name || `${referee.first_name} ${referee.last_name}`)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

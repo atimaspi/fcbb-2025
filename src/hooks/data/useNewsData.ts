@@ -43,14 +43,14 @@ export const useNewsData = () => {
       const mappedData = (data || []).map(item => ({
         id: item.id,
         title: item.title,
-        summary: item.summary,
+        summary: item.excerpt || '', // Using excerpt as summary fallback
         content: item.content,
         category: item.category,
         status: (item.status as 'rascunho' | 'pendente' | 'publicado') || 'rascunho',
-        featured_image: item.featured_image,
+        featured_image: item.featured_image_url,
         author: item.author,
-        tags: item.tags,
-        publish_date: item.publish_date || item.created_at,
+        tags: Array.isArray(item.tags) ? item.tags.join(', ') : (item.tags || ''),
+        publish_date: item.published_at || item.created_at,
         excerpt: item.excerpt,
         published: item.published,
         featured: item.featured,
@@ -73,11 +73,16 @@ export const useNewsData = () => {
     }
   };
 
+  const news = newsData;
+  const publishedNews = newsData.filter(item => item.status === 'publicado');
+
   useEffect(() => {
     fetchNews();
   }, []);
 
   return {
+    news,
+    publishedNews,
     newsData,
     newsLoading,
     newsError,

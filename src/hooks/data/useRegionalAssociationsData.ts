@@ -26,7 +26,19 @@ export const useRegionalAssociationsData = () => {
         .order('name', { ascending: true });
 
       if (error) throw error;
-      setRegionalAssociations(data || []);
+      
+      // Map regional association data with proper structure
+      const mappedData = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        island: item.island,
+        contact_email: item.contact_email,
+        contact_phone: item.contact_phone,
+        status: 'active' as 'active' | 'inactive', // Default to active since no status field in DB
+        created_at: item.created_at
+      }));
+      
+      setRegionalAssociations(mappedData);
       setRegionalAssociationsError(null);
     } catch (err: any) {
       console.error('Error fetching regional associations:', err);

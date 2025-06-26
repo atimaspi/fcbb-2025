@@ -27,22 +27,23 @@ export const useGamesData = () => {
       const { data, error } = await supabase
         .from('game_results')
         .select('*')
-        .order('scheduled_date', { ascending: true });
+        .order('start_time', { ascending: true });
 
       if (error) throw error;
       
       // Map game data with proper status handling
       const mappedData = (data || []).map(item => ({
         id: item.id,
-        home_team_id: item.home_team_id,
-        away_team_id: item.away_team_id,
-        competition_id: item.competition_id,
-        scheduled_date: item.scheduled_date,
-        venue: item.venue,
-        status: (item.status as 'scheduled' | 'live' | 'finished' | 'cancelled') || 'scheduled',
-        home_score: item.home_score,
-        away_score: item.away_score,
-        round: item.round,
+        home_team_id: item.game_id, // Using game_id as fallback
+        away_team_id: item.game_id, // Using game_id as fallback  
+        competition_id: '',
+        scheduled_date: item.start_time,
+        venue: 'TBD',
+        status: (item.game_status === 'ongoing' ? 'live' : 
+                item.game_status === 'completed' ? 'finished' : 'scheduled') as 'scheduled' | 'live' | 'finished' | 'cancelled',
+        home_score: item.home_team_score,
+        away_score: item.away_team_score,
+        round: '',
         created_at: item.created_at
       }));
       
@@ -57,12 +58,17 @@ export const useGamesData = () => {
     }
   };
 
+  const upcomingGames = games.filter(game => game.status === 'scheduled');
+  const recentGames = games.filter(game => game.status === 'finished').slice(0, 5);
+
   useEffect(() => {
     fetchGames();
   }, []);
 
   return {
     games,
+    upcomingGames,
+    recentGames,
     gamesLoading,
     gamesError,
     refetchGames: fetchGames

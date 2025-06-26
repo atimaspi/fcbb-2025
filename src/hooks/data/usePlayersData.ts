@@ -26,10 +26,25 @@ export const usePlayersData = () => {
       const { data, error } = await supabase
         .from('players')
         .select('*')
-        .order('name', { ascending: true });
+        .order('first_name', { ascending: true });
 
       if (error) throw error;
-      setPlayers(data || []);
+      
+      // Map player data with proper structure
+      const mappedData = (data || []).map(item => ({
+        id: item.id,
+        name: `${item.first_name || ''} ${item.last_name || ''}`.trim() || 'Unknown',
+        team_id: item.team_id,
+        position: item.position,
+        jersey_number: item.jersey_number,
+        birth_date: item.birth_date,
+        height: item.height_cm,
+        nationality: item.nationality,
+        status: (item.active === false ? 'inactive' : 'active') as 'active' | 'inactive',
+        created_at: item.created_at
+      }));
+      
+      setPlayers(mappedData);
       setPlayersError(null);
     } catch (err: any) {
       console.error('Error fetching players:', err);
