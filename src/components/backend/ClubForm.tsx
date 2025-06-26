@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Team } from '@/hooks/useBackendData';
+import { Club } from '@/types/backend';
 
 interface ClubFormProps {
-  onSubmit: (data: Omit<Team, 'id' | 'created_at'>) => Promise<void>;
-  initialData?: Team | null;
+  onSubmit: (data: Omit<Club, 'id' | 'created_at'>) => Promise<void>;
+  initialData?: Club | null;
   onCancel: () => void;
   isSubmitting: boolean;
 }
@@ -21,7 +21,7 @@ const ClubForm = ({ onSubmit, initialData, onCancel, isSubmitting }: ClubFormPro
     island: '',
     founded_year: new Date().getFullYear(),
     logo_url: '',
-    status: 'ativo' as 'ativo' | 'inativo'
+    status: 'active' as 'active' | 'inactive'
   });
 
   useEffect(() => {
@@ -33,7 +33,7 @@ const ClubForm = ({ onSubmit, initialData, onCancel, isSubmitting }: ClubFormPro
         island: initialData.island || '',
         founded_year: initialData.founded_year || new Date().getFullYear(),
         logo_url: initialData.logo_url || '',
-        status: initialData.status || 'ativo'
+        status: initialData.status || 'active'
       });
     }
   }, [initialData]);

@@ -62,7 +62,8 @@ const FileUploadComponent = ({
     if (!selectedFile) return;
 
     try {
-      const result = await uploadFile(selectedFile, entityType, entityId, metadata);
+      const path = entityType && entityId ? `${entityType}/${entityId}` : entityType;
+      const result = await uploadFile(selectedFile, path);
       
       if (result) {
         setUploadComplete(true);

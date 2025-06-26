@@ -10,6 +10,7 @@ export interface Game {
   status: 'scheduled' | 'live' | 'finished' | 'cancelled';
   home_score?: number;
   away_score?: number;
+  round?: string;
   created_at: string;
 }
 
@@ -19,7 +20,12 @@ export interface Team {
   club_id?: string;
   category: string;
   division?: string;
-  status?: 'active' | 'inactive';
+  status: 'active' | 'inactive';
+  abbreviation?: string;
+  city?: string;
+  island?: string;
+  founded_year?: number;
+  logo_url?: string;
   created_at: string;
 }
 
@@ -31,8 +37,16 @@ export interface Player {
   jersey_number?: number;
   birth_date?: string;
   height?: number;
+  height_cm?: number;
+  weight_kg?: number;
   nationality?: string;
   status: 'active' | 'inactive';
+  first_name?: string;
+  last_name?: string;
+  age?: number;
+  club?: string;
+  photo_url?: string;
+  documents?: any[];
   created_at: string;
 }
 
@@ -47,6 +61,13 @@ export interface NewsItem {
   author?: string;
   tags?: string;
   publish_date: string;
+  excerpt?: string;
+  published?: boolean;
+  featured?: boolean;
+  featured_image_url?: string;
+  video_url?: string;
+  gallery_images?: any[];
+  attachments?: any[];
   created_at: string;
   updated_at: string;
 }
@@ -70,6 +91,10 @@ export interface Referee {
   phone?: string;
   email?: string;
   status: 'ativo' | 'inativo' | 'suspenso';
+  first_name?: string;
+  last_name?: string;
+  island?: string;
+  active?: boolean;
   created_at: string;
 }
 
@@ -93,6 +118,8 @@ export interface Competition {
   status: 'upcoming' | 'ongoing' | 'finished';
   start_date?: string;
   end_date?: string;
+  description?: string;
+  regulations_url?: string;
   created_at: string;
 }
 
@@ -114,6 +141,10 @@ export interface RegionalAssociation {
   contact_email?: string;
   contact_phone?: string;
   status: 'active' | 'inactive';
+  acronym?: string;
+  address?: string;
+  logo_url?: string;
+  federation_id?: string;
   created_at: string;
 }
 
@@ -132,5 +163,8 @@ export interface Club {
   description?: string;
   status: 'active' | 'inactive';
   active?: boolean;
+  gallery_images?: any[];
+  documents?: any[];
+  regional_association_id?: string;
   created_at: string;
 }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,6 @@ import { Plus, Upload, Trash2, Edit } from 'lucide-react';
 const GalleryManagement = () => {
   const { toast } = useToast();
   const { uploadFile, uploading, progress } = useFileUpload({
-    folder: 'gallery',
     allowedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
   });
   
@@ -39,16 +37,7 @@ const GalleryManagement = () => {
     }
 
     try {
-      const uploadedFile = await uploadFile(
-        selectedFile,
-        'gallery',
-        undefined,
-        {
-          alt_text: formData.alt_text,
-          description: formData.description,
-          is_featured: false
-        }
-      );
+      const uploadedFile = await uploadFile(selectedFile, 'gallery');
 
       if (uploadedFile) {
         // Here you would also save gallery entry to database
