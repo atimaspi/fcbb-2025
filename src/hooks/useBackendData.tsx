@@ -23,24 +23,25 @@ export type {
   Coach,
   Competition,
   Federation,
-  RegionalAssociation
+  RegionalAssociation,
+  Club
 } from '@/types/backend';
 
 export const useBackendData = () => {
   const { operations } = useBackendOperations();
 
   // Use individual data hooks
-  const { clubs, clubsLoading, clubsError } = useClubsData();
-  const { teams, teamsLoading, teamsError } = useTeamsData();
-  const { players, playersLoading, playersError } = usePlayersData();
-  const { games, upcomingGames, recentGames, gamesLoading, gamesError } = useGamesData();
-  const { news, publishedNews, newsData, newsLoading, newsError } = useNewsData();
-  const { events, activeEvents, eventsData, eventsLoading, eventsError } = useEventsData();
-  const { referees, refereesLoading, refereesError } = useRefereesData();
-  const { coaches, coachesLoading, coachesError } = useCoachesData();
-  const { competitions, competitionsLoading, competitionsError } = useCompetitionsData();
-  const { federations, federationsLoading, federationsError } = useFederationsData();
-  const { regionalAssociations, regionalAssociationsLoading, regionalAssociationsError } = useRegionalAssociationsData();
+  const { clubs, clubsLoading, clubsError, refetchClubs } = useClubsData();
+  const { teams, teamsLoading, teamsError, refetchTeams } = useTeamsData();
+  const { players, playersLoading, playersError, refetchPlayers } = usePlayersData();
+  const { games, upcomingGames, recentGames, gamesLoading, gamesError, refetchGames } = useGamesData();
+  const { news, publishedNews, newsData, newsLoading, newsError, refetchNews } = useNewsData();
+  const { events, activeEvents, eventsData, eventsLoading, eventsError, refetchEvents } = useEventsData();
+  const { referees, refereesLoading, refereesError, refetchReferees } = useRefereesData();
+  const { coaches, coachesLoading, coachesError, refetchCoaches } = useCoachesData();
+  const { competitions, competitionsLoading, competitionsError, refetchCompetitions } = useCompetitionsData();
+  const { federations, federationsLoading, federationsError, refetchFederations } = useFederationsData();
+  const { regionalAssociations, regionalAssociationsLoading, regionalAssociationsError, refetchRegionalAssociations } = useRegionalAssociationsData();
 
   const isLoading = clubsLoading || teamsLoading || playersLoading || gamesLoading || 
                    newsLoading || eventsLoading || refereesLoading || coachesLoading ||
@@ -96,6 +97,19 @@ export const useBackendData = () => {
     competitionsError,
     federationsError,
     regionalAssociationsError,
+    
+    // Refetch functions
+    refetchClubs,
+    refetchTeams,
+    refetchPlayers,
+    refetchGames,
+    refetchNews,
+    refetchEvents,
+    refetchReferees,
+    refetchCoaches,
+    refetchCompetitions,
+    refetchFederations,
+    refetchRegionalAssociations,
     
     // Operations
     operations

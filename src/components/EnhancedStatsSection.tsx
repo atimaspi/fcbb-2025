@@ -141,7 +141,7 @@ const EnhancedStatsSection = () => {
   };
 
   // Usar estatísticas do backend se disponíveis, senão usar as padrão
-  const statsData = statisticsData?.length > 0 ? statisticsData.map(stat => {
+  const statsData = statisticsData && Array.isArray(statisticsData) && statisticsData.length > 0 ? statisticsData.map(stat => {
     const iconMap: { [key: string]: any } = {
       'trophy': TrophyIcon,
       'users': UsersIcon,

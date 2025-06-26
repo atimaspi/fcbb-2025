@@ -115,3 +115,21 @@ export interface RegionalAssociation {
   status: 'active' | 'inactive';
   created_at: string;
 }
+
+export interface Club {
+  id: string;
+  name: string;
+  abbreviation?: string;
+  city?: string;
+  island?: string;
+  founded_year?: number;
+  logo_url?: string;
+  address?: string;
+  contact_phone?: string;
+  contact_email?: string;
+  website?: string;
+  description?: string;
+  status: 'active' | 'inactive';
+  active?: boolean;
+  created_at: string;
+}
