@@ -1,35 +1,51 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { Competition } from '@/types/backend';
+
+export interface Competition {
+  id: string;
+  name: string;
+  season: string;
+  type: string;
+  status: 'upcoming' | 'ongoing' | 'finished';
+  start_date?: string;
+  end_date?: string;
+  created_at: string;
+}
 
 export const useCompetitionsData = () => {
-  const { data: competitionsData = [], isLoading: competitionsLoading, error: competitionsError } = useQuery({
-    queryKey: ['competitions'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('championships').select('*');
-      if (error) throw error;
-      return data || [];
-    },
-  });
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [competitionsLoading, setCompetitionsLoading] = useState(true);
+  const [competitionsError, setCompetitionsError] = useState<string | null>(null);
 
-  // Transform competitions data to match interface
-  const competitions: Competition[] = competitionsData.map(champ => ({
-    id: champ.id,
-    name: champ.name,
-    type: champ.type as any,
-    season: champ.season,
-    start_date: champ.start_date,
-    end_date: champ.end_date,
-    description: champ.description,
-    status: champ.status,
-    created_at: champ.created_at,
-    updated_at: (champ as any).updated_at || champ.created_at
-  }));
+  const fetchCompetitions = async () => {
+    try {
+      setCompetitionsLoading(true);
+      const { data, error } = await supabase
+        .from('competitions')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setCompetitions(data || []);
+      setCompetitionsError(null);
+    } catch (err: any) {
+      console.error('Error fetching competitions:', err);
+      setCompetitionsError(err.message);
+      setCompetitions([]);
+    } finally {
+      setCompetitionsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCompetitions();
+  }, []);
 
   return {
     competitions,
     competitionsLoading,
-    competitionsError
+    competitionsError,
+    refetchCompetitions: fetchCompetitions
   };
 };

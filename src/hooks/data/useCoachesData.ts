@@ -1,39 +1,52 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { Coach } from '@/types/backend';
+
+export interface Coach {
+  id: string;
+  name: string;
+  team_id?: string;
+  license_number?: string;
+  phone?: string;
+  email?: string;
+  experience_years?: number;
+  status: 'ativo' | 'inativo' | 'suspenso';
+  created_at: string;
+}
 
 export const useCoachesData = () => {
-  const { data: coachesData = [], isLoading: coachesLoading, error: coachesError } = useQuery({
-    queryKey: ['coaches'],
-    queryFn: async () => {
-      try {
-        // Try to fetch from coaches table directly
-        const { data, error } = await supabase.from('coaches' as any).select('*');
-        if (error) {
-          console.log('Coaches table not available, returning empty array');
-          return [];
-        }
-        return data || [];
-      } catch (error) {
-        console.log('Coaches query failed, returning empty array');
-        return [];
-      }
-    },
-  });
+  const [coaches, setCoaches] = useState<Coach[]>([]);
+  const [coachesLoading, setCoachesLoading] = useState(true);
+  const [coachesError, setCoachesError] = useState<string | null>(null);
 
-  // Transform coaches data - provide empty array as fallback
-  const coaches: Coach[] = Array.isArray(coachesData) ? coachesData.map((coach: any) => ({
-    id: coach.id,
-    name: coach.name || 'Unknown Coach',
-    status: (coach.status as Coach['status']) || 'ativo',
-    created_at: coach.created_at,
-    updated_at: coach.updated_at || coach.created_at
-  })) : [];
+  const fetchCoaches = async () => {
+    try {
+      setCoachesLoading(true);
+      const { data, error } = await supabase
+        .from('coaches')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setCoaches(data || []);
+      setCoachesError(null);
+    } catch (err: any) {
+      console.error('Error fetching coaches:', err);
+      setCoachesError(err.message);
+      setCoaches([]);
+    } finally {
+      setCoachesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCoaches();
+  }, []);
 
   return {
     coaches,
     coachesLoading,
-    coachesError
+    coachesError,
+    refetchCoaches: fetchCoaches
   };
 };

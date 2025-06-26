@@ -1,28 +1,51 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { Federation } from '@/types/backend';
+
+export interface Federation {
+  id: string;
+  name: string;
+  abbreviation?: string;
+  description?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  website?: string;
+  created_at: string;
+}
 
 export const useFederationsData = () => {
-  const { data: federationsData = [], isLoading: federationsLoading, error: federationsError } = useQuery({
-    queryKey: ['federations'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('federations').select('*');
-      if (error) throw error;
-      return data || [];
-    },
-  });
+  const [federations, setFederations] = useState<Federation[]>([]);
+  const [federationsLoading, setFederationsLoading] = useState(true);
+  const [federationsError, setFederationsError] = useState<string | null>(null);
 
-  // Transform federations data to match interface
-  const federations: Federation[] = federationsData.map(fed => ({
-    ...fed,
-    country: (fed as any).country || 'Cabo Verde',
-    partnership_status: 'ativo' as const
-  }));
+  const fetchFederations = async () => {
+    try {
+      setFederationsLoading(true);
+      const { data, error } = await supabase
+        .from('federations')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setFederations(data || []);
+      setFederationsError(null);
+    } catch (err: any) {
+      console.error('Error fetching federations:', err);
+      setFederationsError(err.message);
+      setFederations([]);
+    } finally {
+      setFederationsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFederations();
+  }, []);
 
   return {
     federations,
     federationsLoading,
-    federationsError
+    federationsError,
+    refetchFederations: fetchFederations
   };
 };

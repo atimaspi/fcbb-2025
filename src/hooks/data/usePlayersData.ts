@@ -1,29 +1,53 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { Player } from '@/types/backend';
+
+export interface Player {
+  id: string;
+  name: string;
+  team_id?: string;
+  position?: string;
+  jersey_number?: number;
+  birth_date?: string;
+  height?: number;
+  nationality?: string;
+  status: 'active' | 'inactive';
+  created_at: string;
+}
 
 export const usePlayersData = () => {
-  const { data: playersData = [], isLoading: playersLoading, error: playersError } = useQuery({
-    queryKey: ['players'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('players').select('*');
-      if (error) throw error;
-      return data || [];
-    },
-  });
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [playersLoading, setPlayersLoading] = useState(true);
+  const [playersError, setPlayersError] = useState<string | null>(null);
 
-  // Transform players data to match interface with proper type casting
-  const players: Player[] = playersData.map(player => ({
-    ...player,
-    name: `${player.first_name} ${player.last_name}`,
-    position: (player.position as Player['position']) || undefined,
-    updated_at: (player as any).updated_at || player.created_at
-  }));
+  const fetchPlayers = async () => {
+    try {
+      setPlayersLoading(true);
+      const { data, error } = await supabase
+        .from('players')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setPlayers(data || []);
+      setPlayersError(null);
+    } catch (err: any) {
+      console.error('Error fetching players:', err);
+      setPlayersError(err.message);
+      setPlayers([]);
+    } finally {
+      setPlayersLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPlayers();
+  }, []);
 
   return {
     players,
     playersLoading,
-    playersError
+    playersError,
+    refetchPlayers: fetchPlayers
   };
 };

@@ -1,32 +1,59 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { NewsItem } from '@/types/backend';
+
+export interface NewsItem {
+  id: string;
+  title: string;
+  summary?: string;
+  content: string;
+  category: string;
+  status: 'rascunho' | 'pendente' | 'publicado';
+  featured_image?: string;
+  author?: string;
+  tags?: string;
+  publish_date: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export const useNewsData = () => {
-  const { data: newsData = [], isLoading: newsLoading, error: newsError } = useQuery({
-    queryKey: ['news'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('news').select('*');
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [newsLoading, setNewsLoading] = useState(true);
+  const [newsError, setNewsError] = useState<string | null>(null);
+
+  const fetchNews = async () => {
+    try {
+      setNewsLoading(true);
+      const { data, error } = await supabase
+        .from('news')
+        .select('*')
+        .order('created_at', { ascending: false });
+
       if (error) throw error;
-      return data || [];
-    },
-  });
+      setNews(data || []);
+      setNewsError(null);
+    } catch (err: any) {
+      console.error('Error fetching news:', err);
+      setNewsError(err.message);
+      setNews([]);
+    } finally {
+      setNewsLoading(false);
+    }
+  };
 
-  // Transform news data to match interface
-  const news: NewsItem[] = newsData.map(item => ({
-    ...item,
-    views_count: (item as any).views_count || 0
-  }));
+  useEffect(() => {
+    fetchNews();
+  }, []);
 
-  // Published news
-  const publishedNews = news.filter(item => item.published === true);
+  const publishedNews = news.filter(item => item.status === 'publicado');
 
   return {
     news,
     publishedNews,
-    newsData: news, // For backward compatibility
+    newsData: news, // alias for compatibility
     newsLoading,
-    newsError
+    newsError,
+    refetchNews: fetchNews
   };
 };

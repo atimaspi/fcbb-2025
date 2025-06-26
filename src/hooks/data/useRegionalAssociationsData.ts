@@ -1,29 +1,50 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { RegionalAssociation } from '@/types/backend';
+
+export interface RegionalAssociation {
+  id: string;
+  name: string;
+  island: string;
+  contact_email?: string;
+  contact_phone?: string;
+  status: 'active' | 'inactive';
+  created_at: string;
+}
 
 export const useRegionalAssociationsData = () => {
-  const { data: regionalAssociationsData = [], isLoading: regionalAssociationsLoading, error: regionalAssociationsError } = useQuery({
-    queryKey: ['regional_associations'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('regional_associations').select('*');
-      if (error) throw error;
-      return data || [];
-    },
-  });
+  const [regionalAssociations, setRegionalAssociations] = useState<RegionalAssociation[]>([]);
+  const [regionalAssociationsLoading, setRegionalAssociationsLoading] = useState(true);
+  const [regionalAssociationsError, setRegionalAssociationsError] = useState<string | null>(null);
 
-  // Transform regional associations data to match interface
-  const regionalAssociations: RegionalAssociation[] = regionalAssociationsData.map(ra => ({
-    ...ra,
-    president_name: (ra as any).president_name || undefined,
-    clubs_count: (ra as any).clubs_count || 0,
-    status: 'ativo' as const
-  }));
+  const fetchRegionalAssociations = async () => {
+    try {
+      setRegionalAssociationsLoading(true);
+      const { data, error } = await supabase
+        .from('regional_associations')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setRegionalAssociations(data || []);
+      setRegionalAssociationsError(null);
+    } catch (err: any) {
+      console.error('Error fetching regional associations:', err);
+      setRegionalAssociationsError(err.message);
+      setRegionalAssociations([]);
+    } finally {
+      setRegionalAssociationsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRegionalAssociations();
+  }, []);
 
   return {
     regionalAssociations,
     regionalAssociationsLoading,
-    regionalAssociationsError
+    regionalAssociationsError,
+    refetchRegionalAssociations: fetchRegionalAssociations
   };
 };

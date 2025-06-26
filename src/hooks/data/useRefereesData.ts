@@ -1,29 +1,51 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { Referee } from '@/types/backend';
+
+export interface Referee {
+  id: string;
+  name: string;
+  license_number?: string;
+  level: string;
+  phone?: string;
+  email?: string;
+  status: 'ativo' | 'inativo' | 'suspenso';
+  created_at: string;
+}
 
 export const useRefereesData = () => {
-  const { data: refereesData = [], isLoading: refereesLoading, error: refereesError } = useQuery({
-    queryKey: ['referees'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('referees').select('*');
-      if (error) throw error;
-      return data || [];
-    },
-  });
+  const [referees, setReferees] = useState<Referee[]>([]);
+  const [refereesLoading, setRefereesLoading] = useState(true);
+  const [refereesError, setRefereesError] = useState<string | null>(null);
 
-  // Transform referees data to match interface
-  const referees: Referee[] = refereesData.map(referee => ({
-    ...referee,
-    name: `${referee.first_name} ${referee.last_name}`,
-    status: 'ativo' as const,
-    updated_at: (referee as any).updated_at || referee.created_at
-  }));
+  const fetchReferees = async () => {
+    try {
+      setRefereesLoading(true);
+      const { data, error } = await supabase
+        .from('referees')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setReferees(data || []);
+      setRefereesError(null);
+    } catch (err: any) {
+      console.error('Error fetching referees:', err);
+      setRefereesError(err.message);
+      setReferees([]);
+    } finally {
+      setRefereesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReferees();
+  }, []);
 
   return {
     referees,
     refereesLoading,
-    refereesError
+    refereesError,
+    refetchReferees: fetchReferees
   };
 };

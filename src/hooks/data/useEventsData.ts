@@ -1,37 +1,55 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { Event } from '@/types/backend';
+
+export interface Event {
+  id: string;
+  title: string;
+  description?: string;
+  event_date: string;
+  location?: string;
+  type: string;
+  status: 'agendado' | 'cancelado' | 'finalizado';
+  created_at: string;
+}
 
 export const useEventsData = () => {
-  const { data: eventsData = [], isLoading: eventsLoading, error: eventsError } = useQuery({
-    queryKey: ['events'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('events').select('*');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [eventsError, setEventsError] = useState<string | null>(null);
+
+  const fetchEvents = async () => {
+    try {
+      setEventsLoading(true);
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('event_date', { ascending: true });
+
       if (error) throw error;
-      return data || [];
-    },
-  });
+      setEvents(data || []);
+      setEventsError(null);
+    } catch (err: any) {
+      console.error('Error fetching events:', err);
+      setEventsError(err.message);
+      setEvents([]);
+    } finally {
+      setEventsLoading(false);
+    }
+  };
 
-  // Transform events data to match interface
-  const events: Event[] = eventsData.map(event => ({
-    ...event,
-    event_type: 'evento_social' as const,
-    status: 'agendado' as const,
-    updated_at: (event as any).updated_at || event.created_at
-  }));
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
-  // Active events
-  const activeEvents = events.filter(event => {
-    const eventDate = new Date(event.event_date);
-    return eventDate >= new Date();
-  });
+  const activeEvents = events.filter(event => event.status === 'agendado');
 
   return {
     events,
     activeEvents,
-    eventsData: events, // For backward compatibility
+    eventsData: events, // alias for compatibility
     eventsLoading,
-    eventsError
+    eventsError,
+    refetchEvents: fetchEvents
   };
 };

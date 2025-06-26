@@ -1,44 +1,65 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { Game } from '@/types/backend';
+
+export interface Game {
+  id: string;
+  home_team_id: string;
+  away_team_id: string;
+  competition_id?: string;
+  scheduled_date?: string;
+  game_date?: string;
+  venue?: string;
+  status: 'scheduled' | 'live' | 'finished' | 'cancelled';
+  home_score?: number;
+  away_score?: number;
+  created_at: string;
+}
 
 export const useGamesData = () => {
-  const { data: gamesData = [], isLoading: gamesLoading, error: gamesError } = useQuery({
-    queryKey: ['games'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('games').select('*');
+  const [games, setGames] = useState<Game[]>([]);
+  const [gamesLoading, setGamesLoading] = useState(true);
+  const [gamesError, setGamesError] = useState<string | null>(null);
+
+  const fetchGames = async () => {
+    try {
+      setGamesLoading(true);
+      const { data, error } = await supabase
+        .from('games')
+        .select('*')
+        .order('scheduled_date', { ascending: true });
+
       if (error) throw error;
-      return data || [];
-    },
-  });
+      setGames(data || []);
+      setGamesError(null);
+    } catch (err: any) {
+      console.error('Error fetching games:', err);
+      setGamesError(err.message);
+      setGames([]);
+    } finally {
+      setGamesLoading(false);
+    }
+  };
 
-  // Transform games data to match interface with proper status casting
-  const games: Game[] = gamesData.map(game => ({
-    ...game,
-    status: (game.status as Game['status']) || 'agendado',
-    updated_at: (game as any).updated_at || game.created_at
-  }));
+  useEffect(() => {
+    fetchGames();
+  }, []);
 
-  // Fetch upcoming games
-  const upcomingGames = games.filter(game => {
-    if (!game.scheduled_date) return false;
-    const gameDate = new Date(game.scheduled_date);
-    return gameDate > new Date() && game.status === 'agendado';
-  }).slice(0, 5);
+  const upcomingGames = games.filter(game => 
+    game.status === 'scheduled' && 
+    new Date(game.scheduled_date || game.game_date || '') > new Date()
+  );
 
-  // Fetch recent games
-  const recentGames = games.filter(game => {
-    if (!game.scheduled_date) return false;
-    const gameDate = new Date(game.scheduled_date);
-    return gameDate <= new Date() && game.status === 'finalizado';
-  }).slice(0, 5);
+  const recentGames = games.filter(game => 
+    game.status === 'finished'
+  ).slice(0, 10);
 
   return {
     games,
     upcomingGames,
     recentGames,
     gamesLoading,
-    gamesError
+    gamesError,
+    refetchGames: fetchGames
   };
 };

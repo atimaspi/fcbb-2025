@@ -1,28 +1,58 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { Team } from '@/types/backend';
+
+export interface Team {
+  id: string;
+  name: string;
+  club_id?: string;
+  category: string;
+  division?: string;
+  created_at: string;
+}
 
 export const useTeamsData = () => {
-  const { data: teamsData = [], isLoading: teamsLoading, error: teamsError } = useQuery({
-    queryKey: ['teams'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('teams').select('*');
-      if (error) throw error;
-      return data || [];
-    },
-  });
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [teamsLoading, setTeamsLoading] = useState(true);
+  const [teamsError, setTeamsError] = useState<string | null>(null);
 
-  // Transform teams data to match interface
-  const teams: Team[] = teamsData.map(team => ({
-    ...team,
-    status: 'ativo' as const,
-    updated_at: (team as any).updated_at || team.created_at
-  }));
+  const fetchTeams = async () => {
+    try {
+      setTeamsLoading(true);
+      const { data, error } = await supabase
+        .from('teams')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setTeams(data || []);
+      setTeamsError(null);
+    } catch (err: any) {
+      console.error('Error fetching teams:', err);
+      setTeamsError(err.message);
+      // Fallback data
+      setTeams([
+        {
+          id: '1',
+          name: 'Benfica Basketball',
+          category: 'senior',
+          division: 'masculino',
+          created_at: new Date().toISOString()
+        }
+      ]);
+    } finally {
+      setTeamsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTeams();
+  }, []);
 
   return {
     teams,
     teamsLoading,
-    teamsError
+    teamsError,
+    refetchTeams: fetchTeams
   };
 };
