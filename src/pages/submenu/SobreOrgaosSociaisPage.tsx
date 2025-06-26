@@ -3,60 +3,30 @@ import PageLayout from '@/pages/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const SobreOrgaosSociaisPage = () => {
+  const orgaos = [
+    { nome: "Assembleia Geral", descricao: "Órgão máximo da federação" },
+    { nome: "Direção", descricao: "Órgão executivo da federação" },
+    { nome: "Conselho Fiscal", descricao: "Órgão de fiscalização" },
+    { nome: "Conselho de Disciplina", descricao: "Órgão disciplinar" },
+  ];
+
   return (
     <PageLayout 
-      title="Órgãos Sociais - FCBB" 
-      description="Estrutura organizacional da Federação Cabo-verdiana de Basquetebol"
+      title="Órgãos Sociais" 
+      description="Estrutura organizacional da FCBB"
     >
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl text-cv-blue">Assembleia Geral</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-700">
-                Órgão máximo da federação, responsável pelas decisões estratégicas 
-                e pela eleição dos órgãos dirigentes.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl text-cv-blue">Direção</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-700">
-                Órgão executivo responsável pela gestão corrente da federação 
-                e implementação das decisões da Assembleia Geral.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl text-cv-blue">Conselho Fiscal</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-700">
-                Órgão de fiscalização responsável pelo controlo da gestão financeira 
-                e administrativa da federação.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl text-cv-blue">Conselho de Disciplina</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-700">
-                Órgão responsável pela aplicação de medidas disciplinares e 
-                resolução de conflitos no âmbito das competições.
-              </p>
-            </CardContent>
-          </Card>
+          {orgaos.map((orgao, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <CardTitle className="text-2xl text-cv-blue">{orgao.nome}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700">{orgao.descricao}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </PageLayout>
