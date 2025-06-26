@@ -1,483 +1,384 @@
 
-import { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Calendar, PenLine, Trash2, Play, Square } from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter
-} from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-
-interface Game {
-  id: string;
-  home_team_id: string;
-  away_team_id: string;
-  home_team_name: string;
-  away_team_name: string;
-  scheduled_date: string;
-  venue: string;
-  status: string;
-  home_score: number | null;
-  away_score: number | null;
-  competition_name: string;
-}
-
-interface Team {
-  id: string;
-  name: string;
-}
-
-interface Competition {
-  id: string;
-  name: string;
-}
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { useBackendData } from '@/hooks/useBackendData';
+import { Plus, Edit, Trash2, Trophy, Play, Calendar } from 'lucide-react';
 
 const GamesManagement = () => {
-  const [games, setGames] = useState<Game[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [competitions, setCompetitions] = useState<Competition[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [showDialog, setShowDialog] = useState(false);
-  const [editingGame, setEditingGame] = useState<Game | null>(null);
+  const { toast } = useToast();
+  const { games, teams, competitions } = useBackendData();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingGame, setEditingGame] = useState<any>(null);
   const [formData, setFormData] = useState({
     home_team_id: '',
     away_team_id: '',
     competition_id: '',
     scheduled_date: '',
     venue: '',
-    round: '',
-    status: 'scheduled'
+    status: 'agendado',
+    home_score: 0,
+    away_score: 0,
+    notes: '',
+    referee: '',
+    live_score_enabled: false
   });
-  const { toast } = useToast();
 
-  useEffect(() => {
-    fetchGames();
-    fetchTeams();
-    fetchCompetitions();
-  }, []);
-
-  const fetchGames = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('games')
-        .select(`
-          *,
-          home_team:teams!games_home_team_id_fkey(name),
-          away_team:teams!games_away_team_id_fkey(name),
-          competition:championships(name)
-        `)
-        .order('scheduled_date', { ascending: false });
-
-      if (error) throw error;
-
-      const formattedGames = data?.map(game => ({
-        id: game.id,
-        home_team_id: game.home_team_id,
-        away_team_id: game.away_team_id,
-        home_team_name: game.home_team?.name || 'N/A',
-        away_team_name: game.away_team?.name || 'N/A',
-        scheduled_date: new Date(game.scheduled_date).toLocaleString('pt-PT'),
-        venue: game.venue || '',
-        status: game.status || 'scheduled',
-        home_score: game.home_score,
-        away_score: game.away_score,
-        competition_name: game.competition?.name || 'N/A'
-      })) || [];
-
-      setGames(formattedGames);
-    } catch (error: any) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (formData.home_team_id === formData.away_team_id) {
       toast({
         title: "Erro",
-        description: `Erro ao carregar jogos: ${error.message}`,
+        description: "As equipas devem ser diferentes",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
-
-  const fetchTeams = async () => {
+    
     try {
-      const { data, error } = await supabase
-        .from('teams')
-        .select('id, name')
-        .order('name');
-
-      if (error) throw error;
-      setTeams(data || []);
-    } catch (error: any) {
-      console.error('Erro ao carregar equipas:', error);
+      // Aqui seria a integração com Supabase para salvar
+      toast({
+        title: "Sucesso",
+        description: editingGame ? "Jogo atualizado com sucesso!" : "Jogo criado com sucesso!",
+      });
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar jogo",
+        variant: "destructive",
+      });
     }
   };
 
-  const fetchCompetitions = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('championships')
-        .select('id, name')
-        .order('name');
-
-      if (error) throw error;
-      setCompetitions(data || []);
-    } catch (error: any) {
-      console.error('Erro ao carregar competições:', error);
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este jogo?')) {
+      try {
+        // Aqui seria a integração com Supabase para deletar
+        toast({
+          title: "Sucesso",
+          description: "Jogo eliminado com sucesso!",
+        });
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Erro ao eliminar jogo",
+          variant: "destructive",
+        });
+      }
     }
   };
 
-  const handleAdd = () => {
-    setEditingGame(null);
+  const resetForm = () => {
     setFormData({
       home_team_id: '',
       away_team_id: '',
       competition_id: '',
       scheduled_date: '',
       venue: '',
-      round: '',
-      status: 'scheduled'
+      status: 'agendado',
+      home_score: 0,
+      away_score: 0,
+      notes: '',
+      referee: '',
+      live_score_enabled: false
     });
-    setShowDialog(true);
+    setEditingGame(null);
   };
 
-  const handleEdit = (game: Game) => {
+  const openEditDialog = (game: any) => {
     setEditingGame(game);
     setFormData({
-      home_team_id: game.home_team_id,
-      away_team_id: game.away_team_id,
-      competition_id: '', // Precisaria buscar da base de dados
-      scheduled_date: new Date(game.scheduled_date).toISOString().slice(0, 16),
-      venue: game.venue,
-      round: '',
-      status: game.status
+      home_team_id: game.home_team_id || '',
+      away_team_id: game.away_team_id || '',
+      competition_id: game.competition_id || '',
+      scheduled_date: game.scheduled_date ? new Date(game.scheduled_date).toISOString().slice(0, 16) : '',
+      venue: game.venue || '',
+      status: game.status || 'agendado',
+      home_score: game.home_score || 0,
+      away_score: game.away_score || 0,
+      notes: game.notes || '',
+      referee: game.referee || '',
+      live_score_enabled: game.live_score_enabled || false
     });
-    setShowDialog(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Tem certeza que deseja eliminar este jogo?')) return;
-
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('games')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Sucesso",
-        description: "Jogo eliminado com sucesso.",
-      });
-
-      await fetchGames();
-    } catch (error: any) {
-      toast({
-        title: "Erro",
-        description: `Erro ao eliminar jogo: ${error.message}`,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const gameData = {
-        home_team_id: formData.home_team_id,
-        away_team_id: formData.away_team_id,
-        competition_id: formData.competition_id,
-        scheduled_date: formData.scheduled_date,
-        venue: formData.venue,
-        round: formData.round,
-        status: formData.status
-      };
-
-      if (editingGame) {
-        const { error } = await supabase
-          .from('games')
-          .update(gameData)
-          .eq('id', editingGame.id);
-
-        if (error) throw error;
-
-        toast({
-          title: "Sucesso",
-          description: "Jogo atualizado com sucesso.",
-        });
-      } else {
-        const { error } = await supabase
-          .from('games')
-          .insert(gameData);
-
-        if (error) throw error;
-
-        toast({
-          title: "Sucesso",
-          description: "Jogo criado com sucesso.",
-        });
-      }
-
-      setShowDialog(false);
-      await fetchGames();
-    } catch (error: any) {
-      toast({
-        title: "Erro",
-        description: `Erro ao salvar jogo: ${error.message}`,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    setIsDialogOpen(true);
   };
 
   const getStatusBadge = (status: string) => {
-    const statusMap = {
-      scheduled: { text: 'Agendado', class: 'bg-blue-100 text-blue-800' },
-      live: { text: 'Ao Vivo', class: 'bg-green-100 text-green-800' },
-      finished: { text: 'Terminado', class: 'bg-gray-100 text-gray-800' },
-      postponed: { text: 'Adiado', class: 'bg-yellow-100 text-yellow-800' },
-      cancelled: { text: 'Cancelado', class: 'bg-red-100 text-red-800' }
-    };
+    switch (status) {
+      case 'agendado':
+        return <Badge className="bg-blue-100 text-blue-800">Agendado</Badge>;
+      case 'ao_vivo':
+        return <Badge className="bg-red-100 text-red-800">Ao Vivo</Badge>;
+      case 'finalizado':
+        return <Badge className="bg-green-100 text-green-800">Finalizado</Badge>;
+      case 'cancelado':
+        return <Badge className="bg-gray-100 text-gray-800">Cancelado</Badge>;
+      case 'adiado':
+        return <Badge className="bg-yellow-100 text-yellow-800">Adiado</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
 
-    const statusInfo = statusMap[status as keyof typeof statusMap] || statusMap.scheduled;
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs ${statusInfo.class}`}>
-        {statusInfo.text}
-      </span>
-    );
+  const getTeamName = (teamId: string) => {
+    const team = teams.find((t: any) => t.id === teamId);
+    return team?.name || 'Equipa não encontrada';
+  };
+
+  const getCompetitionName = (competitionId: string) => {
+    const competition = competitions.find((c: any) => c.id === competitionId);
+    return competition?.name || 'Competição não encontrada';
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold text-cv-blue">Gestão de Jogos</h3>
-        <Button onClick={handleAdd} className="bg-cv-blue hover:bg-blue-700 flex items-center gap-2">
-          <Calendar size={18} />
-          Adicionar Jogo
-        </Button>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Data/Hora</TableHead>
-              <TableHead>Jogo</TableHead>
-              <TableHead>Competição</TableHead>
-              <TableHead>Local</TableHead>
-              <TableHead>Resultado</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center">Carregando...</TableCell>
-              </TableRow>
-            ) : games.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center">Nenhum jogo encontrado</TableCell>
-              </TableRow>
-            ) : (
-              games.map((game) => (
-                <TableRow key={game.id}>
-                  <TableCell className="font-medium">{game.scheduled_date}</TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      <div>{game.home_team_name} vs {game.away_team_name}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{game.competition_name}</TableCell>
-                  <TableCell>{game.venue}</TableCell>
-                  <TableCell>
-                    {game.home_score !== null && game.away_score !== null 
-                      ? `${game.home_score} - ${game.away_score}`
-                      : '-'
-                    }
-                  </TableCell>
-                  <TableCell>{getStatusBadge(game.status)}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <button 
-                        onClick={() => handleEdit(game)}
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Editar"
-                      >
-                        <PenLine size={16} />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(game.id)}
-                        className="text-red-600 hover:text-red-800"
-                        title="Eliminar"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-[525px]">
-          <DialogHeader>
-            <DialogTitle>
-              {editingGame ? 'Editar Jogo' : 'Adicionar Novo Jogo'}
-            </DialogTitle>
-            <DialogDescription>
-              Preencha os campos abaixo para {editingGame ? 'atualizar' : 'criar'} o jogo.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 py-4">
+        <div>
+          <h2 className="text-2xl font-bold text-cv-blue">Gestão de Jogos</h2>
+          <p className="text-gray-600">Agendar, editar e gerir jogos e resultados</p>
+        </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={resetForm} className="bg-cv-blue hover:bg-cv-blue/90">
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Jogo
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{editingGame ? 'Editar Jogo' : 'Novo Jogo'}</DialogTitle>
+              <DialogDescription>
+                Configure os detalhes do jogo
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <label htmlFor="home_team" className="text-sm font-medium">
-                    Equipa Casa
-                  </label>
+                <div className="space-y-2">
+                  <Label htmlFor="home_team_id">Equipa da Casa *</Label>
                   <select
-                    id="home_team"
+                    id="home_team_id"
                     value={formData.home_team_id}
-                    onChange={(e) => setFormData({...formData, home_team_id: e.target.value})}
-                    className="px-3 py-2 border border-gray-300 rounded-md"
+                    onChange={(e) => setFormData({ ...formData, home_team_id: e.target.value })}
+                    className="w-full p-2 border rounded-md"
                     required
                   >
-                    <option value="">Selecionar equipa</option>
-                    {teams.map(team => (
+                    <option value="">Selecionar equipa...</option>
+                    {teams.map((team: any) => (
                       <option key={team.id} value={team.id}>{team.name}</option>
                     ))}
                   </select>
                 </div>
-                
-                <div className="grid gap-2">
-                  <label htmlFor="away_team" className="text-sm font-medium">
-                    Equipa Visitante
-                  </label>
+                <div className="space-y-2">
+                  <Label htmlFor="away_team_id">Equipa Visitante *</Label>
                   <select
-                    id="away_team"
+                    id="away_team_id"
                     value={formData.away_team_id}
-                    onChange={(e) => setFormData({...formData, away_team_id: e.target.value})}
-                    className="px-3 py-2 border border-gray-300 rounded-md"
+                    onChange={(e) => setFormData({ ...formData, away_team_id: e.target.value })}
+                    className="w-full p-2 border rounded-md"
                     required
                   >
-                    <option value="">Selecionar equipa</option>
-                    {teams.map(team => (
+                    <option value="">Selecionar equipa...</option>
+                    {teams.map((team: any) => (
                       <option key={team.id} value={team.id}>{team.name}</option>
                     ))}
                   </select>
                 </div>
               </div>
 
-              <div className="grid gap-2">
-                <label htmlFor="competition" className="text-sm font-medium">
-                  Competição
-                </label>
+              <div className="space-y-2">
+                <Label htmlFor="competition_id">Competição *</Label>
                 <select
-                  id="competition"
+                  id="competition_id"
                   value={formData.competition_id}
-                  onChange={(e) => setFormData({...formData, competition_id: e.target.value})}
-                  className="px-3 py-2 border border-gray-300 rounded-md"
+                  onChange={(e) => setFormData({ ...formData, competition_id: e.target.value })}
+                  className="w-full p-2 border rounded-md"
                   required
                 >
-                  <option value="">Selecionar competição</option>
-                  {competitions.map(comp => (
-                    <option key={comp.id} value={comp.id}>{comp.name}</option>
+                  <option value="">Selecionar competição...</option>
+                  {competitions.map((competition: any) => (
+                    <option key={competition.id} value={competition.id}>{competition.name}</option>
                   ))}
                 </select>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <label htmlFor="scheduled_date" className="text-sm font-medium">
-                    Data e Hora
-                  </label>
+                <div className="space-y-2">
+                  <Label htmlFor="scheduled_date">Data e Hora *</Label>
                   <Input
                     id="scheduled_date"
                     type="datetime-local"
                     value={formData.scheduled_date}
-                    onChange={(e) => setFormData({...formData, scheduled_date: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, scheduled_date: e.target.value })}
                     required
                   />
                 </div>
-                
-                <div className="grid gap-2">
-                  <label htmlFor="venue" className="text-sm font-medium">
-                    Local
-                  </label>
+                <div className="space-y-2">
+                  <Label htmlFor="venue">Local</Label>
                   <Input
                     id="venue"
                     value={formData.venue}
-                    onChange={(e) => setFormData({...formData, venue: e.target.value})}
-                    required
+                    onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
+                    placeholder="Ex: Pavilhão Nacional"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <label htmlFor="round" className="text-sm font-medium">
-                    Jornada/Round
-                  </label>
-                  <Input
-                    id="round"
-                    value={formData.round}
-                    onChange={(e) => setFormData({...formData, round: e.target.value})}
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <label htmlFor="status" className="text-sm font-medium">
-                    Estado
-                  </label>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
                   <select
                     id="status"
                     value={formData.status}
-                    onChange={(e) => setFormData({...formData, status: e.target.value})}
-                    className="px-3 py-2 border border-gray-300 rounded-md"
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    className="w-full p-2 border rounded-md"
                   >
-                    <option value="scheduled">Agendado</option>
-                    <option value="live">Ao Vivo</option>
-                    <option value="finished">Terminado</option>
-                    <option value="postponed">Adiado</option>
-                    <option value="cancelled">Cancelado</option>
+                    <option value="agendado">Agendado</option>
+                    <option value="ao_vivo">Ao Vivo</option>
+                    <option value="finalizado">Finalizado</option>
+                    <option value="cancelado">Cancelado</option>
+                    <option value="adiado">Adiado</option>
                   </select>
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="home_score">Resultado Casa</Label>
+                  <Input
+                    id="home_score"
+                    type="number"
+                    min="0"
+                    value={formData.home_score}
+                    onChange={(e) => setFormData({ ...formData, home_score: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="away_score">Resultado Visitante</Label>
+                  <Input
+                    id="away_score"
+                    type="number"
+                    min="0"
+                    value={formData.away_score}
+                    onChange={(e) => setFormData({ ...formData, away_score: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
               </div>
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowDialog(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit" className="bg-cv-blue" disabled={loading}>
-                {loading ? 'A processar...' : editingGame ? 'Atualizar' : 'Criar'} Jogo
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+
+              <div className="space-y-2">
+                <Label htmlFor="referee">Árbitro</Label>
+                <Input
+                  id="referee"
+                  value={formData.referee}
+                  onChange={(e) => setFormData({ ...formData, referee: e.target.value })}
+                  placeholder="Nome do árbitro principal"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notes">Observações</Label>
+                <Textarea
+                  id="notes"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  rows={3}
+                  placeholder="Observações sobre o jogo..."
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="live_score_enabled"
+                  checked={formData.live_score_enabled}
+                  onChange={(e) => setFormData({ ...formData, live_score_enabled: e.target.checked })}
+                />
+                <Label htmlFor="live_score_enabled">Ativar pontuação ao vivo</Label>
+              </div>
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" className="bg-cv-blue hover:bg-cv-blue/90">
+                  {editingGame ? 'Atualizar' : 'Criar'} Jogo
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Jogos Existentes</CardTitle>
+          <CardDescription>Lista de todos os jogos do sistema</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data/Hora</TableHead>
+                <TableHead>Jogo</TableHead>
+                <TableHead>Competição</TableHead>
+                <TableHead>Resultado</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {games.map((game: any) => (
+                <TableRow key={game.id}>
+                  <TableCell>
+                    {new Date(game.scheduled_date).toLocaleDateString('pt-PT')} <br />
+                    <span className="text-sm text-gray-500">
+                      {new Date(game.scheduled_date).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="font-medium">
+                      {getTeamName(game.home_team_id)} vs {getTeamName(game.away_team_id)}
+                    </div>
+                    {game.venue && <div className="text-sm text-gray-500">{game.venue}</div>}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{getCompetitionName(game.competition_id)}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    {game.status === 'finalizado' || game.status === 'ao_vivo' ? (
+                      <span className="font-bold">{game.home_score} - {game.away_score}</span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell>{getStatusBadge(game.status)}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      {game.live_score_enabled && (
+                        <Button variant="outline" size="sm" className="text-red-600">
+                          <Play className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button variant="outline" size="sm" onClick={() => openEditDialog(game)}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleDelete(game.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 };

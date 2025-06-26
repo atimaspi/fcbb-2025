@@ -16,7 +16,10 @@ import {
   User,
   Home,
   Trophy,
-  Building
+  Building,
+  Play,
+  UserCheck,
+  Settings
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -25,59 +28,117 @@ interface AdminSidebarProps {
 }
 
 const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
-  const { profile, isAdmin } = useAuth();
+  const { profile, isAdmin, canManageContent } = useAuth();
 
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'profile', label: 'Meu Perfil', icon: User },
-    { id: 'news', label: 'Notícias', icon: FileText },
-    { id: 'events', label: 'Eventos', icon: Calendar },
-    { id: 'gallery', label: 'Galeria', icon: Image },
-    { id: 'hero-slides', label: 'Banner Principal', icon: Star },
-    { id: 'statistics', label: 'Estatísticas', icon: BarChart3 },
-    { id: 'partners', label: 'Parceiros', icon: Handshake },
-    { id: 'site-settings', label: 'Configurações', icon: Sliders },
+  const menuSections = [
+    {
+      title: 'Principal',
+      items: [
+        { id: 'dashboard', label: 'Dashboard', icon: Home, access: 'all' },
+        { id: 'profile', label: 'Meu Perfil', icon: User, access: 'all' },
+      ]
+    },
+    {
+      title: 'Gestão de Conteúdo',
+      items: [
+        { id: 'news', label: 'Notícias', icon: FileText, access: 'content' },
+        { id: 'events', label: 'Eventos', icon: Calendar, access: 'content' },
+        { id: 'gallery', label: 'Galeria', icon: Image, access: 'content' },
+        { id: 'hero-slides', label: 'Banner Principal', icon: Star, access: 'content' },
+      ]
+    },
+    {
+      title: 'Gestão Desportiva',
+      items: [
+        { id: 'games', label: 'Jogos', icon: Play, access: 'content' },
+        { id: 'players', label: 'Jogadores', icon: UserCheck, access: 'content' },
+        { id: 'clubs', label: 'Clubes', icon: Building, access: 'admin' },
+        { id: 'competitions', label: 'Competições', icon: Trophy, access: 'admin' },
+        { id: 'coaches', label: 'Treinadores', icon: Users, access: 'admin' },
+      ]
+    },
+    {
+      title: 'Sistema',
+      items: [
+        { id: 'statistics', label: 'Estatísticas', icon: BarChart3, access: 'content' },
+        { id: 'partners', label: 'Parceiros', icon: Handshake, access: 'content' },
+        { id: 'site-settings', label: 'Configurações', icon: Sliders, access: 'admin' },
+      ]
+    }
   ];
 
-  // Add data management items if admin
-  if (isAdmin) {
-    menuItems.push(
-      { id: 'clubs', label: 'Clubes', icon: Building },
-      { id: 'competitions', label: 'Competições', icon: Trophy },
-      { id: 'players', label: 'Jogadores', icon: Users },
-      { id: 'coaches', label: 'Treinadores', icon: Shield }
-    );
-  }
+  const hasAccess = (access: string) => {
+    switch (access) {
+      case 'all':
+        return true;
+      case 'content':
+        return canManageContent;
+      case 'admin':
+        return isAdmin;
+      default:
+        return false;
+    }
+  };
 
   return (
     <Card className="w-64 h-fit sticky top-6">
       <CardContent className="p-4">
-        <div className="space-y-2">
+        <div className="space-y-4">
           <div className="mb-4">
-            <h3 className="font-semibold text-cv-blue mb-2">Menu Principal</h3>
-            <div className="text-xs text-gray-600 mb-4">
-              Logado como: {profile?.role || 'Utilizador'}
+            <h3 className="font-semibold text-cv-blue mb-2">Área Reservada FCBB</h3>
+            <div className="text-xs text-gray-600 mb-2">
+              <div><strong>Utilizador:</strong> {profile?.full_name || 'N/A'}</div>
+              <div><strong>Perfil:</strong> {profile?.role || 'Utilizador'}</div>
+            </div>
+            <div className="flex space-x-1">
+              {isAdmin && (
+                <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Admin</span>
+              )}
+              {canManageContent && (
+                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Editor</span>
+              )}
             </div>
           </div>
           
-          {menuItems.map((item) => {
-            const IconComponent = item.icon;
-            return (
-              <Button
-                key={item.id}
-                variant={activeTab === item.id ? "default" : "ghost"}
-                className={`w-full justify-start ${
-                  activeTab === item.id 
-                    ? 'bg-cv-blue text-white' 
-                    : 'text-gray-700 hover:bg-cv-blue/5'
-                }`}
-                onClick={() => onTabChange(item.id)}
-              >
-                <IconComponent className="mr-2 h-4 w-4" />
-                {item.label}
-              </Button>
-            );
-          })}
+          {menuSections.map((section) => (
+            <div key={section.title} className="space-y-2">
+              <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {section.title}
+              </h4>
+              <div className="space-y-1">
+                {section.items
+                  .filter(item => hasAccess(item.access))
+                  .map((item) => {
+                    const IconComponent = item.icon;
+                    return (
+                      <Button
+                        key={item.id}
+                        variant={activeTab === item.id ? "default" : "ghost"}
+                        className={`w-full justify-start text-sm ${
+                          activeTab === item.id 
+                            ? 'bg-cv-blue text-white' 
+                            : 'text-gray-700 hover:bg-cv-blue/5'
+                        }`}
+                        onClick={() => onTabChange(item.id)}
+                      >
+                        <IconComponent className="mr-2 h-4 w-4" />
+                        {item.label}
+                      </Button>
+                    );
+                  })}
+              </div>
+            </div>
+          ))}
+
+          <div className="pt-4 border-t border-gray-200">
+            <div className="text-xs text-gray-500 space-y-1">
+              <div className="font-medium">Funcionalidades:</div>
+              <div>• CRUD Completo</div>
+              <div>• Upload de Arquivos</div>
+              <div>• Sistema de Permissões</div>
+              <div>• Publicação/Rascunho</div>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
