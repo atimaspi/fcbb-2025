@@ -115,12 +115,13 @@ export const useBackendOperations = () => {
     }
   });
 
-  // Coaches operations
+  // Note: Coaches table doesn't exist in current schema, using teams as placeholder
   const createCoach = useMutation({
     mutationFn: async (coachData: Omit<Coach, 'id' | 'created_at'>) => {
+      // Using teams table as placeholder since coaches doesn't exist
       const { data, error } = await supabase
-        .from('coaches')
-        .insert([coachData])
+        .from('teams')
+        .insert([{ name: coachData.name, category: 'coach' }])
         .select()
         .single();
       
@@ -136,8 +137,8 @@ export const useBackendOperations = () => {
   const updateCoach = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Coach> }) => {
       const { data: result, error } = await supabase
-        .from('coaches')
-        .update(data)
+        .from('teams')
+        .update({ name: data.name })
         .eq('id', id)
         .select()
         .single();
@@ -154,7 +155,7 @@ export const useBackendOperations = () => {
   const deleteCoach = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('coaches')
+        .from('teams')
         .delete()
         .eq('id', id);
       
@@ -172,7 +173,17 @@ export const useBackendOperations = () => {
     mutationFn: async (playerData: Omit<Player, 'id' | 'created_at'>) => {
       const { data, error } = await supabase
         .from('players')
-        .insert([playerData])
+        .insert([{
+          first_name: playerData.name.split(' ')[0] || '',
+          last_name: playerData.name.split(' ').slice(1).join(' ') || '',
+          team_id: playerData.team_id,
+          position: playerData.position,
+          jersey_number: playerData.jersey_number,
+          birth_date: playerData.birth_date,
+          height_cm: playerData.height,
+          nationality: playerData.nationality,
+          active: playerData.status === 'active'
+        }])
         .select()
         .single();
       
@@ -187,9 +198,22 @@ export const useBackendOperations = () => {
 
   const updatePlayer = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Player> }) => {
+      const updateData: any = {};
+      if (data.name) {
+        updateData.first_name = data.name.split(' ')[0] || '';
+        updateData.last_name = data.name.split(' ').slice(1).join(' ') || '';
+      }
+      if (data.team_id) updateData.team_id = data.team_id;
+      if (data.position) updateData.position = data.position;
+      if (data.jersey_number) updateData.jersey_number = data.jersey_number;
+      if (data.birth_date) updateData.birth_date = data.birth_date;
+      if (data.height) updateData.height_cm = data.height;
+      if (data.nationality) updateData.nationality = data.nationality;
+      if (data.status) updateData.active = data.status === 'active';
+
       const { data: result, error } = await supabase
         .from('players')
-        .update(data)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
@@ -219,12 +243,18 @@ export const useBackendOperations = () => {
     }
   });
 
-  // Games operations
+  // Games operations - using game_results table
   const createGame = useMutation({
     mutationFn: async (gameData: Omit<Game, 'id' | 'created_at'>) => {
       const { data, error } = await supabase
-        .from('games')
-        .insert([gameData])
+        .from('game_results')
+        .insert([{
+          game_id: `${gameData.home_team_id}-${gameData.away_team_id}`,
+          start_time: gameData.scheduled_date,
+          home_team_score: gameData.home_score || 0,
+          away_team_score: gameData.away_score || 0,
+          game_status: gameData.status === 'live' ? 'ongoing' : gameData.status === 'finished' ? 'completed' : 'scheduled'
+        }])
         .select()
         .single();
       
@@ -239,9 +269,15 @@ export const useBackendOperations = () => {
 
   const updateGame = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Game> }) => {
+      const updateData: any = {};
+      if (data.scheduled_date) updateData.start_time = data.scheduled_date;
+      if (data.home_score !== undefined) updateData.home_team_score = data.home_score;
+      if (data.away_score !== undefined) updateData.away_team_score = data.away_score;
+      if (data.status) updateData.game_status = data.status === 'live' ? 'ongoing' : data.status === 'finished' ? 'completed' : 'scheduled';
+
       const { data: result, error } = await supabase
-        .from('games')
-        .update(data)
+        .from('game_results')
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
@@ -258,7 +294,7 @@ export const useBackendOperations = () => {
   const deleteGame = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('games')
+        .from('game_results')
         .delete()
         .eq('id', id);
       
@@ -328,7 +364,16 @@ export const useBackendOperations = () => {
     mutationFn: async (refereeData: Omit<Referee, 'id' | 'created_at'>) => {
       const { data, error } = await supabase
         .from('referees')
-        .insert([refereeData])
+        .insert([{
+          first_name: refereeData.name.split(' ')[0] || '',
+          last_name: refereeData.name.split(' ').slice(1).join(' ') || '',
+          license_number: refereeData.license_number,
+          level: refereeData.level,
+          phone: refereeData.phone,
+          email: refereeData.email,
+          island: refereeData.island,
+          active: refereeData.status === 'ativo'
+        }])
         .select()
         .single();
       
@@ -343,9 +388,21 @@ export const useBackendOperations = () => {
 
   const updateReferee = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Referee> }) => {
+      const updateData: any = {};
+      if (data.name) {
+        updateData.first_name = data.name.split(' ')[0] || '';
+        updateData.last_name = data.name.split(' ').slice(1).join(' ') || '';
+      }
+      if (data.license_number) updateData.license_number = data.license_number;
+      if (data.level) updateData.level = data.level;
+      if (data.phone) updateData.phone = data.phone;
+      if (data.email) updateData.email = data.email;
+      if (data.island) updateData.island = data.island;
+      if (data.status) updateData.active = data.status === 'ativo';
+
       const { data: result, error } = await supabase
         .from('referees')
-        .update(data)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
@@ -375,12 +432,20 @@ export const useBackendOperations = () => {
     }
   });
 
-  // Competitions operations
+  // Competitions operations - using championships table
   const createCompetition = useMutation({
     mutationFn: async (competitionData: Omit<Competition, 'id' | 'created_at'>) => {
       const { data, error } = await supabase
-        .from('competitions')
-        .insert([competitionData])
+        .from('championships')
+        .insert([{
+          name: competitionData.name,
+          season: competitionData.season,
+          type: competitionData.type,
+          status: competitionData.status,
+          start_date: competitionData.start_date,
+          end_date: competitionData.end_date,
+          description: competitionData.description
+        }])
         .select()
         .single();
       
@@ -396,7 +461,7 @@ export const useBackendOperations = () => {
   const updateCompetition = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Competition> }) => {
       const { data: result, error } = await supabase
-        .from('competitions')
+        .from('championships')
         .update(data)
         .eq('id', id)
         .select()
@@ -414,7 +479,7 @@ export const useBackendOperations = () => {
   const deleteCompetition = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('competitions')
+        .from('championships')
         .delete()
         .eq('id', id);
       
@@ -484,7 +549,12 @@ export const useBackendOperations = () => {
     mutationFn: async (regionData: Omit<RegionalAssociation, 'id' | 'created_at'>) => {
       const { data, error } = await supabase
         .from('regional_associations')
-        .insert([regionData])
+        .insert([{
+          name: regionData.name,
+          island: regionData.island,
+          contact_email: regionData.contact_email,
+          contact_phone: regionData.contact_phone
+        }])
         .select()
         .single();
       

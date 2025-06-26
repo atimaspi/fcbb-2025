@@ -36,7 +36,7 @@ export const useEventsData = () => {
         event_date: item.event_date,
         location: item.location,
         type: item.type,
-        status: 'agendado' as 'agendado' | 'cancelado' | 'finalizado',
+        status: 'agendado' as 'agendado' | 'cancelado' | 'finalizado', // Default status since it doesn't exist in DB
         created_at: item.created_at
       }));
       
@@ -51,12 +51,17 @@ export const useEventsData = () => {
     }
   };
 
+  const activeEvents = events.filter(event => event.status === 'agendado');
+  const eventsData = events;
+
   useEffect(() => {
     fetchEvents();
   }, []);
 
   return {
     events,
+    activeEvents,
+    eventsData,
     eventsLoading,
     eventsError,
     refetchEvents: fetchEvents

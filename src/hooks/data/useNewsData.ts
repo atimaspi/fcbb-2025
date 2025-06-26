@@ -50,14 +50,14 @@ export const useNewsData = () => {
         featured_image: item.featured_image_url,
         author: item.author,
         tags: Array.isArray(item.tags) ? item.tags.join(', ') : (item.tags || ''),
-        publish_date: item.published_at || item.created_at,
+        publish_date: item.created_at, // Using created_at since published_at doesn't exist
         excerpt: item.excerpt,
         published: item.published,
         featured: item.featured,
         featured_image_url: item.featured_image_url,
         video_url: item.video_url,
-        gallery_images: item.gallery_images,
-        attachments: item.attachments,
+        gallery_images: Array.isArray(item.gallery_images) ? item.gallery_images : [],
+        attachments: Array.isArray(item.attachments) ? item.attachments : [],
         created_at: item.created_at,
         updated_at: item.updated_at
       }));
