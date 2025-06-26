@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,17 +30,17 @@ const AdminDashboard = () => {
     publishedNews: newsData.filter(n => n.status === 'publicado').length,
     draftNews: newsData.filter(n => n.status === 'rascunho').length,
     upcomingEvents: eventsData.filter(e => new Date(e.event_date) > new Date()).length,
-    activeTeams: teams.filter(t => t.status === 'ativo').length,
-    activeCompetitions: competitions.filter(c => c.status === 'ativo').length,
-    scheduledGames: games.filter(g => g.status === 'agendado').length,
-    activePlayers: players.filter(p => p.status === 'ativo').length,
+    activeTeams: teams.filter(t => t.status === 'active').length,
+    activeCompetitions: competitions.filter(c => c.status === 'ongoing').length,
+    scheduledGames: games.filter(g => g.status === 'scheduled').length,
+    activePlayers: players.filter(p => p.status === 'active').length,
     galleryItems: galleryData.length
   };
 
   const recentNews = newsData.slice(0, 5);
   const upcomingGames = games
-    .filter(g => g.status === 'agendado' && new Date(g.scheduled_date) > new Date())
-    .sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime())
+    .filter(g => g.status === 'scheduled' && new Date(g.scheduled_date || '') > new Date())
+    .sort((a, b) => new Date(a.scheduled_date || '').getTime() - new Date(b.scheduled_date || '').getTime())
     .slice(0, 5);
 
   const getTeamName = (teamId: string) => {
@@ -183,8 +182,8 @@ const AdminDashboard = () => {
                       </Badge>
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
-                      {new Date(game.scheduled_date).toLocaleDateString('pt-PT')} às{' '}
-                      {new Date(game.scheduled_date).toLocaleTimeString('pt-PT', { 
+                      {new Date(game.scheduled_date || '').toLocaleDateString('pt-PT')} às{' '}
+                      {new Date(game.scheduled_date || '').toLocaleTimeString('pt-PT', { 
                         hour: '2-digit', 
                         minute: '2-digit' 
                       })}
