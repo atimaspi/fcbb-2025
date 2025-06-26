@@ -1,17 +1,10 @@
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-
-interface PerformanceMetrics {
-  fps: number;
-  memoryUsage: number;
-  renderTime: number;
-}
-
-interface PerformanceAlert {
-  type: 'warning' | 'error';
-  message: string;
-  timestamp: number;
-}
+import { useEffect, useState, useCallback } from 'react';
+import { PerformanceMetrics, PerformanceAlert } from '@/types/performance';
+import { getOptimizationSuggestions } from '@/utils/performanceUtils';
+import { useFPSMonitor } from '@/hooks/useFPSMonitor';
+import { useMemoryMonitor } from '@/hooks/useMemoryMonitor';
+import { useRenderMonitor } from '@/hooks/useRenderMonitor';
 
 export const usePerformanceMonitor = () => {
   const [metrics, setMetrics] = useState<PerformanceMetrics>({
@@ -21,88 +14,14 @@ export const usePerformanceMonitor = () => {
   });
   
   const [alerts, setAlerts] = useState<PerformanceAlert[]>([]);
-  const frameRef = useRef<number>();
-  const lastFrameTime = useRef<number>(performance.now());
-  const frameCount = useRef<number>(0);
-  const renderStart = useRef<number>(0);
 
-  // FPS Monitoring
-  const measureFPS = useCallback(() => {
-    const now = performance.now();
-    frameCount.current++;
-    
-    if (now - lastFrameTime.current >= 1000) {
-      const fps = Math.round((frameCount.current * 1000) / (now - lastFrameTime.current));
-      setMetrics(prev => ({ ...prev, fps }));
-      
-      if (fps < 30) {
-        setAlerts(prev => [...prev, {
-          type: 'warning',
-          message: `FPS baixo: ${fps}fps`,
-          timestamp: Date.now()
-        }]);
-      }
-      
-      frameCount.current = 0;
-      lastFrameTime.current = now;
-    }
-    
-    frameRef.current = requestAnimationFrame(measureFPS);
-  }, []);
+  const { measureFPS, cleanup: cleanupFPS } = useFPSMonitor(setMetrics, setAlerts);
+  const { measureMemory } = useMemoryMonitor(setMetrics, setAlerts);
+  const { startRenderMeasure, endRenderMeasure } = useRenderMonitor(setMetrics, setAlerts);
 
-  // Memory Usage Monitoring
-  const measureMemory = useCallback(() => {
-    if ('memory' in performance) {
-      const memory = (performance as any).memory;
-      const usedMB = Math.round(memory.usedJSHeapSize / 1048576);
-      setMetrics(prev => ({ ...prev, memoryUsage: usedMB }));
-      
-      if (usedMB > 100) {
-        setAlerts(prev => [...prev, {
-          type: 'error',
-          message: `Uso de memória alto: ${usedMB}MB`,
-          timestamp: Date.now()
-        }]);
-      }
-    }
-  }, []);
-
-  // Optimization suggestions
-  const getOptimizationSuggestions = useCallback(() => {
-    const suggestions: string[] = [];
-    
-    if (metrics.fps < 30) {
-      suggestions.push('Considere reduzir animações complexas');
-    }
-    
-    if (metrics.memoryUsage > 50) {
-      suggestions.push('Otimize o uso de memória');
-    }
-    
-    if (metrics.renderTime > 16) {
-      suggestions.push('Simplifique componentes pesados');
-    }
-    
-    return suggestions;
+  const getOptimizationSuggestionsCallback = useCallback(() => {
+    return getOptimizationSuggestions(metrics.fps, metrics.memoryUsage, metrics.renderTime);
   }, [metrics]);
-
-  // Render Time Monitoring
-  const startRenderMeasure = useCallback(() => {
-    renderStart.current = performance.now();
-  }, []);
-
-  const endRenderMeasure = useCallback(() => {
-    const renderTime = performance.now() - renderStart.current;
-    setMetrics(prev => ({ ...prev, renderTime }));
-    
-    if (renderTime > 16.67) {
-      setAlerts(prev => [...prev, {
-        type: 'warning',
-        message: `Renderização lenta: ${renderTime.toFixed(2)}ms`,
-        timestamp: Date.now()
-      }]);
-    }
-  }, []);
 
   // Initialize monitoring
   useEffect(() => {
@@ -110,12 +29,10 @@ export const usePerformanceMonitor = () => {
     const memoryInterval = setInterval(measureMemory, 5000);
     
     return () => {
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-      }
+      cleanupFPS();
       clearInterval(memoryInterval);
     };
-  }, [measureFPS, measureMemory]);
+  }, [measureFPS, measureMemory, cleanupFPS]);
 
   // Clear old alerts
   useEffect(() => {
@@ -131,7 +48,7 @@ export const usePerformanceMonitor = () => {
   return {
     metrics,
     alerts,
-    getOptimizationSuggestions,
+    getOptimizationSuggestions: getOptimizationSuggestionsCallback,
     startRenderMeasure,
     endRenderMeasure,
     clearAlerts: () => setAlerts([])
