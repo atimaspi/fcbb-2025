@@ -57,6 +57,7 @@ const App = () => {
                     <Route path="/old" element={<Index />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/admin" element={<Admin />} />
+                    <Route path="/area-reservada" element={<AreaReservadaPage />} />
                     <Route path="/noticias" element={<NoticiasPage />} />
                     <Route path="/selecoes" element={<SelecoesPage />} />
                     <Route path="/competicoes" element={<CompeticoesPage />} />
@@ -64,7 +65,6 @@ const App = () => {
                     <Route path="/galeria" element={<GaleriaPage />} />
                     <Route path="/sobre" element={<SobrePage />} />
                     <Route path="/contactos" element={<ContactosPage />} />
-                    <Route path="/area-reservada" element={<AreaReservadaPage />} />
                   </Routes>
                 </BrowserRouter>
               </TooltipProvider>

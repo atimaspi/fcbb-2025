@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Menu, X, Lock, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -111,6 +110,11 @@ const StickyNavigation = () => {
 
   const toggleDropdown = (itemId: string) => {
     setActiveDropdown(activeDropdown === itemId ? null : itemId);
+  };
+
+  const handleAreaReservadaClick = () => {
+    console.log('StickyNavigation Área Reservada clicked');
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -248,6 +252,7 @@ const StickyNavigation = () => {
                     <Link
                       to="/area-reservada"
                       className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 border-b border-gray-100"
+                      onClick={handleAreaReservadaClick}
                     >
                       <Lock size={16} className="inline mr-2" />
                       Área Reservada
@@ -268,6 +273,7 @@ const StickyNavigation = () => {
                       ? 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white' 
                       : 'border-yellow-300 text-yellow-300 hover:bg-yellow-300 hover:text-blue-900'
                   }`}
+                  onClick={handleAreaReservadaClick}
                 >
                   <Lock size={18} />
                   <span>Área Reservada</span>
@@ -351,7 +357,7 @@ const StickyNavigation = () => {
                       <Link
                         to="/area-reservada"
                         className="flex items-center space-x-2 px-4 py-3 font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg mx-2 transition-all"
-                        onClick={() => setIsMobileMenuOpen(false)}
+                        onClick={handleAreaReservadaClick}
                       >
                         <Lock size={18} />
                         <span>Área Reservada</span>
@@ -370,7 +376,7 @@ const StickyNavigation = () => {
                     <Link
                       to="/area-reservada"
                       className="flex items-center space-x-2 px-4 py-3 font-medium text-blue-600 hover:bg-blue-50 rounded-lg mx-2 transition-all border-2 border-blue-600"
-                      onClick={() => setIsMobileMenuOpen(false)}
+                      onClick={handleAreaReservadaClick}
                     >
                       <Lock size={18} />
                       <span>Área Reservada</span>

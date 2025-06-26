@@ -4,6 +4,10 @@ import { Link } from 'react-router-dom';
 import { AccessibleButton } from '@/components/ui/accessible-button';
 
 const TopBar = () => {
+  const handleAreaReservadaClick = () => {
+    console.log('TopBar Área Reservada clicked');
+  };
+
   return (
     <div className="bg-cv-blue text-white">
       <div className="cv-container">
@@ -43,6 +47,7 @@ const TopBar = () => {
               className="flex items-center gap-1 hover:text-cv-yellow focus-visible-cv transition-colors text-xs"
               aria-label="Aceder à área reservada"
               title="Área Reservada"
+              onClick={handleAreaReservadaClick}
             >
               <Lock size={12} aria-hidden="true" />
               Área Reservada

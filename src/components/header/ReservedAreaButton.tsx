@@ -9,13 +9,18 @@ interface ReservedAreaButtonProps {
 }
 
 const ReservedAreaButton = ({ isScrolled, isMobile = false, onClose }: ReservedAreaButtonProps) => {
+  const handleClick = () => {
+    console.log('Área Reservada button clicked');
+    if (onClose) onClose();
+  };
+
   if (isMobile) {
     return (
       <div className="border-t border-gray-200 pt-4 mt-4">
         <Link
           to="/area-reservada"
           className="flex items-center space-x-3 px-6 py-3 font-semibold font-display text-cv-blue hover:bg-cv-blue/5 rounded-lg mx-3 transition-all border-2 border-cv-blue"
-          onClick={onClose}
+          onClick={handleClick}
         >
           <Lock size={20} />
           <span>Área Reservada</span>
@@ -32,6 +37,7 @@ const ReservedAreaButton = ({ isScrolled, isMobile = false, onClose }: ReservedA
           ? 'border-cv-blue text-cv-blue hover:bg-cv-blue hover:text-white' 
           : 'border-cv-yellow text-cv-yellow hover:bg-cv-yellow hover:text-cv-blue'
       }`}
+      onClick={handleClick}
     >
       <Lock size={18} />
       <span>Área Reservada</span>
