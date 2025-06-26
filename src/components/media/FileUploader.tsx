@@ -1,10 +1,9 @@
 
-import React, { useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { Upload, X, FileText, Image as ImageIcon, Video } from 'lucide-react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
 import { useFileUpload } from '@/hooks/useFileUpload';
+import { Upload, X, File, Image } from 'lucide-react';
 
 interface FileUploaderProps {
   onFileUpload: (file: any) => void;
@@ -12,90 +11,99 @@ interface FileUploaderProps {
   entityId?: string;
   allowedTypes?: string[];
   maxFiles?: number;
-  folder?: string;
-  className?: string;
 }
 
-const FileUploader: React.FC<FileUploaderProps> = ({
-  onFileUpload,
-  entityType,
-  entityId,
-  allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
-  maxFiles = 5,
-  folder = '',
-  className = ''
-}) => {
+const FileUploader = ({ 
+  onFileUpload, 
+  entityType, 
+  entityId, 
+  allowedTypes = ['image/jpeg', 'image/png', 'image/webp'],
+  maxFiles = 10
+}: FileUploaderProps) => {
   const { uploadFile, uploading, progress } = useFileUpload({
-    folder,
-    allowedTypes
+    allowedTypes,
+    maxSize: 50 * 1024 * 1024
   });
+  
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    for (const file of acceptedFiles.slice(0, maxFiles)) {
-      const uploadedFile = await uploadFile(file, entityType, entityId);
-      if (uploadedFile) {
-        onFileUpload(uploadedFile);
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setSelectedFiles(prev => [...prev, ...files].slice(0, maxFiles));
+  };
+
+  const handleUpload = async () => {
+    for (const file of selectedFiles) {
+      try {
+        const path = entityType && entityId ? `${entityType}/${entityId}` : entityType;
+        const result = await uploadFile(file, path);
+        if (result && onFileUpload) {
+          onFileUpload(result);
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
       }
     }
-  }, [uploadFile, onFileUpload, entityType, entityId, maxFiles]);
+    setSelectedFiles([]);
+  };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: allowedTypes.reduce((acc, type) => {
-      acc[type] = [];
-      return acc;
-    }, {} as Record<string, string[]>),
-    maxFiles,
-    disabled: uploading
-  });
-
-  const getFileIcon = (type: string) => {
-    if (type.startsWith('image/')) return <ImageIcon className="w-8 h-8" />;
-    if (type.startsWith('video/')) return <Video className="w-8 h-8" />;
-    return <FileText className="w-8 h-8" />;
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
-    <div className={`w-full ${className}`}>
-      <div
-        {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-          isDragActive
-            ? 'border-cv-blue bg-blue-50'
-            : 'border-gray-300 hover:border-cv-blue hover:bg-gray-50'
-        } ${uploading ? 'pointer-events-none opacity-50' : ''}`}
-      >
-        <input {...getInputProps()} />
-        
-        <div className="flex flex-col items-center space-y-4">
-          <Upload className="w-12 h-12 text-gray-400" />
-          
-          {uploading ? (
-            <div className="w-full max-w-xs">
-              <p className="text-sm text-gray-600 mb-2">Enviando arquivo...</p>
-              <Progress value={progress} className="w-full" />
-              <p className="text-xs text-gray-500 mt-1">{Math.round(progress)}%</p>
-            </div>
-          ) : (
-            <>
-              <div>
-                <p className="text-lg font-medium text-gray-700">
-                  {isDragActive ? 'Solte os arquivos aqui' : 'Arraste arquivos ou clique para selecionar'}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Máximo {maxFiles} arquivo(s). Tipos aceitos: {allowedTypes.map(type => 
-                    type.split('/')[1].toUpperCase()
-                  ).join(', ')}
-                </p>
-              </div>
-              
-              <Button type="button" variant="outline">
-                Selecionar Arquivos
-              </Button>
-            </>
-          )}
+    <div className="space-y-4">
+      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+        <Upload className="mx-auto h-12 w-12 text-gray-400" />
+        <div className="mt-4">
+          <input
+            type="file"
+            multiple
+            accept={allowedTypes.join(',')}
+            onChange={handleFileSelect}
+            className="hidden"
+            id="file-upload"
+          />
+          <label
+            htmlFor="file-upload"
+            className="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-cv-blue hover:bg-blue-700"
+          >
+            Selecionar Arquivos
+          </label>
         </div>
       </div>
+
+      {selectedFiles.length > 0 && (
+        <div className="space-y-2">
+          {selectedFiles.map((file, index) => (
+            <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+              <div className="flex items-center space-x-2">
+                {file.type.startsWith('image/') ? (
+                  <Image className="h-4 w-4" />
+                ) : (
+                  <File className="h-4 w-4" />
+                )}
+                <span className="text-sm">{file.name}</span>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => removeFile(index)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          
+          <Button
+            onClick={handleUpload}
+            disabled={uploading}
+            className="w-full"
+          >
+            {uploading ? `Enviando... ${progress}%` : 'Enviar Arquivos'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -26,7 +26,7 @@ const GamesManagementAdvanced = () => {
     scheduled_date: '',
     venue: '',
     round: '',
-    status: 'scheduled',
+    status: 'scheduled' as 'scheduled' | 'live' | 'finished' | 'cancelled',
     home_score: '',
     away_score: ''
   });
@@ -68,7 +68,8 @@ const GamesManagementAdvanced = () => {
       const gameData = {
         ...formData,
         home_score: formData.home_score ? parseInt(formData.home_score) : null,
-        away_score: formData.away_score ? parseInt(formData.away_score) : null
+        away_score: formData.away_score ? parseInt(formData.away_score) : null,
+        status: formData.status as 'scheduled' | 'live' | 'finished' | 'cancelled'
       };
 
       if (editingGame) {
@@ -108,7 +109,7 @@ const GamesManagementAdvanced = () => {
       scheduled_date: game.scheduled_date ? format(new Date(game.scheduled_date), 'yyyy-MM-dd\'T\'HH:mm') : '',
       venue: game.venue || '',
       round: game.round || '',
-      status: game.status || 'scheduled',
+      status: (game.status || 'scheduled') as 'scheduled' | 'live' | 'finished' | 'cancelled',
       home_score: game.home_score?.toString() || '',
       away_score: game.away_score?.toString() || ''
     });

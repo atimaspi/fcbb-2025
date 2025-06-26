@@ -79,10 +79,12 @@ const PlayersManagementAdvanced = () => {
     try {
       const playerData = {
         ...formData,
+        name: `${formData.first_name} ${formData.last_name}`.trim(),
         jersey_number: formData.jersey_number ? parseInt(formData.jersey_number) : null,
         height_cm: formData.height_cm ? parseInt(formData.height_cm) : null,
         weight_kg: formData.weight_kg ? parseInt(formData.weight_kg) : null,
-        age: formData.birth_date ? new Date().getFullYear() - new Date(formData.birth_date).getFullYear() : null
+        age: formData.birth_date ? new Date().getFullYear() - new Date(formData.birth_date).getFullYear() : null,
+        status: formData.status as 'active' | 'inactive'
       };
 
       if (selectedPlayer) {

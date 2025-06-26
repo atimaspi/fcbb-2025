@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,7 +24,7 @@ const CoachesManagement = () => {
     phone: '',
     email: '',
     experience_years: '',
-    status: 'ativo'
+    status: 'ativo' as 'ativo' | 'inativo' | 'suspenso'
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -47,7 +46,8 @@ const CoachesManagement = () => {
     try {
       const coachData = {
         ...formData,
-        experience_years: formData.experience_years ? parseInt(formData.experience_years) : null
+        experience_years: formData.experience_years ? parseInt(formData.experience_years) : null,
+        status: formData.status as 'ativo' | 'inativo' | 'suspenso'
       };
 
       if (editingCoach) {
@@ -87,7 +87,7 @@ const CoachesManagement = () => {
       phone: coach.phone || '',
       email: coach.email || '',
       experience_years: coach.experience_years?.toString() || '',
-      status: coach.status || 'ativo'
+      status: (coach.status || 'ativo') as 'ativo' | 'inativo' | 'suspenso'
     });
     setIsDialogOpen(true);
   };
@@ -118,7 +118,7 @@ const CoachesManagement = () => {
       phone: '',
       email: '',
       experience_years: '',
-      status: 'ativo'
+      status: 'ativo' as 'ativo' | 'inativo' | 'suspenso'
     });
     setEditingCoach(null);
   };

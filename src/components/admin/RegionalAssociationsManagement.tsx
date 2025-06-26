@@ -47,17 +47,22 @@ const RegionalAssociationsManagement = () => {
     }
 
     try {
+      const associationData = {
+        ...formData,
+        status: 'active' as 'active' | 'inactive'
+      };
+
       if (editingAssociation) {
         await operations.regionalAssociations.update.mutateAsync({ 
           id: editingAssociation.id, 
-          data: formData 
+          data: associationData 
         });
         toast({
           title: "Sucesso",
           description: "Associação atualizada com sucesso!"
         });
       } else {
-        await operations.regionalAssociations.create.mutateAsync(formData);
+        await operations.regionalAssociations.create.mutateAsync(associationData);
         toast({
           title: "Sucesso", 
           description: "Associação criada com sucesso!"

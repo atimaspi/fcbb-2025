@@ -1,173 +1,108 @@
 
-import React, { useState } from 'react';
-import { X, Download, Eye, Trash2 } from 'lucide-react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useFileUpload } from '@/hooks/useFileUpload';
-
-interface MediaFile {
-  id: string;
-  url: string;
-  path: string;
-  name: string;
-  size: number;
-  type: string;
-  alt_text?: string;
-  description?: string;
-}
+import { X, Download, Eye } from 'lucide-react';
 
 interface MediaGalleryProps {
-  files: MediaFile[];
-  onFileRemove: (fileId: string) => void;
+  files: any[];
+  onFileRemove?: (fileId: string) => void;
   editable?: boolean;
 }
 
-const MediaGallery: React.FC<MediaGalleryProps> = ({
-  files,
-  onFileRemove,
-  editable = false
-}) => {
-  const [selectedFile, setSelectedFile] = useState<MediaFile | null>(null);
-  const { deleteFile } = useFileUpload();
+const MediaGallery = ({ files, onFileRemove, editable = false }: MediaGalleryProps) => {
+  const handleDownload = (file: any) => {
+    if (file.url) {
+      const link = document.createElement('a');
+      link.href = file.url;
+      link.download = file.name || 'download';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
 
-  const handleDelete = async (file: MediaFile) => {
-    const success = await deleteFile(file.path, file.id);
-    if (success) {
+  const handleView = (file: any) => {
+    if (file.url) {
+      window.open(file.url, '_blank');
+    }
+  };
+
+  const handleRemove = (file: any) => {
+    if (onFileRemove && file.id) {
       onFileRemove(file.id);
     }
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  const isImage = (type: string) => type.startsWith('image/');
-  const isVideo = (type: string) => type.startsWith('video/');
-
-  if (!files.length) {
+  if (!files || files.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        Nenhum arquivo enviado
+        Nenhum arquivo encontrado
       </div>
     );
   }
 
   return (
-    <>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {files.map((file) => (
-          <div key={file.id} className="relative group border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
-            <div className="aspect-square bg-gray-100 flex items-center justify-center">
-              {isImage(file.type) ? (
-                <img
-                  src={file.url}
-                  alt={file.alt_text || file.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : isVideo(file.type) ? (
-                <video
-                  src={file.url}
-                  className="w-full h-full object-cover"
-                  muted
-                />
-              ) : (
-                <div className="text-center p-4">
-                  <div className="w-12 h-12 mx-auto mb-2 bg-gray-200 rounded flex items-center justify-center">
-                    📄
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {files.map((file, index) => (
+        <div key={file.id || index} className="relative group">
+          <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+            {file.type?.startsWith('image/') || file.url?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+              <img
+                src={file.url}
+                alt={file.name || file.alt_text || 'Imagem'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-4xl mb-2">📄</div>
+                  <div className="text-xs text-gray-600 px-2">
+                    {file.name || 'Documento'}
                   </div>
-                  <p className="text-xs text-gray-600 truncate">{file.name}</p>
                 </div>
-              )}
-            </div>
-            
-            <div className="p-3">
-              <p className="text-sm font-medium truncate" title={file.name}>
-                {file.name}
-              </p>
-              <p className="text-xs text-gray-500">
-                {formatFileSize(file.size)}
-              </p>
-            </div>
-
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="flex space-x-1">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="w-8 h-8 p-0"
-                  onClick={() => setSelectedFile(file)}
-                >
-                  <Eye className="w-4 h-4" />
-                </Button>
-                
-                {editable && (
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="w-8 h-8 p-0"
-                    onClick={() => handleDelete(file)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                )}
               </div>
-            </div>
+            )}
           </div>
-        ))}
-      </div>
-
-      {/* Modal de visualização */}
-      <Dialog open={!!selectedFile} onOpenChange={() => setSelectedFile(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedFile?.name}</DialogTitle>
-          </DialogHeader>
           
-          {selectedFile && (
-            <div className="space-y-4">
-              <div className="flex justify-center">
-                {isImage(selectedFile.type) ? (
-                  <img
-                    src={selectedFile.url}
-                    alt={selectedFile.alt_text || selectedFile.name}
-                    className="max-w-full max-h-96 object-contain"
-                  />
-                ) : isVideo(selectedFile.type) ? (
-                  <video
-                    src={selectedFile.url}
-                    controls
-                    className="max-w-full max-h-96"
-                  />
-                ) : (
-                  <div className="text-center p-8">
-                    <p className="text-lg">Pré-visualização não disponível</p>
-                    <Button
-                      className="mt-4"
-                      onClick={() => window.open(selectedFile.url, '_blank')}
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Baixar Arquivo
-                    </Button>
-                  </div>
-                )}
-              </div>
-              
-              <div className="space-y-2 text-sm">
-                <p><strong>Tamanho:</strong> {formatFileSize(selectedFile.size)}</p>
-                <p><strong>Tipo:</strong> {selectedFile.type}</p>
-                {selectedFile.description && (
-                  <p><strong>Descrição:</strong> {selectedFile.description}</p>
-                )}
-              </div>
+          {/* Action buttons */}
+          <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center space-x-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => handleView(file)}
+              className="h-8 w-8 p-0"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => handleDownload(file)}
+              className="h-8 w-8 p-0"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            {editable && onFileRemove && (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => handleRemove(file)}
+                className="h-8 w-8 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          
+          {/* File info */}
+          {file.description && (
+            <div className="mt-2 text-xs text-gray-600 text-center">
+              {file.description}
             </div>
           )}
-        </DialogContent>
-      </Dialog>
-    </>
+        </div>
+      ))}
+    </div>
   );
 };
 

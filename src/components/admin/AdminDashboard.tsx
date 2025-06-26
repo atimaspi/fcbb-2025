@@ -1,230 +1,164 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useContentData } from '@/hooks/useContentData';
 import { useBackendData } from '@/hooks/useBackendData';
-import { useAuth } from '@/contexts/AuthContext';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { 
-  FileText, 
-  Calendar, 
   Users, 
+  Calendar, 
   Trophy, 
-  Play, 
-  Image,
   TrendingUp,
-  AlertCircle,
-  CheckCircle,
-  Clock
+  Building,
+  UserCheck,
+  Whistle,
+  MapPin
 } from 'lucide-react';
 
 const AdminDashboard = () => {
-  const { newsData, eventsData, galleryData, isLoading: contentLoading } = useContentData();
-  const { teams, competitions, games, players, isLoading: backendLoading } = useBackendData();
-  const { profile, user } = useAuth();
-
-  const isLoading = contentLoading || backendLoading;
-
-  // Estatísticas calculadas
-  const stats = {
-    publishedNews: newsData.filter(n => n.status === 'publicado').length,
-    draftNews: newsData.filter(n => n.status === 'rascunho').length,
-    upcomingEvents: eventsData.filter(e => new Date(e.event_date) > new Date()).length,
-    activeTeams: teams.filter(t => t.status === 'active').length,
-    activeCompetitions: competitions.filter(c => c.status === 'ongoing').length,
-    scheduledGames: games.filter(g => g.status === 'scheduled').length,
-    activePlayers: players.filter(p => p.status === 'active').length,
-    galleryItems: galleryData.length
-  };
-
-  const recentNews = newsData.slice(0, 5);
-  const upcomingGames = games
-    .filter(g => g.status === 'scheduled' && new Date(g.scheduled_date || '') > new Date())
-    .sort((a, b) => new Date(a.scheduled_date || '').getTime() - new Date(b.scheduled_date || '').getTime())
-    .slice(0, 5);
-
-  const getTeamName = (teamId: string) => {
-    const team = teams.find(t => t.id === teamId);
-    return team?.name || 'Equipa não encontrada';
-  };
+  const { 
+    teams, 
+    players, 
+    games, 
+    competitions,
+    clubs,
+    coaches,
+    referees,
+    regionalAssociations,
+    isLoading 
+  } = useBackendData();
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cv-blue"></div>
-        <span className="ml-2">A carregar dashboard...</span>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
+  const stats = [
+    {
+      title: 'Equipas',
+      value: teams.filter((team: any) => team.status === 'active').length,
+      total: teams.length,
+      icon: Users,
+      description: 'Equipas ativas no sistema'
+    },
+    {
+      title: 'Competições',
+      value: competitions.filter((comp: any) => comp.status === 'ongoing').length,
+      total: competitions.length,
+      icon: Trophy,
+      description: 'Competições em curso'
+    },
+    {
+      title: 'Jogos',
+      value: games.filter((game: any) => game.status === 'scheduled').length,
+      total: games.length,
+      icon: Calendar,
+      description: 'Jogos agendados'
+    },
+    {
+      title: 'Jogadores',
+      value: players.filter((player: any) => player.status === 'active').length,
+      total: players.length,
+      icon: UserCheck,
+      description: 'Jogadores ativos'
+    },
+    {
+      title: 'Clubes',
+      value: clubs.filter((club: any) => club.status === 'active').length,
+      total: clubs.length,
+      icon: Building,
+      description: 'Clubes registados'
+    },
+    {
+      title: 'Treinadores',
+      value: coaches.filter((coach: any) => coach.status === 'ativo').length,
+      total: coaches.length,
+      icon: Users,
+      description: 'Treinadores ativos'
+    },
+    {
+      title: 'Árbitros',
+      value: referees.filter((ref: any) => ref.status === 'ativo').length,
+      total: referees.length,
+      icon: Whistle,
+      description: 'Árbitros ativos'
+    },
+    {
+      title: 'Associações',
+      value: regionalAssociations.filter((assoc: any) => assoc.status === 'active').length,
+      total: regionalAssociations.length,
+      icon: MapPin,
+      description: 'Associações regionais'
+    }
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-cv-blue">Dashboard FCBB</h1>
-        <p className="text-gray-600">
-          Bem-vindo, {profile?.full_name || user?.email}. Aqui está um resumo do sistema.
-        </p>
+      <div>
+        <h2 className="text-3xl font-bold text-cv-blue">Dashboard Administrativo</h2>
+        <p className="text-gray-600 mt-2">Visão geral do sistema de gestão de basquetebol</p>
       </div>
 
-      {/* Estatísticas Principais */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Notícias Publicadas</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.publishedNews}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.draftNews} em rascunho
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Eventos Próximos</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.upcomingEvents}</div>
-            <p className="text-xs text-muted-foreground">
-              Agendados
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Equipas Ativas</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{stats.activeTeams}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.activePlayers} jogadores
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Jogos Agendados</CardTitle>
-            <Play className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{stats.scheduledGames}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.activeCompetitions} competições ativas
-            </p>
-          </CardContent>
-        </Card>
+        {stats.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={index}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">
+                  {stat.title}
+                </CardTitle>
+                <Icon className="h-5 w-5 text-cv-blue" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-cv-blue">{stat.value}</div>
+                <p className="text-xs text-gray-500 mt-1">
+                  de {stat.total} {stat.description.toLowerCase()}
+                </p>
+                <div className="mt-2 bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-cv-blue h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${stat.total > 0 ? (stat.value / stat.total) * 100 : 0}%` }}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
-      {/* Conteúdo em Duas Colunas */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Notícias Recentes */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Notícias Recentes
-            </CardTitle>
-            <CardDescription>Últimas notícias criadas no sistema</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentNews.length > 0 ? (
-                recentNews.map((news) => (
-                  <div key={news.id} className="flex items-start justify-between border-b pb-2 last:border-0">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-sm line-clamp-2">{news.title}</h4>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(news.created_at).toLocaleDateString('pt-PT')}
-                      </p>
-                    </div>
-                    <Badge variant={news.status === 'publicado' ? 'default' : 'secondary'} className="text-xs">
-                      {news.status}
-                    </Badge>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 text-sm">Nenhuma notícia encontrada</p>
-              )}
-            </div>
-            <Button variant="outline" size="sm" className="w-full mt-4">
-              Ver Todas as Notícias
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Próximos Jogos */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Play className="h-5 w-5" />
+              <Calendar className="h-5 w-5" />
               Próximos Jogos
             </CardTitle>
             <CardDescription>Jogos agendados para os próximos dias</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {upcomingGames.length > 0 ? (
-                upcomingGames.map((game) => (
-                  <div key={game.id} className="border-b pb-2 last:border-0">
-                    <div className="flex items-center justify-between">
-                      <div className="font-medium text-sm">
-                        {getTeamName(game.home_team_id)} vs {getTeamName(game.away_team_id)}
-                      </div>
-                      <Badge variant="outline" className="text-xs">
-                        {game.status}
-                      </Badge>
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {new Date(game.scheduled_date || '').toLocaleDateString('pt-PT')} às{' '}
-                      {new Date(game.scheduled_date || '').toLocaleTimeString('pt-PT', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </div>
-                    {game.venue && (
-                      <div className="text-xs text-gray-500">{game.venue}</div>
-                    )}
+              {games.slice(0, 5).map((game: any) => (
+                <div key={game.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-sm">
+                      {teams.find((t: any) => t.id === game.home_team_id)?.name || 'Equipa'} vs{' '}
+                      {teams.find((t: any) => t.id === game.away_team_id)?.name || 'Equipa'}
+                    </p>
+                    <p className="text-xs text-gray-500">{game.venue || 'Local não definido'}</p>
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-500 text-sm">Nenhum jogo agendado</p>
-              )}
-            </div>
-            <Button variant="outline" size="sm" className="w-full mt-4">
-              Ver Todos os Jogos
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Alertas e Ações Rápidas */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-amber-600">
-              <AlertCircle className="h-5 w-5" />
-              Ações Necessárias
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              {stats.draftNews > 0 && (
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  {stats.draftNews} notícias em rascunho
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500">
+                      {game.scheduled_date ? new Date(game.scheduled_date).toLocaleDateString() : 'Data não definida'}
+                    </p>
+                  </div>
                 </div>
+              ))}
+              {games.length === 0 && (
+                <p className="text-gray-500 text-center py-4">Nenhum jogo agendado</p>
               )}
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                Sistema funcionando normalmente
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -232,31 +166,29 @@ const AdminDashboard = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Estatísticas Rápidas
+              <Trophy className="h-5 w-5" />
+              Competições Ativas
             </CardTitle>
+            <CardDescription>Competições em curso</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2 text-sm">
-              <div>Total de itens na galeria: {stats.galleryItems}</div>
-              <div>Competições ativas: {stats.activeCompetitions}</div>
-              <div>Eventos futuros: {stats.upcomingEvents}</div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Image className="h-5 w-5" />
-              Ações Rápidas
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Button size="sm" className="w-full">Nova Notícia</Button>
-              <Button size="sm" variant="outline" className="w-full">Novo Jogo</Button>
-              <Button size="sm" variant="outline" className="w-full">Upload Galeria</Button>
+            <div className="space-y-3">
+              {competitions.filter((comp: any) => comp.status === 'ongoing').slice(0, 5).map((competition: any) => (
+                <div key={competition.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-sm">{competition.name}</p>
+                    <p className="text-xs text-gray-500 capitalize">{competition.type} • {competition.season}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Em curso
+                    </span>
+                  </div>
+                </div>
+              ))}
+              {competitions.filter((comp: any) => comp.status === 'ongoing').length === 0 && (
+                <p className="text-gray-500 text-center py-4">Nenhuma competição em curso</p>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -29,7 +29,7 @@ const CompetitionsManagementAdvanced = () => {
     name: '',
     type: '',
     season: '',
-    status: 'ativo',
+    status: 'upcoming' as 'upcoming' | 'ongoing' | 'finished',
     description: '',
     regulations_url: ''
   });
@@ -62,7 +62,8 @@ const CompetitionsManagementAdvanced = () => {
       const competitionData = {
         ...formData,
         start_date: startDate?.toISOString().split('T')[0] || null,
-        end_date: endDate?.toISOString().split('T')[0] || null
+        end_date: endDate?.toISOString().split('T')[0] || null,
+        status: formData.status as 'upcoming' | 'ongoing' | 'finished'
       };
 
       if (editingCompetition) {
@@ -99,7 +100,7 @@ const CompetitionsManagementAdvanced = () => {
       name: competition.name || '',
       type: competition.type || '',
       season: competition.season || '',
-      status: competition.status || 'ativo',
+      status: (competition.status || 'upcoming') as 'upcoming' | 'ongoing' | 'finished',
       description: competition.description || '',
       regulations_url: competition.regulations_url || ''
     });
