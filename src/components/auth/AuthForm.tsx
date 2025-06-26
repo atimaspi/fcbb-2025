@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import CreateAdminUser from './CreateAdminUser';
 
@@ -20,8 +19,8 @@ const AuthForm = () => {
   const { toast } = useToast();
 
   const [loginData, setLoginData] = useState({
-    email: '',
-    password: ''
+    email: 'admin@fcbb.cv',
+    password: 'admin123456'
   });
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -38,7 +37,7 @@ const AuthForm = () => {
         if (error.message.includes('Invalid login credentials')) {
           toast({
             title: "Credenciais Inválidas",
-            description: "Email ou palavra-passe incorretos.",
+            description: "Email ou palavra-passe incorretos. Crie um admin primeiro se necessário.",
             variant: "destructive",
           });
         } else {
@@ -64,6 +63,35 @@ const AuthForm = () => {
         description: "Ocorreu um erro inesperado.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleQuickAccess = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: 'admin@fcbb.cv',
+        password: 'admin123456',
+      });
+
+      if (!error) {
+        toast({
+          title: "Acesso Rápido",
+          description: "Login automático realizado!",
+        });
+        navigate('/area-reservada');
+      } else {
+        setShowCreateAdmin(true);
+        toast({
+          title: "Admin não encontrado",
+          description: "Crie primeiro um utilizador administrador",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      setShowCreateAdmin(true);
     } finally {
       setIsLoading(false);
     }
@@ -162,11 +190,20 @@ const AuthForm = () => {
                 </Button>
               </form>
 
-              <div className="mt-6 text-center">
+              <div className="mt-6 space-y-2">
+                <Button 
+                  variant="outline" 
+                  onClick={handleQuickAccess}
+                  className="w-full text-cv-blue border-cv-blue hover:bg-cv-blue hover:text-white"
+                  disabled={isLoading}
+                >
+                  🚀 Acesso Rápido de Teste
+                </Button>
+                
                 <Button 
                   variant="outline" 
                   onClick={() => setShowCreateAdmin(true)}
-                  className="text-sm"
+                  className="w-full text-sm"
                 >
                   Criar Admin Inicial
                 </Button>

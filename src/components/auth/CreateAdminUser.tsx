@@ -4,131 +4,195 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/contexts/AuthContext';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Shield } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { UserPlus, Loader2 } from 'lucide-react';
 
 const CreateAdminUser = () => {
-  const [email, setEmail] = useState('admin@fcbb.cv');
-  const [password, setPassword] = useState('Spokers@1');
-  const [fullName, setFullName] = useState('Administrador FCBB');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  
-  const { createAdminUser } = useAuth();
+  const { toast } = useToast();
+  const [isCreating, setIsCreating] = useState(false);
+  const [formData, setFormData] = useState({
+    email: 'admin@fcbb.cv',
+    password: 'admin123456',
+    fullName: 'Administrador FCBB'
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess(false);
-    
-    const { error } = await createAdminUser(email, password, fullName);
-    
-    if (error) {
-      if (error.message && error.message.includes('already registered')) {
-        setError('Este email já está registado. Tente fazer login.');
-      } else if (error.message && error.message.includes('User already registered')) {
-        setError('Este email já está registado. Tente fazer login.');
-      } else {
-        setError(error.message || 'Erro ao criar usuário');
+    setIsCreating(true);
+
+    try {
+      // Create user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName,
+          }
+        }
+      });
+
+      if (authError) {
+        console.error('Auth error:', authError);
+        toast({
+          title: "Erro na Criação",
+          description: authError.message,
+          variant: "destructive",
+        });
+        return;
       }
-    } else {
-      setSuccess(true);
+
+      if (authData.user) {
+        // Update profile to admin role
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: authData.user.id,
+            full_name: formData.fullName,
+            role: 'admin',
+            updated_at: new Date().toISOString()
+          });
+
+        if (profileError) {
+          console.error('Profile error:', profileError);
+          toast({
+            title: "Aviso",
+            description: "Utilizador criado mas houve erro ao definir perfil de admin",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Administrador Criado!",
+            description: `Admin criado com sucesso: ${formData.email}`,
+          });
+        }
+      }
+
+    } catch (error: any) {
+      console.error('Error creating admin:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao criar administrador",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreating(false);
     }
-    
-    setLoading(false);
   };
 
-  if (success) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-green-600">
-            <Shield className="h-5 w-5" />
-            Admin Criado com Sucesso!
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Alert>
-            <AlertDescription>
-              O usuário admin foi criado com sucesso. Pode agora fazer login com:
-              <br />
-              <strong>Email:</strong> {email}
-              <br />
-              <strong>Password:</strong> {password}
-            </AlertDescription>
-          </Alert>
-          <Button 
-            onClick={() => window.location.reload()} 
-            className="w-full mt-4 bg-cv-blue hover:bg-cv-blue/90"
-          >
-            Fazer Login Agora
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
+  const handleQuickLogin = async () => {
+    setIsCreating(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        toast({
+          title: "Erro de Login",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Login Realizado",
+          description: "Acesso à área reservada liberado!",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: "Erro ao fazer login",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Shield className="h-5 w-5 text-cv-blue" />
-          Criar Usuário Admin Inicial
+        <CardTitle className="flex items-center space-x-2 text-cv-blue">
+          <UserPlus className="h-5 w-5" />
+          <span>Criar Administrador de Teste</span>
         </CardTitle>
         <CardDescription>
-          Crie o primeiro administrador do sistema. Se não consegue criar conta, use esta opção.
+          Crie um utilizador administrador para testar as funcionalidades
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleCreateAdmin} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="adminFullName">Nome Completo</Label>
+            <Label htmlFor="admin-email">Email do Admin</Label>
             <Input
-              id="adminFullName"
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="adminEmail">Email</Label>
-            <Input
-              id="adminEmail"
+              id="admin-email"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
             />
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="adminPassword">Palavra-passe</Label>
+            <Label htmlFor="admin-password">Palavra-passe</Label>
             <Input
-              id="adminPassword"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              id="admin-password"
+              type="text"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
-              minLength={6}
             />
           </div>
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          <Button 
-            type="submit" 
-            className="w-full bg-cv-blue hover:bg-cv-blue/90"
-            disabled={loading}
-          >
-            {loading ? <LoadingSpinner size="sm" /> : 'Criar Admin'}
-          </Button>
+
+          <div className="space-y-2">
+            <Label htmlFor="admin-name">Nome Completo</Label>
+            <Input
+              id="admin-name"
+              value={formData.fullName}
+              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Button
+              type="submit"
+              className="w-full bg-cv-blue hover:bg-cv-blue/90"
+              disabled={isCreating}
+            >
+              {isCreating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Criando...
+                </>
+              ) : (
+                <>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Criar Administrador
+                </>
+              )}
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleQuickLogin}
+              disabled={isCreating}
+            >
+              Login Direto (se já existe)
+            </Button>
+          </div>
         </form>
+
+        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+          <h4 className="font-medium text-sm text-gray-700 mb-2">Credenciais de Teste:</h4>
+          <p className="text-xs text-gray-600">Email: {formData.email}</p>
+          <p className="text-xs text-gray-600">Password: {formData.password}</p>
+        </div>
       </CardContent>
     </Card>
   );

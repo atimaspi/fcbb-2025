@@ -1,35 +1,23 @@
 
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { usePermissions } from '@/hooks/usePermissions';
+import { Card, CardContent } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
-  LayoutDashboard,
+  BarChart3, 
+  Users, 
   FileText, 
   Calendar, 
-  Trophy, 
-  Users, 
-  Settings,
-  BarChart3,
-  Shield,
-  Upload,
-  User,
-  UserCheck,
-  GraduationCap,
-  GamepadIcon,
-  Building2,
-  Building,
-  Image,
+  Image, 
+  Sliders, 
   Star,
   Handshake,
-  Sliders
+  Shield,
+  User,
+  Home,
+  Trophy,
+  Building
 } from 'lucide-react';
-
-interface MenuItem {
-  id: string;
-  label: string;
-  icon: any;
-  permission: { resource: string; action: string } | null;
-}
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -37,81 +25,62 @@ interface AdminSidebarProps {
 }
 
 const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
-  const { canAccessAdminArea } = usePermissions();
+  const { profile, isAdmin } = useAuth();
 
-  const getAvailableMenuItems = (): MenuItem[] => {
-    const baseItems: MenuItem[] = [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, permission: { resource: 'dashboard', action: 'view' } },
-      { id: 'profile', label: 'Perfil', icon: User, permission: null },
-    ];
+  const menuItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: Home },
+    { id: 'profile', label: 'Meu Perfil', icon: User },
+    { id: 'news', label: 'Notícias', icon: FileText },
+    { id: 'events', label: 'Eventos', icon: Calendar },
+    { id: 'gallery', label: 'Galeria', icon: Image },
+    { id: 'hero-slides', label: 'Banner Principal', icon: Star },
+    { id: 'statistics', label: 'Estatísticas', icon: BarChart3 },
+    { id: 'partners', label: 'Parceiros', icon: Handshake },
+    { id: 'site-settings', label: 'Configurações', icon: Sliders },
+  ];
 
-    const contentManagementItems: MenuItem[] = [
-      { id: 'hero-slides', label: 'Slides Banner', icon: Image, permission: { resource: 'dashboard', action: 'view' } },
-      { id: 'statistics', label: 'Estatísticas', icon: BarChart3, permission: { resource: 'dashboard', action: 'view' } },
-      { id: 'partners', label: 'Parceiros', icon: Handshake, permission: { resource: 'dashboard', action: 'view' } },
-      { id: 'site-settings', label: 'Configurações Site', icon: Sliders, permission: { resource: 'settings', action: 'edit' } },
-    ];
-
-    const adminItems: MenuItem[] = [
-      { id: 'news', label: 'Notícias', icon: FileText, permission: { resource: 'news', action: 'create' } },
-      { id: 'events', label: 'Eventos', icon: Calendar, permission: { resource: 'events', action: 'create' } },
-      { id: 'competitions', label: 'Competições', icon: Trophy, permission: { resource: 'dashboard', action: 'view' } },
-      { id: 'federations', label: 'Federações', icon: Building2, permission: { resource: 'dashboard', action: 'view' } },
-      { id: 'regionalAssociations', label: 'Ass. Regionais', icon: Building, permission: { resource: 'dashboard', action: 'view' } },
-      { id: 'clubs', label: 'Clubes', icon: Users, permission: { resource: 'dashboard', action: 'view' } },
-      { id: 'players', label: 'Jogadores', icon: UserCheck, permission: { resource: 'dashboard', action: 'view' } },
-      { id: 'coaches', label: 'Treinadores', icon: GraduationCap, permission: { resource: 'dashboard', action: 'view' } },
-      { id: 'games', label: 'Jogos', icon: GamepadIcon, permission: { resource: 'dashboard', action: 'view' } },
-      { id: 'gallery', label: 'Galeria', icon: Upload, permission: { resource: 'dashboard', action: 'view' } },
-      { id: 'referees', label: 'Arbitragem', icon: Shield, permission: { resource: 'dashboard', action: 'view' } },
-    ];
-
-    const filteredItems = [...baseItems];
-    
-    // Add content management items if user has admin access
-    if (canAccessAdminArea()) {
-      filteredItems.push(...contentManagementItems);
-    }
-
-    // Add other admin items if user has admin access
-    adminItems.forEach(item => {
-      if (!item.permission || canAccessAdminArea()) {
-        filteredItems.push(item);
-      }
-    });
-
-    return filteredItems;
-  };
-
-  const menuItems = getAvailableMenuItems();
+  // Add data management items if admin
+  if (isAdmin) {
+    menuItems.push(
+      { id: 'clubs', label: 'Clubes', icon: Building },
+      { id: 'competitions', label: 'Competições', icon: Trophy },
+      { id: 'players', label: 'Jogadores', icon: Users },
+      { id: 'coaches', label: 'Treinadores', icon: Shield }
+    );
+  }
 
   return (
-    <div className="w-64 space-y-2">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Menu Administrativo</CardTitle>
-        </CardHeader>
-        <CardContent className="p-2">
-          <nav className="space-y-1">
-            {menuItems.map((item) => (
+    <Card className="w-64 h-fit sticky top-6">
+      <CardContent className="p-4">
+        <div className="space-y-2">
+          <div className="mb-4">
+            <h3 className="font-semibold text-cv-blue mb-2">Menu Principal</h3>
+            <div className="text-xs text-gray-600 mb-4">
+              Logado como: {profile?.role || 'Utilizador'}
+            </div>
+          </div>
+          
+          {menuItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
               <Button
                 key={item.id}
                 variant={activeTab === item.id ? "default" : "ghost"}
                 className={`w-full justify-start ${
                   activeTab === item.id 
-                    ? 'bg-cv-blue hover:bg-cv-blue/90' 
-                    : 'hover:bg-gray-100'
+                    ? 'bg-cv-blue text-white' 
+                    : 'text-gray-700 hover:bg-cv-blue/5'
                 }`}
                 onClick={() => onTabChange(item.id)}
               >
-                <item.icon className="h-4 w-4 mr-2" />
+                <IconComponent className="mr-2 h-4 w-4" />
                 {item.label}
               </Button>
-            ))}
-          </nav>
-        </CardContent>
-      </Card>
-    </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
