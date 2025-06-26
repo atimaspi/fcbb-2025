@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,8 +11,10 @@ interface Profile {
   bio?: string;
   phone?: string;
   address?: string;
-  created_at: string;
+  created_at?: string;
   updated_at?: string;
+  club_id?: string;
+  regional_association_id?: string;
 }
 
 interface AuthContextType {
@@ -55,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       }
       
-      return data;
+      return data as Profile;
     } catch (error) {
       console.error('Error in fetchProfile:', error);
       return null;
@@ -72,7 +75,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (session?.user) {
           const profileData = await fetchProfile(session.user.id);
-          setProfile(profileData);
+          if (profileData) {
+            setProfile(profileData);
+          }
         } else {
           setProfile(null);
         }
@@ -88,7 +93,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (session?.user) {
         const profileData = await fetchProfile(session.user.id);
-        setProfile(profileData);
+        if (profileData) {
+          setProfile(profileData);
+        }
       }
       
       setLoading(false);
