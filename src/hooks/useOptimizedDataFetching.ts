@@ -57,16 +57,25 @@ export const useOptimizedDataFetching = () => {
     refetchOnWindowFocus: true
   });
 
+  const { data: teamsData, isLoading: teamsLoading } = useQuery({
+    queryKey: ['teams'],
+    queryFn: () => optimizedFetch('teams'),
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false
+  });
+
   return {
     newsData: newsData || [],
     clubsData: clubsData || [],
     gamesData: gamesData || [],
+    teamsData: teamsData || [],
     
     newsLoading,
     clubsLoading,
     gamesLoading,
+    teamsLoading,
     
-    isLoading: newsLoading || clubsLoading,
+    isLoading: newsLoading || clubsLoading || teamsLoading,
     
     optimizedFetch
   };

@@ -67,6 +67,25 @@ export const usePerformanceMonitor = () => {
     }
   }, []);
 
+  // Optimization suggestions
+  const getOptimizationSuggestions = useCallback(() => {
+    const suggestions: string[] = [];
+    
+    if (metrics.fps < 30) {
+      suggestions.push('Considere reduzir animações complexas');
+    }
+    
+    if (metrics.memoryUsage > 50) {
+      suggestions.push('Otimize o uso de memória');
+    }
+    
+    if (metrics.renderTime > 16) {
+      suggestions.push('Simplifique componentes pesados');
+    }
+    
+    return suggestions;
+  }, [metrics]);
+
   // Render Time Monitoring
   const startRenderMeasure = useCallback(() => {
     renderStart.current = performance.now();
@@ -112,6 +131,7 @@ export const usePerformanceMonitor = () => {
   return {
     metrics,
     alerts,
+    getOptimizationSuggestions,
     startRenderMeasure,
     endRenderMeasure,
     clearAlerts: () => setAlerts([])
