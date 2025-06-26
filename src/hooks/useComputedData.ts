@@ -21,9 +21,9 @@ export const useComputedData = (
   const upcomingGames = useMemo(() => {
     const now = new Date();
     return games.filter(game => {
-      if (!game.game_date) return false;
-      const gameDate = new Date(game.game_date);
-      return gameDate > now && game.status === 'agendado';
+      if (!game.scheduled_date) return false;
+      const gameDate = new Date(game.scheduled_date);
+      return gameDate > now && game.status === 'scheduled';
     }).slice(0, 5); // Get next 5 games
   }, [games]);
 
@@ -31,9 +31,9 @@ export const useComputedData = (
   const recentGames = useMemo(() => {
     const now = new Date();
     return games.filter(game => {
-      if (!game.game_date) return false;
-      const gameDate = new Date(game.game_date);
-      return gameDate <= now && game.status === 'finalizado';
+      if (!game.scheduled_date) return false;
+      const gameDate = new Date(game.scheduled_date);
+      return gameDate <= now && game.status === 'finished';
     }).slice(0, 5); // Get last 5 completed games
   }, [games]);
 

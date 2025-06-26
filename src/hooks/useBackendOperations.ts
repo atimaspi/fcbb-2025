@@ -66,9 +66,26 @@ export const useBackendOperations = () => {
   // Clubs operations
   const createClub = useMutation({
     mutationFn: async (clubData: Omit<Club, 'id' | 'created_at'>) => {
+      // Transform data to match database schema
+      const dbData = {
+        name: clubData.name,
+        island: clubData.island || '',
+        active: clubData.status === 'active',
+        abbreviation: clubData.abbreviation,
+        city: clubData.city,
+        founded_year: clubData.founded_year,
+        logo_url: clubData.logo_url,
+        address: clubData.address,
+        contact_phone: clubData.contact_phone,
+        contact_email: clubData.contact_email,
+        website: clubData.website,
+        description: clubData.description,
+        regional_association_id: clubData.regional_association_id
+      };
+
       const { data, error } = await supabase
         .from('clubs')
-        .insert([clubData])
+        .insert([dbData])
         .select()
         .single();
       
@@ -83,9 +100,24 @@ export const useBackendOperations = () => {
 
   const updateClub = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Club> }) => {
+      // Transform data to match database schema
+      const dbData: any = {};
+      if (data.name) dbData.name = data.name;
+      if (data.island) dbData.island = data.island;
+      if (data.status) dbData.active = data.status === 'active';
+      if (data.abbreviation) dbData.abbreviation = data.abbreviation;
+      if (data.city) dbData.city = data.city;
+      if (data.founded_year) dbData.founded_year = data.founded_year;
+      if (data.logo_url) dbData.logo_url = data.logo_url;
+      if (data.address) dbData.address = data.address;
+      if (data.contact_phone) dbData.contact_phone = data.contact_phone;
+      if (data.contact_email) dbData.contact_email = data.contact_email;
+      if (data.website) dbData.website = data.website;
+      if (data.description) dbData.description = data.description;
+
       const { data: result, error } = await supabase
         .from('clubs')
-        .update(data)
+        .update(dbData)
         .eq('id', id)
         .select()
         .single();
@@ -310,9 +342,25 @@ export const useBackendOperations = () => {
   // News operations
   const createNews = useMutation({
     mutationFn: async (newsData: Omit<NewsItem, 'id' | 'created_at' | 'updated_at'>) => {
+      // Transform data to match database schema
+      const dbData = {
+        title: newsData.title,
+        content: newsData.content,
+        category: newsData.category,
+        status: newsData.status,
+        author: newsData.author,
+        excerpt: newsData.excerpt,
+        featured: newsData.featured,
+        featured_image_url: newsData.featured_image_url,
+        video_url: newsData.video_url,
+        tags: Array.isArray(newsData.tags) ? newsData.tags : (newsData.tags ? [newsData.tags] : []),
+        gallery_images: newsData.gallery_images || [],
+        attachments: newsData.attachments || []
+      };
+
       const { data, error } = await supabase
         .from('news')
-        .insert([newsData])
+        .insert([dbData])
         .select()
         .single();
       
@@ -327,9 +375,24 @@ export const useBackendOperations = () => {
 
   const updateNews = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<NewsItem> }) => {
+      // Transform data to match database schema
+      const dbData: any = {};
+      if (data.title) dbData.title = data.title;
+      if (data.content) dbData.content = data.content;
+      if (data.category) dbData.category = data.category;
+      if (data.status) dbData.status = data.status;
+      if (data.author) dbData.author = data.author;
+      if (data.excerpt) dbData.excerpt = data.excerpt;
+      if (data.featured !== undefined) dbData.featured = data.featured;
+      if (data.featured_image_url) dbData.featured_image_url = data.featured_image_url;
+      if (data.video_url) dbData.video_url = data.video_url;
+      if (data.tags) dbData.tags = Array.isArray(data.tags) ? data.tags : [data.tags];
+      if (data.gallery_images) dbData.gallery_images = data.gallery_images;
+      if (data.attachments) dbData.attachments = data.attachments;
+
       const { data: result, error } = await supabase
         .from('news')
-        .update(data)
+        .update(dbData)
         .eq('id', id)
         .select()
         .single();
@@ -553,7 +616,8 @@ export const useBackendOperations = () => {
           name: regionData.name,
           island: regionData.island,
           contact_email: regionData.contact_email,
-          contact_phone: regionData.contact_phone
+          contact_phone: regionData.contact_phone,
+          federation_id: regionData.federation_id || ''
         }])
         .select()
         .single();
