@@ -3,23 +3,25 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Team } from '@/hooks/useBackendData';
 
 interface ClubFormProps {
-  onSubmit: (data: any) => Promise<void>;
-  initialData?: any | null;
+  onSubmit: (data: Omit<Team, 'id' | 'created_at'>) => Promise<void>;
+  initialData?: Team | null;
   onCancel: () => void;
   isSubmitting: boolean;
 }
 
-const ClubForm: React.FC<ClubFormProps> = ({ onSubmit, initialData, onCancel, isSubmitting }) => {
+const ClubForm = ({ onSubmit, initialData, onCancel, isSubmitting }: ClubFormProps) => {
   const [formData, setFormData] = useState({
     name: '',
     abbreviation: '',
     city: '',
     island: '',
-    status: 'ativo',
+    founded_year: new Date().getFullYear(),
+    logo_url: '',
+    status: 'ativo' as 'ativo' | 'inativo'
   });
 
   useEffect(() => {
@@ -29,68 +31,129 @@ const ClubForm: React.FC<ClubFormProps> = ({ onSubmit, initialData, onCancel, is
         abbreviation: initialData.abbreviation || '',
         city: initialData.city || '',
         island: initialData.island || '',
-        status: initialData.status || 'ativo',
-      });
-    } else {
-      setFormData({
-        name: '',
-        abbreviation: '',
-        city: '',
-        island: '',
-        status: 'ativo',
+        founded_year: initialData.founded_year || new Date().getFullYear(),
+        logo_url: initialData.logo_url || '',
+        status: initialData.status || 'ativo'
       });
     }
   }, [initialData]);
 
-  const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await onSubmit(formData);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
+  const islands = [
+    'Santiago', 'São Vicente', 'Santo Antão', 'Fogo', 
+    'Maio', 'Sal', 'Boa Vista', 'Brava', 'São Nicolau'
+  ];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name">Nome do Clube *</Label>
-          <Input id="name" value={formData.name} onChange={(e) => handleChange('name', e.target.value)} required />
+          <Input
+            id="name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            required
+            placeholder="Ex: Clube Desportivo Travadores"
+          />
         </div>
+        
         <div className="space-y-2">
           <Label htmlFor="abbreviation">Abreviação</Label>
-          <Input id="abbreviation" value={formData.abbreviation} onChange={(e) => handleChange('abbreviation', e.target.value)} />
+          <Input
+            id="abbreviation"
+            value={formData.abbreviation}
+            onChange={(e) => setFormData({ ...formData, abbreviation: e.target.value })}
+            placeholder="Ex: TRA"
+            maxLength={5}
+          />
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="city">Cidade</Label>
-          <Input id="city" value={formData.city} onChange={(e) => handleChange('city', e.target.value)} />
+          <Input
+            id="city"
+            value={formData.city}
+            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+            placeholder="Ex: Praia"
+          />
         </div>
+        
         <div className="space-y-2">
           <Label htmlFor="island">Ilha</Label>
-          <Input id="island" value={formData.island} onChange={(e) => handleChange('island', e.target.value)} />
+          <select
+            id="island"
+            value={formData.island}
+            onChange={(e) => setFormData({ ...formData, island: e.target.value })}
+            className="w-full p-2 border rounded-md"
+          >
+            <option value="">Selecionar ilha...</option>
+            {islands.map((island) => (
+              <option key={island} value={island}>{island}</option>
+            ))}
+          </select>
         </div>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="status">Status</Label>
-        <Select value={formData.status} onValueChange={(value) => handleChange('status', value)}>
-          <SelectTrigger id="status">
-            <SelectValue placeholder="Selecione o status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ativo">Ativo</SelectItem>
-            <SelectItem value="inativo">Inativo</SelectItem>
-          </SelectContent>
-        </Select>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="founded_year">Ano de Fundação</Label>
+          <Input
+            id="founded_year"
+            type="number"
+            min="1900"
+            max={new Date().getFullYear()}
+            value={formData.founded_year}
+            onChange={(e) => setFormData({ ...formData, founded_year: parseInt(e.target.value) || new Date().getFullYear() })}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <select
+            id="status"
+            value={formData.status}
+            onChange={(e) => setFormData({ ...formData, status: e.target.value as 'ativo' | 'inativo' })}
+            className="w-full p-2 border rounded-md"
+          >
+            <option value="ativo">Ativo</option>
+            <option value="inativo">Inativo</option>
+          </select>
+        </div>
       </div>
-      <DialogFooter>
-        <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando...' : (initialData ? 'Salvar Alterações' : 'Criar Clube')}
+
+      <div className="space-y-2">
+        <Label htmlFor="logo_url">URL do Logo</Label>
+        <Input
+          id="logo_url"
+          type="url"
+          value={formData.logo_url}
+          onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
+          placeholder="https://exemplo.com/logo.png"
+        />
+      </div>
+
+      <div className="flex justify-end space-x-2 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+          Cancelar
         </Button>
-      </DialogFooter>
+        <Button type="submit" disabled={isSubmitting} className="bg-cv-blue hover:bg-cv-blue/90">
+          {isSubmitting ? (
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              A guardar...
+            </div>
+          ) : (
+            initialData ? 'Atualizar Clube' : 'Criar Clube'
+          )}
+        </Button>
+      </div>
     </form>
   );
 };
