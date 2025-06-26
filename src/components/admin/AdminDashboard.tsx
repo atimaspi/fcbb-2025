@@ -132,7 +132,7 @@ const AdminDashboard = () => {
                   </div>
                   <div className="flex items-center text-xs text-gray-500">
                     <Eye className="w-3 h-3 mr-1" />
-                    {news.views_count || 0}
+                    {(news as any).views_count || 0}
                   </div>
                 </div>
               )) : (
