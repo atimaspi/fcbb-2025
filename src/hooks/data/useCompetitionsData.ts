@@ -10,6 +10,8 @@ export interface Competition {
   status: 'upcoming' | 'ongoing' | 'finished';
   start_date?: string;
   end_date?: string;
+  description?: string;
+  regulations_url?: string;
   created_at: string;
 }
 
@@ -21,13 +23,29 @@ export const useCompetitionsData = () => {
   const fetchCompetitions = async () => {
     try {
       setCompetitionsLoading(true);
+      // Note: Using 'championships' table as 'competitions' table doesn't exist in current schema
       const { data, error } = await supabase
-        .from('competitions')
+        .from('championships')
         .select('*')
         .order('name', { ascending: true });
 
       if (error) throw error;
-      setCompetitions(data || []);
+      
+      // Map championship data to competition structure
+      const mappedData = (data || []).map(item => ({
+        id: item.id,
+        name: item.name || '',
+        season: item.season || '',
+        type: item.type || '',
+        status: (item.status as 'upcoming' | 'ongoing' | 'finished') || 'upcoming',
+        start_date: item.start_date,
+        end_date: item.end_date,
+        description: item.description,
+        regulations_url: item.regulations_url,
+        created_at: item.created_at
+      }));
+      
+      setCompetitions(mappedData);
       setCompetitionsError(null);
     } catch (err: any) {
       console.error('Error fetching competitions:', err);

@@ -4,151 +4,224 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useBackendData } from '@/hooks/useBackendData';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Trophy, CalendarIcon } from 'lucide-react';
+import { useBackendData } from '@/hooks/useBackendData';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { Plus, Edit, Trash2, Trophy, Calendar } from 'lucide-react';
 
 const CompetitionsManagementAdvanced = () => {
-  const { competitions, isLoading, operations } = useBackendData();
+  const { competitions, operations, competitionsLoading } = useBackendData();
   const { toast } = useToast();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingCompetition, setEditingCompetition] = useState(null);
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  
+  const [selectedCompetition, setSelectedCompetition] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    type: '',
     season: '',
-    status: 'upcoming' as 'upcoming' | 'ongoing' | 'finished',
+    type: '',
+    status: 'upcoming',
+    start_date: '',
+    end_date: '',
     description: '',
     regulations_url: ''
   });
 
   const competitionTypes = [
-    { value: 'liga', label: 'Liga' },
-    { value: 'taca', label: 'Taça' },
-    { value: 'regional', label: 'Regional' },
-    { value: 'juventude', label: 'Juventude' },
-    { value: 'feminino', label: 'Feminino' },
-    { value: 'veteranos', label: 'Veteranos' }
+    'Liga Nacional', 'Taça', 'Super Taça', 'Torneio Regional', 'Copa', 'Campeonato'
   ];
 
-  const statusOptions = [
-    { value: 'ativo', label: 'Ativo' },
-    { value: 'programado', label: 'Programado' },
-    { value: 'concluido', label: 'Concluído' },
-    { value: 'suspenso', label: 'Suspenso' },
-    { value: 'cancelado', label: 'Cancelado' }
-  ];
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleEdit = (competition: any) => {
+    setSelectedCompetition(competition);
+    setFormData({
+      name: competition.name || '',
+      season: competition.season || '',
+      type: competition.type || '',
+      status: competition.status || 'upcoming',
+      start_date: competition.start_date || '',
+      end_date: competition.end_date || '',
+      description: competition.description || '',
+      regulations_url: competition.regulations_url || ''
+    });
+    setIsEditing(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleCreate = () => {
+    setSelectedCompetition(null);
+    setFormData({
+      name: '',
+      season: '',
+      type: '',
+      status: 'upcoming',
+      start_date: '',
+      end_date: '',
+      description: '',
+      regulations_url: ''
+    });
+    setIsEditing(true);
+  };
+
+  const handleSave = async () => {
     try {
       const competitionData = {
         ...formData,
-        start_date: startDate?.toISOString().split('T')[0] || null,
-        end_date: endDate?.toISOString().split('T')[0] || null,
-        status: formData.status as 'upcoming' | 'ongoing' | 'finished'
+        status: formData.status as 'finished' | 'upcoming' | 'ongoing'
       };
 
-      if (editingCompetition) {
-        await operations.competitions.update.mutateAsync({ 
-          id: editingCompetition.id, 
-          data: competitionData 
+      if (selectedCompetition) {
+        await operations.competitions.update.mutateAsync({
+          id: selectedCompetition.id,
+          data: competitionData
         });
-        toast({
-          title: "Sucesso",
-          description: "Competição atualizada com sucesso!"
-        });
+        toast({ title: "Sucesso", description: "Competição atualizada!" });
       } else {
         await operations.competitions.create.mutateAsync(competitionData);
-        toast({
-          title: "Sucesso", 
-          description: "Competição criada com sucesso!"
-        });
+        toast({ title: "Sucesso", description: "Competição criada!" });
       }
-      
-      setIsDialogOpen(false);
-      resetForm();
-    } catch (error) {
+      setIsEditing(false);
+    } catch (error: any) {
       toast({
         title: "Erro",
-        description: "Erro ao salvar competição",
+        description: error.message,
         variant: "destructive"
       });
     }
   };
 
-  const handleEdit = (competition: any) => {
-    setEditingCompetition(competition);
-    setFormData({
-      name: competition.name || '',
-      type: competition.type || '',
-      season: competition.season || '',
-      status: (competition.status || 'upcoming') as 'upcoming' | 'ongoing' | 'finished',
-      description: competition.description || '',
-      regulations_url: competition.regulations_url || ''
-    });
-    if (competition.start_date) {
-      setStartDate(new Date(competition.start_date));
-    }
-    if (competition.end_date) {
-      setEndDate(new Date(competition.end_date));
-    }
-    setIsDialogOpen(true);
-  };
-
   const handleDelete = async (competitionId: string) => {
-    if (confirm('Tem certeza que deseja eliminar esta competição?')) {
+    if (window.confirm('Tem certeza que deseja eliminar esta competição?')) {
       try {
         await operations.competitions.delete.mutateAsync(competitionId);
-        toast({
-          title: "Sucesso",
-          description: "Competição eliminada com sucesso!"
-        });
-      } catch (error) {
+        toast({ title: "Sucesso", description: "Competição eliminada!" });
+      } catch (error: any) {
         toast({
           title: "Erro",
-          description: "Erro ao eliminar competição",
+          description: error.message,
           variant: "destructive"
         });
       }
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      type: '',
-      season: '',
-      status: 'ativo',
-      description: '',
-      regulations_url: ''
-    });
-    setStartDate(undefined);
-    setEndDate(undefined);
-    setEditingCompetition(null);
-  };
-
-  if (isLoading) {
+  if (isEditing) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner size="lg" />
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h3 className="text-xl font-semibold text-cv-blue">
+            {selectedCompetition ? 'Editar Competição' : 'Nova Competição'}
+          </h3>
+          <div className="space-x-2">
+            <Button variant="outline" onClick={() => setIsEditing(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSave} className="bg-cv-blue hover:bg-blue-700">
+              Salvar
+            </Button>
+          </div>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Informações da Competição</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Nome da Competição *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Liga Nacional de Basquetebol"
+                />
+              </div>
+              <div>
+                <Label htmlFor="season">Temporada *</Label>
+                <Input
+                  id="season"
+                  value={formData.season}
+                  onChange={(e) => setFormData(prev => ({ ...prev, season: e.target.value }))}
+                  placeholder="2024/2025"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="type">Tipo</Label>
+                <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecionar tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {competitionTypes.map(type => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="status">Status</Label>
+                <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="upcoming">Por Iniciar</SelectItem>
+                    <SelectItem value="ongoing">Em Curso</SelectItem>
+                    <SelectItem value="finished">Finalizada</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="start_date">Data de Início</Label>
+                <Input
+                  id="start_date"
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="end_date">Data de Fim</Label>
+                <Input
+                  id="end_date"
+                  type="date"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="description">Descrição</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Descrição da competição"
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="regulations_url">URL do Regulamento</Label>
+              <Input
+                id="regulations_url"
+                type="url"
+                value={formData.regulations_url}
+                onChange={(e) => setFormData(prev => ({ ...prev, regulations_url: e.target.value }))}
+                placeholder="https://exemplo.com/regulamento.pdf"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -156,236 +229,50 @@ const CompetitionsManagementAdvanced = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-cv-blue flex items-center gap-2">
-            <Trophy className="h-6 w-6" />
-            Gestão de Competições
-          </h2>
-          <p className="text-gray-600">Gerir campeonatos, ligas e torneios</p>
-        </div>
-        
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Competição
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {editingCompetition ? 'Editar Competição' : 'Nova Competição'}
-              </DialogTitle>
-              <DialogDescription>
-                Preencha as informações da competição
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Nome da Competição *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  required
-                  placeholder="Ex: Liga Nacional Masculina 2024/25"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="type">Tipo *</Label>
-                  <Select value={formData.type} onValueChange={(value) => handleInputChange('type', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecionar tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {competitionTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="season">Época *</Label>
-                  <Input
-                    id="season"
-                    value={formData.season}
-                    onChange={(e) => handleInputChange('season', e.target.value)}
-                    required
-                    placeholder="Ex: 2024/2025"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Data de Início</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !startDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {startDate ? format(startDate, "dd/MM/yyyy") : <span>Selecionar data</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={startDate}
-                        onSelect={setStartDate}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div>
-                  <Label>Data de Fim</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !endDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {endDate ? format(endDate, "dd/MM/yyyy") : <span>Selecionar data</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={endDate}
-                        onSelect={setEndDate}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map((status) => (
-                      <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="description">Descrição</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="Descrição da competição..."
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="regulations_url">URL do Regulamento</Label>
-                <Input
-                  id="regulations_url"
-                  type="url"
-                  value={formData.regulations_url}
-                  onChange={(e) => handleInputChange('regulations_url', e.target.value)}
-                  placeholder="https://..."
-                />
-              </div>
-
-              <div className="flex gap-2 pt-4">
-                <Button type="submit" className="flex-1">
-                  {editingCompetition ? 'Atualizar' : 'Criar'} Competição
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setIsDialogOpen(false)}
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <h3 className="text-xl font-semibold text-cv-blue">Gestão de Competições</h3>
+        <Button onClick={handleCreate} className="bg-cv-blue hover:bg-blue-700">
+          <Plus className="w-4 h-4 mr-2" />
+          Nova Competição
+        </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Competições Ativas ({competitions.length})</CardTitle>
-          <CardDescription>
-            Lista de todas as competições no sistema
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Época</TableHead>
-                <TableHead>Período</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {competitions.map((competition: any) => (
-                <TableRow key={competition.id}>
-                  <TableCell className="font-medium">{competition.name}</TableCell>
-                  <TableCell className="capitalize">{competition.type}</TableCell>
-                  <TableCell>{competition.season}</TableCell>
-                  <TableCell>
-                    {competition.start_date && competition.end_date ? (
-                      `${format(new Date(competition.start_date), 'dd/MM/yyyy')} - ${format(new Date(competition.end_date), 'dd/MM/yyyy')}`
-                    ) : (
-                      'Não definido'
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={competition.status === 'ativo' ? 'default' : 'secondary'}>
-                      {competition.status}
+      <div className="grid grid-cols-1 gap-4">
+        {competitions.map((competition: any) => (
+          <Card key={competition.id}>
+            <CardContent className="p-4">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Trophy className="w-5 h-5 text-cv-blue" />
+                    <h4 className="font-semibold">{competition.name}</h4>
+                    <Badge variant={competition.status === 'ongoing' ? 'default' : 'secondary'}>
+                      {competition.status === 'ongoing' ? 'Em Curso' :
+                       competition.status === 'upcoming' ? 'Por Iniciar' : 'Finalizada'}
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleEdit(competition)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleDelete(competition.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-2">{competition.description}</p>
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <span>Tipo: {competition.type}</span>
+                    <span>Temporada: {competition.season}</span>
+                    {competition.start_date && (
+                      <span>Início: {new Date(competition.start_date).toLocaleDateString()}</span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => handleEdit(competition)}>
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleDelete(competition.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };

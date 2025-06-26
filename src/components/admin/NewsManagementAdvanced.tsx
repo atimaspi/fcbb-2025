@@ -29,7 +29,7 @@ const NewsManagementAdvanced = () => {
     featured: false,
     featured_image_url: '',
     video_url: '',
-    tags: [] as string[],
+    tags: '',
     gallery_images: [] as any[],
     attachments: [] as any[]
   });
@@ -50,7 +50,7 @@ const NewsManagementAdvanced = () => {
       featured: news.featured || false,
       featured_image_url: news.featured_image_url || '',
       video_url: news.video_url || '',
-      tags: news.tags || [],
+      tags: Array.isArray(news.tags) ? news.tags.join(', ') : (news.tags || ''),
       gallery_images: news.gallery_images || [],
       attachments: news.attachments || []
     });
@@ -68,7 +68,7 @@ const NewsManagementAdvanced = () => {
       featured: false,
       featured_image_url: '',
       video_url: '',
-      tags: [],
+      tags: '',
       gallery_images: [],
       attachments: []
     });
@@ -77,14 +77,21 @@ const NewsManagementAdvanced = () => {
 
   const handleSave = async () => {
     try {
+      const newsData = {
+        ...formData,
+        status: formData.published ? 'publicado' as const : 'rascunho' as const,
+        publish_date: formData.published ? new Date().toISOString() : '',
+        tags: formData.tags
+      };
+
       if (selectedNews) {
         await operations.news.update.mutateAsync({
           id: selectedNews.id,
-          data: formData
+          data: newsData
         });
         toast({ title: "Sucesso", description: "Notícia atualizada!" });
       } else {
-        await operations.news.create.mutateAsync(formData);
+        await operations.news.create.mutateAsync(newsData);
         toast({ title: "Sucesso", description: "Notícia criada!" });
       }
       setIsEditing(false);
@@ -110,23 +117,6 @@ const NewsManagementAdvanced = () => {
         });
       }
     }
-  };
-
-  const addTag = () => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, newTag.trim()]
-      }));
-      setNewTag('');
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }));
   };
 
   const handleFileUpload = (file: any, type: 'featured' | 'gallery' | 'attachment') => {
@@ -225,6 +215,16 @@ const NewsManagementAdvanced = () => {
                     placeholder="https://youtube.com/watch?v=..."
                   />
                 </div>
+
+                <div>
+                  <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
+                  <Input
+                    id="tags"
+                    value={formData.tags}
+                    onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
+                    placeholder="basquetebol, liga, nacional"
+                  />
+                </div>
               </CardContent>
             </Card>
 
@@ -242,7 +242,6 @@ const NewsManagementAdvanced = () => {
                   entityType="news"
                   entityId={selectedNews?.id}
                   allowedTypes={['image/jpeg', 'image/png', 'image/webp', 'image/gif']}
-                  folder="news/gallery"
                 />
                 
                 {formData.gallery_images.length > 0 && (
@@ -266,7 +265,6 @@ const NewsManagementAdvanced = () => {
                   entityType="news"
                   entityId={selectedNews?.id}
                   allowedTypes={['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']}
-                  folder="news/attachments"
                 />
                 
                 {formData.attachments.length > 0 && (
@@ -335,7 +333,6 @@ const NewsManagementAdvanced = () => {
                   entityId={selectedNews?.id}
                   allowedTypes={['image/jpeg', 'image/png', 'image/webp']}
                   maxFiles={1}
-                  folder="news/featured"
                 />
                 
                 {formData.featured_image_url && (
@@ -355,37 +352,6 @@ const NewsManagementAdvanced = () => {
                     </Button>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Tags */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Tag className="w-5 h-5" />
-                  Tags
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    placeholder="Nova tag"
-                    onKeyPress={(e) => e.key === 'Enter' && addTag()}
-                  />
-                  <Button onClick={addTag} size="sm">
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-                
-                <div className="flex flex-wrap gap-2">
-                  {formData.tags.map(tag => (
-                    <Badge key={tag} variant="secondary" className="cursor-pointer" onClick={() => removeTag(tag)}>
-                      {tag} ×
-                    </Badge>
-                  ))}
-                </div>
               </CardContent>
             </Card>
           </div>

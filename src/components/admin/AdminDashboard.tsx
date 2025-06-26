@@ -10,7 +10,7 @@ import {
   TrendingUp,
   Building,
   UserCheck,
-  Whistle,
+  Users2,
   MapPin
 } from 'lucide-react';
 
@@ -38,7 +38,7 @@ const AdminDashboard = () => {
   const stats = [
     {
       title: 'Equipas',
-      value: teams.filter((team: any) => team.status === 'active').length,
+      value: teams.filter((team: any) => (team.status as string) === 'active').length,
       total: teams.length,
       icon: Users,
       description: 'Equipas ativas no sistema'
@@ -82,7 +82,7 @@ const AdminDashboard = () => {
       title: 'Árbitros',
       value: referees.filter((ref: any) => ref.status === 'ativo').length,
       total: referees.length,
-      icon: Whistle,
+      icon: Users2,
       description: 'Árbitros ativos'
     },
     {

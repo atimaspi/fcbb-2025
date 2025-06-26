@@ -13,12 +13,19 @@ export interface NewsItem {
   author?: string;
   tags?: string;
   publish_date: string;
+  excerpt?: string;
+  published?: boolean;
+  featured?: boolean;
+  featured_image_url?: string;
+  video_url?: string;
+  gallery_images?: any[];
+  attachments?: any[];
   created_at: string;
   updated_at: string;
 }
 
 export const useNewsData = () => {
-  const [news, setNews] = useState<NewsItem[]>([]);
+  const [newsData, setNewsData] = useState<NewsItem[]>([]);
   const [newsLoading, setNewsLoading] = useState(true);
   const [newsError, setNewsError] = useState<string | null>(null);
 
@@ -31,12 +38,36 @@ export const useNewsData = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setNews(data || []);
+      
+      // Map news data with proper type handling
+      const mappedData = (data || []).map(item => ({
+        id: item.id,
+        title: item.title,
+        summary: item.summary,
+        content: item.content,
+        category: item.category,
+        status: (item.status as 'rascunho' | 'pendente' | 'publicado') || 'rascunho',
+        featured_image: item.featured_image,
+        author: item.author,
+        tags: item.tags,
+        publish_date: item.publish_date || item.created_at,
+        excerpt: item.excerpt,
+        published: item.published,
+        featured: item.featured,
+        featured_image_url: item.featured_image_url,
+        video_url: item.video_url,
+        gallery_images: item.gallery_images,
+        attachments: item.attachments,
+        created_at: item.created_at,
+        updated_at: item.updated_at
+      }));
+      
+      setNewsData(mappedData);
       setNewsError(null);
     } catch (err: any) {
       console.error('Error fetching news:', err);
       setNewsError(err.message);
-      setNews([]);
+      setNewsData([]);
     } finally {
       setNewsLoading(false);
     }
@@ -46,12 +77,8 @@ export const useNewsData = () => {
     fetchNews();
   }, []);
 
-  const publishedNews = news.filter(item => item.status === 'publicado');
-
   return {
-    news,
-    publishedNews,
-    newsData: news, // alias for compatibility
+    newsData,
     newsLoading,
     newsError,
     refetchNews: fetchNews

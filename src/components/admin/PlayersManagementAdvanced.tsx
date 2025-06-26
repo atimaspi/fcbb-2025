@@ -303,7 +303,6 @@ const PlayersManagementAdvanced = () => {
                   entityType="player"
                   entityId={selectedPlayer?.id}
                   allowedTypes={['application/pdf', 'image/jpeg', 'image/png']}
-                  folder="players/documents"
                 />
                 
                 {formData.documents.length > 0 && (
@@ -333,7 +332,6 @@ const PlayersManagementAdvanced = () => {
                   entityId={selectedPlayer?.id}
                   allowedTypes={['image/jpeg', 'image/png', 'image/webp']}
                   maxFiles={1}
-                  folder="players/photos"
                 />
                 
                 {formData.photo_url && (

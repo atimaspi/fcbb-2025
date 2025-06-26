@@ -8,11 +8,11 @@ export interface Game {
   away_team_id: string;
   competition_id?: string;
   scheduled_date?: string;
-  game_date?: string;
   venue?: string;
   status: 'scheduled' | 'live' | 'finished' | 'cancelled';
   home_score?: number;
   away_score?: number;
+  round?: string;
   created_at: string;
 }
 
@@ -25,12 +25,28 @@ export const useGamesData = () => {
     try {
       setGamesLoading(true);
       const { data, error } = await supabase
-        .from('games')
+        .from('game_results')
         .select('*')
         .order('scheduled_date', { ascending: true });
 
       if (error) throw error;
-      setGames(data || []);
+      
+      // Map game data with proper status handling
+      const mappedData = (data || []).map(item => ({
+        id: item.id,
+        home_team_id: item.home_team_id,
+        away_team_id: item.away_team_id,
+        competition_id: item.competition_id,
+        scheduled_date: item.scheduled_date,
+        venue: item.venue,
+        status: (item.status as 'scheduled' | 'live' | 'finished' | 'cancelled') || 'scheduled',
+        home_score: item.home_score,
+        away_score: item.away_score,
+        round: item.round,
+        created_at: item.created_at
+      }));
+      
+      setGames(mappedData);
       setGamesError(null);
     } catch (err: any) {
       console.error('Error fetching games:', err);
@@ -45,19 +61,8 @@ export const useGamesData = () => {
     fetchGames();
   }, []);
 
-  const upcomingGames = games.filter(game => 
-    game.status === 'scheduled' && 
-    new Date(game.scheduled_date || game.game_date || '') > new Date()
-  );
-
-  const recentGames = games.filter(game => 
-    game.status === 'finished'
-  ).slice(0, 10);
-
   return {
     games,
-    upcomingGames,
-    recentGames,
     gamesLoading,
     gamesError,
     refetchGames: fetchGames

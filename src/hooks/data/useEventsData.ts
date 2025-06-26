@@ -27,7 +27,20 @@ export const useEventsData = () => {
         .order('event_date', { ascending: true });
 
       if (error) throw error;
-      setEvents(data || []);
+      
+      // Map event data with proper status handling
+      const mappedData = (data || []).map(item => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        event_date: item.event_date,
+        location: item.location,
+        type: item.type,
+        status: 'agendado' as 'agendado' | 'cancelado' | 'finalizado',
+        created_at: item.created_at
+      }));
+      
+      setEvents(mappedData);
       setEventsError(null);
     } catch (err: any) {
       console.error('Error fetching events:', err);
@@ -42,12 +55,8 @@ export const useEventsData = () => {
     fetchEvents();
   }, []);
 
-  const activeEvents = events.filter(event => event.status === 'agendado');
-
   return {
     events,
-    activeEvents,
-    eventsData: events, // alias for compatibility
     eventsLoading,
     eventsError,
     refetchEvents: fetchEvents
