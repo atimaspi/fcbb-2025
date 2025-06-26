@@ -110,7 +110,7 @@ export const useContentData = () => {
         tags: Array.isArray(item.tags) ? item.tags.join(', ') : (item.tags || ''),
         publish_date: item.created_at,
         created_at: item.created_at,
-        updated_at: item.updated_at
+        updated_at: item.updated_at || item.created_at
       }));
       
       setNewsData(mappedData);
@@ -138,7 +138,7 @@ export const useContentData = () => {
         event_date: item.event_date,
         location: item.location,
         type: item.type,
-        status: 'agendado' as 'agendado' | 'cancelado' | 'finalizado', // Default status
+        status: 'agendado' as 'agendado' | 'cancelado' | 'finalizado',
         created_at: item.created_at
       }));
       
@@ -165,7 +165,7 @@ export const useContentData = () => {
         title: item.title,
         description: item.description,
         media_type: 'image' as 'image' | 'video' | 'document',
-        file_url: '/placeholder.svg', // Default file URL
+        file_url: '/placeholder.svg',
         thumbnail_url: '/placeholder.svg',
         created_at: item.created_at
       }));
@@ -227,7 +227,7 @@ export const useContentData = () => {
         website_url: item.website_url,
         description: item.description,
         category: item.category,
-        order: index, // Use index as order since order field doesn't exist
+        order: index,
         active: item.active,
         created_at: item.created_at
       }));
@@ -299,9 +299,21 @@ export const useContentData = () => {
 
   const createNews = async (newsData: Omit<NewsItem, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      // Transform data to match database schema
+      const dbData = {
+        title: newsData.title,
+        content: newsData.content,
+        category: newsData.category,
+        status: newsData.status,
+        author: newsData.author,
+        excerpt: newsData.summary,
+        featured_image_url: newsData.featured_image,
+        tags: newsData.tags ? [newsData.tags] : [] // Convert string to array
+      };
+
       const { data, error } = await supabase
         .from('news')
-        .insert([newsData])
+        .insert([dbData])
         .select()
         .single();
 
@@ -315,9 +327,20 @@ export const useContentData = () => {
 
   const updateNews = async (id: string, newsData: Partial<NewsItem>) => {
     try {
+      // Transform data to match database schema
+      const dbData: any = {};
+      if (newsData.title) dbData.title = newsData.title;
+      if (newsData.content) dbData.content = newsData.content;
+      if (newsData.category) dbData.category = newsData.category;
+      if (newsData.status) dbData.status = newsData.status;
+      if (newsData.author) dbData.author = newsData.author;
+      if (newsData.summary) dbData.excerpt = newsData.summary;
+      if (newsData.featured_image) dbData.featured_image_url = newsData.featured_image;
+      if (newsData.tags) dbData.tags = [newsData.tags]; // Convert string to array
+
       const { data, error } = await supabase
         .from('news')
-        .update(newsData)
+        .update(dbData)
         .eq('id', id)
         .select()
         .single();

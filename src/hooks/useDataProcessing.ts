@@ -1,4 +1,3 @@
-
 import { useMemo } from 'react';
 import type { 
   Team, 
@@ -53,7 +52,7 @@ export const useDataProcessing = ({
       city: team.city,
       island: team.island,
       logo_url: team.logo_url,
-      status: team.status || 'ativo',
+      status: team.status || 'active',
       updated_at: team.updated_at || team.created_at
     }));
   }, [teamsData]);
@@ -135,7 +134,7 @@ export const useDataProcessing = ({
       weight_kg: player.weight_kg,
       nationality: player.nationality,
       photo_url: player.photo_url,
-      status: player.status,
+      status: player.status || 'active',
       club: player.club,
       active: player.active !== false,
       documents: player.documents,
@@ -168,7 +167,10 @@ export const useDataProcessing = ({
       video_url: newsItem.video_url,
       attachments: newsItem.attachments,
       gallery_images: newsItem.gallery_images,
-      status: newsItem.status
+      status: newsItem.status,
+      publish_date: newsItem.publish_date || newsItem.created_at, // Add required field
+      summary: newsItem.summary || newsItem.excerpt, // Add summary field
+      featured_image: newsItem.featured_image_url // Add featured_image field
     }));
   }, [newsData]);
 
@@ -258,7 +260,7 @@ export const useDataProcessing = ({
       updated_at: association.updated_at || association.created_at,
       president_name: association.president_name,
       clubs_count: association.clubs_count || 0,
-      status: association.status || 'ativo'
+      status: association.status || 'active'
     }));
   }, [regionalAssociationsData]);
 
